@@ -2,6 +2,9 @@
 
 Denne app er en simpel booking-applikation, der tillader brugere at reservere tidspunkter til forskellige tjenester. Applikationen består af en frontend bygget med React og en backend bygget med Django.
 
+![Django Tests](https://github.com/<your-username>/<your-repo>/actions/workflows/django-tests.yml/badge.svg)
+![Node.js Tests](https://github.com/<your-username>/<your-repo>/actions/workflows/nodejs-tests.yml/badge.svg)
+
 
 ## Kom i gang med Docker
 
