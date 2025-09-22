@@ -9,7 +9,9 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from pathlib import Path
 import os
 
@@ -35,6 +37,15 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'rest_framework',
     'organization',
+    "unfold",  # before django.contrib.admin
+    "unfold.contrib.filters",  # optional, if special filters are needed
+    "unfold.contrib.forms",  # optional, if special form elements are needed
+    "unfold.contrib.inlines",  # optional, if special inlines are needed
+    "unfold.contrib.import_export",  # optional, if django-import-export package is used
+    "unfold.contrib.guardian",  # optional, if django-guardian package is used
+    "unfold.contrib.simple_history",  # optional, if django-simple-history package is used
+    "unfold.contrib.location_field",  # optional, if django-location-field package is used
+    "unfold.contrib.constance",  # optional, if django-constance package is used
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +55,11 @@ INSTALLED_APPS = [
     'django_webpack_dev_server',
     'frontend',
     'bookingsystem',
-    'AktivitetsTeam',
+    'django_bootstrap5',
+    'template_partials',
+    'django_bootstrap_icons',
+    'embed_video',
+    'django_admin_listfilter_dropdown',
 ]
 
 MIDDLEWARE = [
@@ -142,3 +157,82 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+UNFOLD = {
+    "SITE_TITLE": "Admin",
+    "SITE_HEADER": "SKS Admin",
+    "SITE_SUBHEADER": "- Med lort på styret",
+    #"SITE_DROPDOWN": [
+    #    {
+    #        "icon": "diamond",
+    #        "title": _("My site"),
+    #        "link": "https://example.com",
+    #    },
+        # ...
+    #],
+    #"SITE_URL": "/",
+    "SITE_SYMBOL": "mode_heat",  # symbol from icon set
+    "SHOW_HISTORY": True, # show/hide "History" button, default: True
+    "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
+    "SHOW_BACK_BUTTON": True, # show/hide "Back" button on changeform in header, default: False
+    #"ENVIRONMENT": "sample_app.environment_callback",
+    #"DASHBOARD_CALLBACK": "sample_app.dashboard_callback",
+
+    "BORDER_RADIUS": "6px",
+    "COLORS": {
+        "primary": {
+            50: "#FFF0EB",
+            100: "#FFE2D6",
+            200: "#FFC8B3",
+            300: "#FFAB8A",
+            400: "#FF8E61",
+            500: "#FF733C",
+            600: "#FF733C",
+            700: "#FF733C",
+            800: "#FA4700",
+            900: "#BD3500",
+            950: "#802400",
+        },
+    },
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "dn": "🇩🇰",
+                "en": "🇬🇧",
+            },
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,  # Search in applications and models names
+        "show_all_applications": False,  # Dropdown with all applications and models
+        "navigation": [
+            {
+                "title": _("Organization"),
+                "separator": True,  # Top border
+                "collapsible": True,  # Collapsible group of links
+                "default_open": True,  # If collapsible, open on load
+                "items": [
+                    {
+                        "title": _("Brugere"),
+                        "icon": "person",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:organization_volunteer_changelist"),
+                    },
+                    {
+                        "title": _("Teams"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:organization_team_changelist"),
+                    },
+                    {
+                        "title": _("Events"),
+                        "icon": "event",
+                        "link": reverse_lazy("admin:organization_event_changelist"),
+                    },
+
+                ],
+            },
+        ],
+    },
+}

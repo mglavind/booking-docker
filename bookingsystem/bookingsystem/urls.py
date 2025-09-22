@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),  # Protect the view with login_required
-    path('', include('AktivitetsTeam.urls')),
+    path('organization/', include('organization.urls')),
+    
+    #path('', include('AktivitetsTeam.urls')),
 ]
 
