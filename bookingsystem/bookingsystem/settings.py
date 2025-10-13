@@ -13,23 +13,55 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from pathlib import Path
+from dotenv import load_dotenv
 import os
 
+import os
+from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Load .env files locally (optional)
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# -----------------------------
+# SECRET KEY
+# -----------------------------
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# -----------------------------
+# DEBUG
+# -----------------------------
+DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wpm8zp9_(ojrenmqy0a#x-j0g9k9zw7clfp*gz6ajhbqknoe1g'
+# -----------------------------
+# Allowed hosts
+# -----------------------------
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# -----------------------------
+# Database
+# -----------------------------
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "booking_db"),
+        "USER": os.getenv("POSTGRES_USER", "booking_user"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "booking_password"),
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
+        "PORT": os.getenv("POSTGRES_PORT", 5432),
+    }
+}
 
-ALLOWED_HOSTS = []
+# -----------------------------
+# Static files
+# -----------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+
 
 
 # Application definition
@@ -92,23 +124,13 @@ TEMPLATES = [
     },
 ]
 
-STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend/static/frontend/'),
 ]
 
 WSGI_APPLICATION = 'bookingsystem.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
