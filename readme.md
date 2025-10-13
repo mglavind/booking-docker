@@ -12,7 +12,7 @@ For at sætte applikationen i gang med Docker, følg disse trin:
 
 1. **Klon repositoryet:**
     ```sh
-    git clone <repository-url>
+    git clone (https://github.com/mglavind/booking-docker.git)
     cd booking-docker
     ```
 
