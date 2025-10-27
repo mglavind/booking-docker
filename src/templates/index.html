@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+{% load partials %}
+{% load bootstrap_icons %}
+
+
+{% block app_content %}
+{% load static %}
+
+<div class="container mx-auto">
+    <div class="mt-4">
+            <h1 class="display-4 mb-4">Hej {{ user.first_name }}!</h1>
+    </div>
+    <p> Så vidt vi ved er du en del af event.name hvor du er en del af team.name
+    </p>
+
+
+    <h2>Dit overblik</h2>
+    <div class="container py-2">
+    </div>
+</div>
+{% endblock %}
+
+
