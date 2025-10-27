@@ -1,35 +1,31 @@
-# -----------------------------
-# Stage 1: build Python environment
-# -----------------------------
-FROM python:3.11-slim AS base
+# Stage 1: Base build stage
+FROM python:3.13-bookworm
+# Create the app directory
+RUN mkdir /app
 
+# Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 
+ 
+# Set the working directory
+WORKDIR /app
 
-# Install system dependencies (needed for psycopg2 and Pillow)
-RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl
 
-WORKDIR /code
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Install dependencies first (for layer caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the requirements file first (better caching)
+COPY src/requirements.txt .
 
-# -----------------------------
-# Stage 2: copy code and run app
-# -----------------------------
-FROM base AS app
+RUN uv pip install -r requirements.txt --system
 
-WORKDIR /code
+COPY src/ .
 
-# Copy only necessary parts (not .git, node_modules, etc.)
-COPY . .
-
-# Collect static files during build
-RUN python bookingsystem/manage.py collectstatic --noinput
-
-# Expose port
-EXPOSE 8000
-
-# Run with Gunicorn (production WSGI server)
-CMD ["gunicorn", "bookingsystem.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip 
+ 
+# Expose the application port
+EXPOSE 8000 
+ 
+# Start the application using Gunicorn
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
