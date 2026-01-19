@@ -1,0 +1,16 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    
+<p>
+    <a class="btn btn-light" href="{% url 'AktivitetsTeam_AktivitetsTeamItem_list' %}">
+    AktivitetsTeamItem Listing
+    </a>
+</p>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save" class="btn btn-primary">
+  </form>
+{% endblock %}

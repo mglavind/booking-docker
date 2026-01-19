@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.errors }}
+    
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="col-form-label" for="first_name">Fornavn:</label>
+        </div>
+        <div class="col-md-10">
+            <input class="form-control" id="first_name" type="text" name="first_name" value="{{ object.first_name }}">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="col-form-label" for="last_name">Efternavn:</label>
+        </div>
+        <div class="col-md-10">
+            <input class="form-control" id="last_name" type="text" name="last_name" value="{{ object.last_name }}">
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="col-form-label" for="email">E-mail:</label>
+        </div>
+        <div class="col-md-10">
+            <input class="form-control" id="email" type="text" name="email" value="{{ object.email }}" readonly>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="col-form-label" for="phone">Telefon:</label>
+        </div>
+        <div class="col-md-10">
+            <input class="form-control" id="phone" type="text" name="phone" value="{{ object.phone }}">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="col-form-label" for="username">Brugernavn:</label>
+        </div>
+        <div class="col-md-10">
+            <input class="form-control" id="username" type="text" name="username" value="{{ object.username }}" readonly>
+        </div>
+    </div>
+
+    <div class="row mb-3 mt-3">
+        <div class="col-md-2"></div>
+        <div class="col-md-10">
+            <input type="submit" value="Gem" class="btn btn-primary">
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+

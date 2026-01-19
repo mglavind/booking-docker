@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+{% load bootstrap_icons %}
+<br>
+{% if request.user.is_authenticated %}
+      <h5>Booking oversigt for team: {% with volunteer_team_memberships=request.user.teammembership_set.all %}
+          {% if volunteer_team_memberships %}
+              {{ volunteer_team_memberships.first.team.name }}
+          {% endif %}
+          {% endwith %}</h5>
+  {% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Booket af</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% with user_team_membership=request.user.teammembership_set.first %}
+    {% if user_team_membership %}
+      {% for object in object_list %}
+        {% if user_team_membership.team.name and object.team == user_team_membership.team %}
+      <tr>
+        
+        <th scope="row"><a href="{{object.get_absolute_url}}">{{object}}</a></th>
+        <td>{{object.team_contact}}</td>
+        <td>
+          {% if object.status == 'Pending' %}
+              <span class="badge bg-warning text-dark">
+                  <small>Afventer</small>
+              </span>
+          {% elif object.status == 'Approved' %}
+              <span class="badge bg-success">
+                  <small>Godkendt</small>
+              </span>
+          {% elif object.status == 'Rejected' %}
+              <span class="badge bg-danger">
+                  <small>Afvist</small>
+              </span>
+          {% endif %}
+      </td>
+        <td>
+          <a href="{% url 'Butikken_MealBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
+            {% bs_icon 'pencil' %}  
+          </a>
+          <a href="{% url 'Butikken_MealBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+            {% bs_icon 'trash' %}  
+          </a>
+      </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  </tbody>
+</table>
+
+<div>
+  <a class="btn btn-primary"
+    href="{% url 'Butikken_MealBooking_create' %}">
+  Ny måltids bestilling
+  </a>
+</div>
+{% endblock %}

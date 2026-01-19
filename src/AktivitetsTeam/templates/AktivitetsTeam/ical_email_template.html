@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Detaljer</title>
+</head>
+<body>
+    <p>Hey! {{ volunteer.first_name }},</p>
+    <p>Så er det opdateret bookinger, og du får her følgende info</p>
+    <ul>
+        <li>Emne: {{ booking.item }}</li>
+        <li>Team: {{ booking.team }}</li>
+        <li>Kontaktperson: {{ booking.team_contact }} - {{booking.team_contact.phone}}</li>
+        <li>Lokation: {{ booking.location }}, {{ booking.address }}</li>
+        <li>Start: {{ booking.start_date }} {{ booking.start_time }}</li>
+        <li>Slut: {{ booking.end_date }} {{ booking.end_time }}</li>
+    </ul>
+    Bemærkninger
+    {{booking.remarks}}
+
+    interne bemærkninger:
+    {{booking.remarks_internal}}
+
+    <p>Mvh</p>
+    <p>Din Teamleder</p>
+</body>
+</html>

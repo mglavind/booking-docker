@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load comments %}
+{% load comments_xtd %}
+{% load static %}
+{% load bootstrap_icons %}
+{% block content %}
+    
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.item }} booking </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >{{ object.item }} booking til {{ object.team }} </h1>
+
+
+<br>
+    
+<table class="table">
+    <tr>
+        <td>Aktivitet</td>
+        <td>{{ object.item }}</td>
+    </tr>
+    <tr>
+        <td>Location</td>
+        <td>{{ object.location }}</td>
+    </tr>
+    <tr>
+        <td>Start dato</td>
+        <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+        <td>Start tid</td>
+        <td>{{ object.start_time }}</td>
+    </tr>
+    <tr>
+        <td>Slut dato</td>
+        <td>{{ object.end_date }}</td>
+    </tr>
+    <tr>
+        <td>Slut tid</td>
+        <td>{{ object.end_time }}</td>
+    </tr>
+    <tr>
+        <td>Team</td>
+        <td>{{ object.team }}</td>
+    </tr>
+    <tr>
+        <td>Kontaktperson</td>
+        <td>{{ object.team_contact }}</td>
+    </tr>
+    <tr>
+        <td>Bemærkninger</td>
+        <td>{{ object.remarks }}</td>
+    </tr>
+    <tr>
+        <td>Position</td>
+        <td>{{ object_dict.latitude }}. {{ object_dict.longitude }}
+        </br>
+        </br>
+                
+            <a href="https://www.google.com/maps?q={{ object_dict.latitude }},{{ object_dict.longitude }}" target="_blank" class="btn btn-primary">
+                Open in Google Maps
+            </a>
+        </td>
+        
+    </tr>
+    
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if object.status == 'Pending' %}
+                <button class="btn btn-warning btn-sm" disabled>Afventer</button>
+            {% elif object.status == 'Approved' %}
+                <button class="btn btn-success btn-sm" disabled>Godkendt</button>
+            {% elif object.status == 'Rejected' %}
+                <button class="btn btn-danger btn-sm" disabled>Afvist</button>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Oprettet</td>
+        <td>{{ object.created }}</td>
+    </tr>
+    <tr>
+        <td>Sidst Opdateret</td>
+        <td>{{ object.last_updated }}</td>
+    </tr>
+</table>
+
+</br>
+{{ object_dict|json_script:"object_json" }}
+<div id="map" style="height: 40em;" ></div>
+
+</br>
+<div class="container">
+    <div class="row align-items-start">
+        <div class="col col-4">
+            <a class="btn btn-primary btn-block" style="width: 100%" href="{{object.get_update_url}}">Rediger</a>
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_approve' object.pk %}?next={% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-block" style="width: 100%">Godkend</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_reject' object.pk %}?next={% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-block" style="width: 100%">Afvis</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container ">
+
+    <!-- Comments -->
+        {% get_comment_count for object as comment_count %}
+        <div class="comment mt-3 mb-5">  
+        <div class="card pt-4">
+            <div class="card-body">
+            <h5 class="card-title">Kommentarer</h5>
+
+            <!-- Kommentar træet -->
+
+            {% if comment_count %}
+                <ul class="media-list">
+                {% render_xtdcomment_tree for object %}
+                </ul>
+            {% endif %}
+
+            <!-- Skrivefelt -->
+
+            {% render_comment_form for object %}
+
+            <!-- Optælling -->
+            <div class="py-4 card-text">
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">Tilbage til oversigt</a>
+                &nbsp;&sdot;&nbsp;
+                {{ comment_count }} komment{{ comment_count|pluralize:"ar,arer" }}
+                er givet.
+            </div>
+        </div>
+        </div>
+
+    </div>
+
+<script>
+    (g => {
+        var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
+        b = b[c] || (b[c] = {});
+        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
+            await (a = m.createElement("script"));
+            e.set("libraries", [...r] + "");
+            for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+            e.set("callback", c + ".maps." + q);
+            a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+            d[q] = f;
+            a.onerror = () => h = n(Error(p + " could not load."));
+            a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+            m.head.append(a)
+        }));
+        d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
+    })({
+        key: "AIzaSyB_gCWQdMQ5CGrarZge8VqOeXzdeuoV-7Q", v: "weekly"
+    });
+
+    let map, marker, infoWindow;
+    async function initMap() {
+        const objectDict = JSON.parse(document.getElementById('object_json').textContent);
+        const defaultLat = 56.114951;  // Replace with your default latitude
+        const defaultLng = 9.655592;  // Replace with your default longitude
+
+        const initialLat = objectDict.latitude !== 'default_latitude' ? parseFloat(objectDict.latitude) : defaultLat;
+        const initialLng = objectDict.longitude !== 'default_longitude' ? parseFloat(objectDict.longitude) : defaultLng;
+
+        const position = { lat: initialLat, lng: initialLng };
+
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+        map = new Map(document.getElementById("map"), {
+            zoom: 15,
+            center: position,
+            mapId: "DEMO_MAP_ID",
+        });
+
+        const infoWindowContent = `
+            <div>
+                <p>Latitude: ${initialLat}</p>
+                <p>Longitude: ${initialLng}</p>
+                <a href="https://www.google.com/maps/search/?api=1&query=${initialLat},${initialLng}" target="_blank">View on Google Maps</a>
+            </div>
+        `;
+
+        // Initialize InfoWindow
+        infoWindow = new google.maps.InfoWindow({
+            content: infoWindowContent,
+        });
+
+        // Open InfoWindow immediately
+        infoWindow.open(map, marker);
+
+        marker = new AdvancedMarkerElement({
+            map: map,
+            position: position,
+            title: "Initial Location",
+        });
+
+
+        // Update form fields with marker's initial position
+        document.getElementById('latitude').value = initialLat;
+        document.getElementById('longitude').value = initialLng;
+
+        // Update marker and form fields on map click
+        map.addListener("click", (e) => {
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+
+            // Remove the old marker
+            marker.setMap(null);
+
+            // Create a new marker
+            marker = new AdvancedMarkerElement({
+                map: map,
+                position: { lat, lng },
+                title: "New Location",
+            });
+
+            // Update InfoWindow content
+            const newInfoWindowContent = `
+                <div>
+                    <p>Latitude: ${lat}</p>
+                    <p>Longitude: ${lng}</p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank">View on Google Maps</a>
+                </div>
+            `;
+            infoWindow.setContent(newInfoWindowContent);
+
+            // Open InfoWindow on new marker click
+            infoWindow.open(map, marker);
+
+            // Update form fields
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+        });
+ 
+    }
+
+    initMap();
+</script>
+
+    
+{% endblock %}
+
+
+
+

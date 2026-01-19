@@ -1,4 +1,4 @@
-#!/Users/mglavind/Documents/Projects/docker/booking-docker/bookingsystem/venv/bin/python
+#!/Users/mglavind/Documents/Projects/docker/booking-docker/src/venv/bin/python3
 import sys
 from dotenv.__main__ import cli
 if __name__ == '__main__':

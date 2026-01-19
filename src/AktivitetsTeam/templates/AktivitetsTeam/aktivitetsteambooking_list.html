@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+{% load bootstrap_icons %}
+{% load comments %}
+<br>
+{% if request.user.is_authenticated %}
+      <h5>Booking oversigt for team: 
+          {% if user_team_membership %}
+              {{ user_team_membership.team.name }}
+          {% endif %}
+      </h5>
+  {% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Item</th>
+      <th scope="col">Fra</th>
+      <th scope="col">Til</th>
+      <th scope="col">Booket af</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if user_team_membership %}
+        {% for object in object_list %}
+          {% if not user.is_staff %}
+            {% if user_team_membership.team.name and object.team == user_team_membership.team %}
+              <tr>
+                <td>
+                  {{ object.id}}
+                </td>
+                <td>
+                  <a href="{{object.get_absolute_url}}">{{object.item}}</a>
+                </td>
+                <td>{{object.start_date}}</td>
+                <td>{{object.end_date}}</td>
+                <td>{{object.team_contact}}</td>
+                <td>
+                  {% if object.status == 'Pending' %}
+                      <span class="badge bg-warning text-dark">
+                          <small>Afventer</small>
+                      </span>
+                  {% elif object.status == 'Approved' %}
+                      <span class="badge bg-success">
+                          <small>Godkendt</small>
+                      </span>
+                  {% elif object.status == 'Rejected' %}
+                      <span class="badge bg-danger">
+                          <small>Afvist</small>
+                      </span>
+                  {% endif %}
+              </td>
+                <td>
+                  <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
+                    {% bs_icon 'pencil' %}  
+                  </a>
+                  <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+                    {% bs_icon 'trash' %}  
+                  </a>
+              </td>
+              </tr>
+            {% endif %}
+
+          {% else %}
+            <tr>
+              <th scope="row">{{ object.id}}</th>
+              <td><a href="{{object.get_absolute_url}}">{{object.item}}</a>  </td>
+              <td>{{object.start_date}}</td>
+              <td>{{object.end_date}}</td>
+              <td>{{object.team_contact}}</td>
+              <td>
+                {% if object.status == 'Pending' %}
+                    <button class="btn btn-warning btn-sm d-flex">Afventer</button>
+                {% elif object.status == 'Approved' %}
+                  <button class="btn btn-success btn-sm d-flex">Godkendt</button>
+                {% elif object.status == 'Rejected' %}
+                    <button class="btn btn-danger btn-sm d-flex">Afvist</button>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' object.pk %}" class="btn btn-primary btn-sm">
+                    {% bs_icon 'info-circle' %}
+                </a>
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+                    {% bs_icon 'trash' %}
+                </a>
+            </td>
+            <td>
+              <div class="d-flex gap-2 align-items-center">
+                <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_reject' object.pk %}?next=AktivitetsTeam_AktivitetsTeamBooking_list" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm d-flex">{% bs_icon 'hand-thumbs-down' %}</button>
+                </form>
+                <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_approve' object.pk %}?next=AktivitetsTeam_AktivitetsTeamBooking_list" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-sm d-flex">{% bs_icon 'hand-thumbs-up' %}</button>
+                </form>
+              </div>
+          </td>    
+          <td>
+            {% with comments=object.comments.all %}
+                {% if comments %}
+                    <a href="{{object.get_absolute_url}}" class="btn btn-outline-secondary btn-sm">
+                        {{ comments.count }} {% bs_icon 'chat-left-dots' %}
+                    </a>
+                {% endif %}
+            {% endwith %}
+          </td>
+
+            </tr>
+          {% endif %}
+        {% endfor %}
+    {% endif %}
+  </tbody>
+</table>
+
+<div>
+  <a class="btn btn-primary"
+    href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}">
+  Ny AktivitetsTeam booking
+  </a>
+</div>
+{% endblock %}

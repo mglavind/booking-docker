@@ -60,3 +60,16 @@ class VolunteerSerializer(serializers.ModelSerializer):
             "last_updated",
             "email",
         ]
+
+class KeySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Key
+        fields = [
+            "description",
+            "created",
+            "last_updated",
+            "name",
+            "number",
+            "current_user",
+        ]

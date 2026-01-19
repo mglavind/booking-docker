@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'organization_Key_list' %}">Nøgle oversigt</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.name }} nøgle </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" > Nøgle {{ object.number }} til {{ object.name }} </h1>
+
+    
+<table class="table">
+    <tr><td>Nummer</td><td>{{ object.number }}</td></tr>
+    <tr><td>Navn</td><td>{{ object.name }}</td></tr>
+    <tr><td>Beskrivelse</td><td>{{ object.description }}</td></tr>
+    <tr><td>Nuværende bruger</td><td>{{ object.current_user }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Rediger</a>
+
+{% endblock %}

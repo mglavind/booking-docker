@@ -30,7 +30,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/mglavind/Documents/Projects/docker/booking-docker/bookingsystem/venv"
+set -gx VIRTUAL_ENV "/Users/mglavind/Documents/Projects/docker/booking-docker/src/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

@@ -1,0 +1,23 @@
+services:
+  db:
+    ports:
+      - "5434:5432"  # Different port for production
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - .env.prod
+
+  web:
+    container_name: django_app_prod
+    ports:
+      - "8002:8000"
+    restart: always
+    volumes: []  # No volume mounts for production (baked into image)
+    environment:
+      DEBUG: "False"
+    env_file:
+      - .env.prod
+
+volumes:
+  postgres_data_prod:

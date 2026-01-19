@@ -1,0 +1,21 @@
+
+
+{% block app_content %}
+<li class="mb-1">
+    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#organization-collapse" aria-expanded="false">
+        Organisation
+    </button>
+
+    <div class="collapse" id="organization-collapse">
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+                <a href="{% url 'organization_Volunteer_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Medarbejdere</a>
+            </li>
+            <li>
+                <a href="{% url 'organization_Key_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Nøgler</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+{% endblock %}

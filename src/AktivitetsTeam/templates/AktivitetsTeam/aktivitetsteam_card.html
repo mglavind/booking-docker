@@ -1,0 +1,23 @@
+{% block app_content %}
+
+<li class="mb-1">
+    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#Aktivitet-collapse" aria-expanded="false">
+        Aktivitets teamet
+    </button>
+
+    <div class="collapse" id="Aktivitet-collapse">
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Alle bookinger</a>
+            </li>
+            <li>
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamItem_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Katalog</a>
+            </li>
+            <li>
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamItem_create' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Ny Booking</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+{% endblock %}

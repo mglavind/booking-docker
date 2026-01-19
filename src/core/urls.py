@@ -6,7 +6,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),  # Protect the view with login_required
     path('organization/', include('organization.urls')),
+    path('butikken/', include('Butikken.urls')),
+    path('aktivitetsteam/', include('AktivitetsTeam.urls')),
     
-    #path('', include('AktivitetsTeam.urls')),
+    # NEW: Comments URLs
+    path('comments/', include('django_comments_xtd.urls')),
+    path('comments/', include('django_comments.urls')),
 ]
 

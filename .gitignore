@@ -12,3 +12,6 @@ instance/
 *.mo
 *.db
 *.sqlite
+
+.env.staging
+.env.prod

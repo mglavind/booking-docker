@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% load bootstrap5 %}
+{% block content %}
+
+</br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'organization_Key_list' %}">Key Listing</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Opdater nøgle</li>
+    </ol>
+</nav>
+
+</br>
+<h1 class="display-3">Opdater nøgle</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.errors }}
+    {{ form.as_p }}
+
+    <input type="submit" value="Gem" class="btn btn-primary">
+</form>
+
+{% endblock %}

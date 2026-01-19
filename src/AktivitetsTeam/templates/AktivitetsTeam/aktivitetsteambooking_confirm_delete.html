@@ -1,0 +1,11 @@
+
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <p>Er du sikker på at du vil slette din booking af {{ object.item }}  fra {{ object.start_date }} kl.{{ object.start_time }} til {{ object.end_date }} kl.{{ object.end_time }}   ?</p>
+  <div>
+    <input class="btn btn-danger" value="Slet booking" type="submit">
+  </div>
+</form>
+{% endblock %}

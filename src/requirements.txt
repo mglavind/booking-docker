@@ -1,25 +1,32 @@
-asgiref==3.8.1
-certifi==2025.1.31
-charset-normalizer==3.4.1
-defusedxml==0.7.1
-Django==5.1.6
-django-admin-list-filter-dropdown==1.0.3
+# Core Framework
+Django==5.2.10
+djangorestframework==3.16.1
+asgiref==3.11.0
+
+# UI & Admin (Unfold & Import/Export)
+django-unfold==0.76.0
+django-import-export==4.4.0
+django-bootstrap5==26.1
 django-bootstrap-icons==0.9.0
-django-bootstrap5==23.3
-django-embed-video==1.4.10
-django-template-partials==25.2
-django-unfold==0.65.0
-django-webpack-dev-server==1.0.0
-djangorestframework==3.15.2
-geographiclib==2.1
-geopy==2.4.1
-gunicorn==23.0.0
-idna==3.10
-progressbar2==4.5.0
+django-template-partials==25.3
+django-admin-list-filter-dropdown==1.0.3
+
+# Infrastructure & DB
 psycopg2-binary==2.9.11
-python-dotenv==1.0.1
-python-utils==3.9.1
-requests==2.32.3
-sqlparse==0.5.3
-typing_extensions==4.12.2
-urllib3==2.3.0
+gunicorn==23.0.0
+python-dotenv==1.2.1
+sqlparse==0.5.5
+
+# Utilities & Date/Time
+icalendar==6.3.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+requests==2.32.5
+urllib3==2.6.3
+certifi==2026.1.4
+django-comments-xtd==2.10.11
+django-contrib-comments==2.2.0
+
+# Geographic Data
+geopy==2.4.1
+geographiclib==2.1

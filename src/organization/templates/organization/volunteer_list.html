@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+{% load bootstrap_icons %}
+
+<table class="table table-hover" id="volunteer-table">
+  <thead>
+    <tr>
+      <th scope="col">
+        <button class="btn btn-link sort-button" data-sort="team_name">
+          <span class="fw-bold text-dark">Gruppe</span> {% bs_icon 'arrow-down-up' %}
+        </button>
+      </th>
+      <th scope="col">
+        <button class="btn btn-link sort-button" data-sort="first_name">
+          <span class="fw-bold text-dark">Fornavn</span> {% bs_icon 'arrow-down-up' %}
+        </button>
+      </th>
+      <th scope="col">
+        <button class="btn btn-link sort-button" data-sort="last_name">
+          <span class="fw-bold text-dark">Efternavn</span> {% bs_icon 'arrow-down-up' %}
+        </button>
+      </th>
+      <th scope="col">
+        <button class="btn btn-link sort-button" data-sort="phone">
+          <span class="fw-bold text-dark">Telefon</span> {% bs_icon 'arrow-down-up' %}
+        </button>
+      </th>
+      <th scope="col">
+        <button class="btn btn-link sort-button" data-sort="email">
+          <span class="fw-bold text-dark">Email</span> {% bs_icon 'arrow-down-up' %}
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for volunteer in volunteer_list %}
+      <tr>
+        <td>{{ volunteer.team_name }}</td>
+        <td>{{ volunteer.first_name }}</td>
+        <td>{{ volunteer.last_name }}</td>
+        <td>{{ volunteer.phone }}</td>
+        <td>{{ volunteer.email }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const table = document.getElementById("volunteer-table");
+    const sortButtons = table.querySelectorAll(".sort-button");
+    const tbody = table.querySelector("tbody");
+    const rows = [...tbody.querySelectorAll("tr")];
+
+    sortButtons.forEach(button => {
+      button.addEventListener("click", function () {
+        const sortBy = button.getAttribute("data-sort");
+        const sortedRows = [...rows].sort((a, b) => {
+          const valueA = a.querySelector(`td:nth-child(${button.parentElement.cellIndex + 1})`).innerText;
+          const valueB = b.querySelector(`td:nth-child(${button.parentElement.cellIndex + 1})`).innerText;
+          return valueA.localeCompare(valueB);
+        });
+
+        tbody.innerHTML = "";
+        sortedRows.forEach(row => {
+          tbody.appendChild(row);
+        });
+      });
+    });
+  });
+</script>
+
+{% endblock %}

@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from django.templatetags.static import static
-from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -25,38 +25,41 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# -----------------------------
-# SECRET KEY
-# -----------------------------
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'slettenbooking@gmail.com')
 
-# -----------------------------
-# DEBUG
-# -----------------------------
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG"))
+# Debug setting
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# -----------------------------
+# Secret key
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key-change-in-production')
+
 # Allowed hosts
-# -----------------------------
-# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a , between each.
-# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1,[::1]'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# -----------------------------
-# Database
-# -----------------------------
-DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql',
-         'NAME': os.getenv('DATABASE_NAME'),
-         'USER': os.getenv('DATABASE_USERNAME'),
-         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-         'HOST': os.getenv('DATABASE_HOST'),
-         'PORT': os.getenv('DATABASE_PORT'),
-     }
- }
+# Environment detection
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
+
+# Database configuration
+if ENVIRONMENT in ['staging', 'production']:
+    # Use PostgreSQL for staging/production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USERNAME'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': os.environ.get('DATABASE_HOST', 'db'),
+            'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        }
+    }
+else:
+    # Use SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # -----------------------------
 # Static files
@@ -70,8 +73,6 @@ STATIC_ROOT = '/vol/web/static/'
 
 INSTALLED_APPS = [
     'rest_framework',
-    'organization',
-    'django.contrib.staticfiles',
     "unfold",  # before django.contrib.admin
     "unfold.contrib.filters",  # optional, if special filters are needed
     "unfold.contrib.forms",  # optional, if special form elements are needed
@@ -81,7 +82,13 @@ INSTALLED_APPS = [
     "unfold.contrib.simple_history",  # optional, if django-simple-history package is used
     "unfold.contrib.location_field",  # optional, if django-location-field package is used
     "unfold.contrib.constance",  # optional, if django-constance package is used
-    'django.contrib.admin',
+    "django.contrib.admin",  # required
+    'django_comments_xtd',
+    'django_comments',
+    'django.contrib.sites',  # Required by django-comments
+    'organization',
+    'django.contrib.staticfiles',
+    'import_export',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -92,8 +99,9 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'template_partials',
     'django_bootstrap_icons',
-    'embed_video',
     'django_admin_listfilter_dropdown',
+    'AktivitetsTeam',
+    'Butikken'
 ]
 
 MIDDLEWARE = [
@@ -170,7 +178,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 
+SITE_ID = 1  # Required for django.contrib.sites
 
+# Basic XTD Settings
+COMMENTS_APP = 'django_comments_xtd'
+COMMENTS_XTD_MAX_THREAD_LEVEL = 2  # How deep the replies go
+COMMENTS_XTD_CONFIRM_EMAIL = False # Set to True if you want email verification
 
 
 # Default primary key field type
@@ -179,28 +192,16 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
+AUTH_USER_MODEL = 'organization.Volunteer'
 
 UNFOLD = {
     "SITE_TITLE": "Admin",
     "SITE_HEADER": "SKS Admin",
     "SITE_SUBHEADER": "- Med lort på styret",
-    #"SITE_DROPDOWN": [
-    #    {
-    #        "icon": "diamond",
-    #        "title": _("My site"),
-    #        "link": "https://example.com",
-    #    },
-        # ...
-    #],
-    #"SITE_URL": "/",
-    "SITE_SYMBOL": "mode_heat",  # symbol from icon set
-    "SHOW_HISTORY": True, # show/hide "History" button, default: True
-    "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
-    "SHOW_BACK_BUTTON": True, # show/hide "Back" button on changeform in header, default: False
-    #"ENVIRONMENT": "sample_app.environment_callback",
-    #"DASHBOARD_CALLBACK": "sample_app.dashboard_callback",
-
+    "SITE_SYMBOL": "mode_heat",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": True,
     "BORDER_RADIUS": "6px",
     "COLORS": {
         "primary": {
@@ -226,18 +227,18 @@ UNFOLD = {
         },
     },
     "SIDEBAR": {
-        "show_search": True,  # Search in applications and models names
-        "show_all_applications": False,  # Dropdown with all applications and models
+        "show_search": True,
+        "show_all_applications": False,
         "navigation": [
             {
                 "title": _("Organization"),
-                "separator": True,  # Top border
-                "collapsible": True,  # Collapsible group of links
-                "default_open": True,  # If collapsible, open on load
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
                 "items": [
                     {
                         "title": _("Brugere"),
-                        "icon": "person",  # Supported icon set: https://fonts.google.com/icons
+                        "icon": "person",
                         "link": reverse_lazy("admin:organization_volunteer_changelist"),
                     },
                     {
@@ -250,7 +251,57 @@ UNFOLD = {
                         "icon": "event",
                         "link": reverse_lazy("admin:organization_event_changelist"),
                     },
-
+                ],
+            },
+            {
+                "title": _("Butikken & Forplejning"),  # Added Butikken Section
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Vareoversigt"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:Butikken_butikkenitem_changelist"),
+                    },
+                    {
+                        "title": _("Vare Bookinger"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:Butikken_butikkenbooking_changelist"),
+                    },
+                    {
+                        "title": _("Måltider"),
+                        "icon": "restaurant_menu",
+                        "link": reverse_lazy("admin:Butikken_mealplan_changelist"),
+                    },
+                    {
+                        "title": _("Team Måltidsvalg"),
+                        "icon": "assignment",
+                        "link": reverse_lazy("admin:Butikken_teammealplan_changelist"),
+                    },
+                    {
+                        "title": _("Opskrifter"),
+                        "icon": "menu_book",
+                        "link": reverse_lazy("admin:Butikken_recipe_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Aktivitetsteam"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Bookinger"),
+                        "icon": "calendar_month",
+                        "link": reverse_lazy("admin:AktivitetsTeam_aktivitetsteambooking_changelist"),
+                    },
+                    {
+                        "title": _("Aktiviteter"),
+                        "icon": "sports_gymnastics",
+                        "link": reverse_lazy("admin:AktivitetsTeam_aktivitetsteamitem_changelist"),
+                    },
                 ],
             },
         ],

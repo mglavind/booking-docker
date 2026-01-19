@@ -108,3 +108,38 @@ class VolunteerForm(forms.ModelForm):
             "phone",
         ]
 
+
+class KeyForm(forms.ModelForm):
+    class Meta:
+        model = models.Key
+        fields = [
+            "number",
+            "name", 
+            "description", 
+            "current_user"]  # add/remove as needed
+        widgets = {
+            'number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'readonly': 'readonly'  # Make the field read-only
+                }),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'readonly': 'readonly'  # Make the field read-only
+                }),
+            'description': forms.Textarea(attrs={
+                'rows': 3, 
+                'class': 'form-control',
+                'readonly': 'readonly'  # Make the field read-only
+                }),
+            'current_user': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'number': 'Nøgle nummer',
+            'name': 'Nøgle navn',
+            'description': 'Beskrivelse',
+            'current_user': 'Nuværende bruger',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(KeyForm, self).__init__(*args, **kwargs)
+        self.fields["current_user"].queryset = Volunteer.objects.all().order_by('first_name')

@@ -1,0 +1,79 @@
+
+{% extends "base.html" %}
+{% load comments %}
+{% load comments_xtd %}
+{% load static %}
+{% load bootstrap_icons %}
+{% block content %}
+
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Butikken_ButikkenBooking_list' %}">Butikken bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.item }} booking </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >{{ object.item }} booking til {{ object.team }} </h1>
+
+
+<br>
+    
+<table class="table">
+    <tr>
+        <td>Item</td>
+        <td>{{ object.item }}</td>
+    </tr>
+    <tr>
+        <td>Antal</td>
+        <td>{{ object.quantity }}</td>
+    </tr>
+    <tr>
+        <td>Fra</td>
+        <td>{{ object.start }}</td>
+    </tr>
+    <tr>
+        <td>Team</td>
+        <td>{{ object.team }}</td>
+    </tr>
+    <tr>
+        <td>Kontaktperson</td>
+        <td>{{ object.team_contact }}</td>
+    </tr>
+    <tr>
+        <td>Del af Måltid</td>
+        <td>{{ object.for_meal }}</td>
+    </tr>
+    <tr>
+        <td>Anvendelses dato</td>
+        <td>{{ object.date_used }}</td>
+    <tr>
+        <td>Bemærkninger</td>
+        <td>{{ object.remarks }}</td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if object.status == 'Pending' %}
+                <button class="btn btn-warning btn-sm" disabled>Afventer</button>
+            {% elif object.status == 'Approved' %}
+                <button class="btn btn-success btn-sm" disabled>Godkendt</button>
+            {% elif object.status == 'Rejected' %}
+                <button class="btn btn-danger btn-sm" disabled>Afvist</button>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Oprettet</td>
+        <td>{{ object.created }}</td>
+    </tr>
+    <tr>
+        <td>Sidst Opdateret</td>
+        <td>{{ object.last_updated }}</td>
+    </tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit</a>
+
+
+{% endblock %}

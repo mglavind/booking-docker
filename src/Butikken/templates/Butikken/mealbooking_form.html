@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Butikken_MealBooking_list' %}">Måltids bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> Ny måltidsbestilling </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >Ny måltidsbestilling</h1>
+
+<br>
+<form method="post">
+    {% csrf_token %}
+    {{form.errors}}
+    {{formset.errors}}
+    {{ form.as_p }}
+    {{ teammealplan_formset.management_form }}
+    <table class="table">
+        {% for form in teammealplan_formset %}
+        <tr>
+            <td>{{ form.meal_plan.label }}: {{ form.meal_plan }}</td>
+            <td>{{ form.meal_option.label }}: {{ form.meal_option }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}

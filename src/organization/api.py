@@ -42,3 +42,12 @@ class VolunteerViewSet(viewsets.ModelViewSet):
     queryset = models.Volunteer.objects.all()
     serializer_class = serializers.VolunteerSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class KeyViewSet(viewsets.ModelViewSet):
+    """ViewSet for the Key class"""
+
+    queryset = models.Key.objects.all()
+    serializer_class = serializers.KeySerializer
+    permission_classes = [permissions.IsAuthenticated]
+

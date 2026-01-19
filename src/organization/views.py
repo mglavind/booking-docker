@@ -17,6 +17,8 @@ from . import models
 from . import forms
 from django.db.models import F
 from .models import Team, TeamMembership
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 
 User = get_user_model()
 
@@ -101,111 +103,111 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 
 
 
-class EventMembershipListView(generic.ListView):
+class EventMembershipListView(LoginRequiredMixin, generic.ListView):
     model = models.EventMembership
     form_class = forms.EventMembershipForm
 
 
-class EventMembershipCreateView(generic.CreateView):
+class EventMembershipCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.EventMembership
     form_class = forms.EventMembershipForm
 
 
-class EventMembershipDetailView(generic.DetailView):
+class EventMembershipDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.EventMembership
     form_class = forms.EventMembershipForm
 
 
-class EventMembershipUpdateView(generic.UpdateView):
+class EventMembershipUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.EventMembership
     form_class = forms.EventMembershipForm
     pk_url_kwarg = "pk"
 
 
-class EventMembershipDeleteView(generic.DeleteView):
+class EventMembershipDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.EventMembership
     success_url = reverse_lazy("organization_EventMembership_list")
 
 
-class EventListView(generic.ListView):
+class EventListView(LoginRequiredMixin, generic.ListView):
     model = models.Event
     form_class = forms.EventForm
 
 
-class EventCreateView(generic.CreateView):
+class EventCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
 
 
-class EventDetailView(generic.DetailView):
+class EventDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.Event
     form_class = forms.EventForm
 
 
-class EventUpdateView(generic.UpdateView):
+class EventUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Event
     form_class = forms.EventForm
     pk_url_kwarg = "pk"
 
 
-class EventDeleteView(generic.DeleteView):
+class EventDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.Event
     success_url = reverse_lazy("organization_Event_list")
 
 
-class TeamListView(generic.ListView):
+class TeamListView(LoginRequiredMixin, generic.ListView):
     model = models.Team
     form_class = forms.TeamForm
 
 
-class TeamCreateView(generic.CreateView):
+class TeamCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Team
     form_class = forms.TeamForm
 
 
-class TeamDetailView(generic.DetailView):
+class TeamDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.Team
     form_class = forms.TeamForm
 
 
-class TeamUpdateView(generic.UpdateView):
+class TeamUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.Team
     form_class = forms.TeamForm
     pk_url_kwarg = "pk"
 
 
-class TeamDeleteView(generic.DeleteView):
+class TeamDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.Team
     success_url = reverse_lazy("organization_Team_list")
 
 
-class TeamMembershipListView(generic.ListView):
+class TeamMembershipListView(LoginRequiredMixin, generic.ListView):
     model = models.TeamMembership
     form_class = forms.TeamMembershipForm
 
 
-class TeamMembershipCreateView(generic.CreateView):
+class TeamMembershipCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.TeamMembership
     form_class = forms.TeamMembershipForm
 
 
-class TeamMembershipDetailView(generic.DetailView):
+class TeamMembershipDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.TeamMembership
     form_class = forms.TeamMembershipForm
 
 
-class TeamMembershipUpdateView(generic.UpdateView):
+class TeamMembershipUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.TeamMembership
     form_class = forms.TeamMembershipForm
     pk_url_kwarg = "pk"
 
 
-class TeamMembershipDeleteView(generic.DeleteView):
+class TeamMembershipDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.TeamMembership
     success_url = reverse_lazy("organization_TeamMembership_list")
 
 
-class VolunteerListView(generic.ListView):
+class VolunteerListView(LoginRequiredMixin, generic.ListView):
     model = models.Volunteer
     form_class = forms.VolunteerForm
     template_name = 'volunteer_list.html'  # Change this to the path of your template
@@ -220,12 +222,12 @@ class VolunteerListView(generic.ListView):
         return volunteers_sorted.values('team_name', 'first_name', 'last_name', 'phone', 'email')
 
 
-class VolunteerCreateView(generic.CreateView):
+class VolunteerCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.Volunteer
     form_class = forms.VolunteerForm
 
 
-class VolunteerDetailView(generic.DetailView):
+class VolunteerDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.Volunteer
     form_class = forms.VolunteerForm
     success_url = reverse_lazy("organization_Volunteer_detail")
@@ -254,3 +256,44 @@ class VolunteerDeleteView(generic.DeleteView):
     model = models.Volunteer
     success_url = reverse_lazy("organization_Volunteer_list")
 
+class KeyListView(generic.ListView):
+    model = models.Key
+    form_class = forms.KeyForm
+    context_object_name = "key_list"
+
+    def get_queryset(self):
+        return models.Key.objects.annotate(
+            number_int=Cast('number', IntegerField())
+        ).order_by('number_int')
+
+
+class KeyCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.Key
+    form_class = forms.KeyForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            messages.error(request, "Du har ikke tilladelse til at oprette en nøgle.")
+            return redirect(reverse_lazy('organization_Key_list'))
+
+class KeyDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.Key
+    form_class = forms.KeyForm
+
+
+class KeyUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = models.Key
+    form_class = forms.KeyForm
+    pk_url_kwarg = "pk"
+
+    def dispatch(self, request, *args, **kwargs):
+        # Only allow admins
+        if not request.user.is_staff:  # or use is_superuser if you prefer
+            messages.error(request, "Du har ikke tilladelse til at ændre denne nøgle.")
+            # Redirect back to the previous page, or fallback to a safe URL
+            return redirect(request.META.get('HTTP_REFERER', reverse_lazy('organization_Key_list')))
+        return super().dispatch(request, *args, **kwargs)
+
+class KeyDeleteView(LoginRequiredMixin, generic.DeleteView):
+    model = models.Key
+    success_url = reverse_lazy("organization_Key_list")

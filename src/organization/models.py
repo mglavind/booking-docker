@@ -78,7 +78,7 @@ class Team(models.Model):
         return str(self.name)
     
 
-class Volunteer(models.Model):
+class Volunteer(AbstractUser):
 
     # Fields
     username = models.CharField(max_length=30, unique=True, db_index=True)
@@ -86,17 +86,22 @@ class Volunteer(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_name = models.CharField(max_length=30, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
+    email = models.EmailField(unique=True, db_index=True)
+    phone = models.CharField(max_length=30, blank=True, db_index=True)
     events = models.ManyToManyField(Event, through='EventMembership',blank=True, db_index=True)
     teams = models.ManyToManyField(Team, through='TeamMembership', blank=True, db_index=True)
-    phone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(max_length=254, blank=True)
-    
 
     class Meta:
         pass
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def get_absolute_url(self):
+        return reverse("organization_Volunteer_detail", args=(self.pk,))
+
+    def get_update_url(self):
+        return reverse("organization_Volunteer_update", args=(self.pk,))
     
 
 class TeamEventMembership(models.Model):
@@ -144,5 +149,34 @@ class EventMembership(models.Model):
     def get_update_url(self):
         return reverse("organization_EventMembership_update", args=(self.pk,))
     
+class Key(models.Model):
+
+    # Relationships
+    current_user = models.ForeignKey("organization.Volunteer", on_delete=models.CASCADE, blank=True, null=True, db_index=True)
+
+    # Fields
+    description = models.TextField(max_length=100, blank=True)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    last_updated = models.DateTimeField(auto_now=True, editable=False)
+    name = models.CharField(max_length=30)
+    number = models.CharField(max_length=30)
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return str(self.name)
+
+    def get_absolute_url(self):
+        return reverse("organization_Key_detail", args=(self.pk,))
+
+    def get_update_url(self):
+        return reverse("organization_Key_update", args=(self.pk,))
+
+
+
+
+
+
 
 

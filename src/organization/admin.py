@@ -281,6 +281,27 @@ class VolunteerAdmin(ModelAdmin):
         self.message_user(request, f'Event Memberships created for selected volunteers with the next upcoming event: {next_event}', level='success')
     create_event_membership.short_description = "Add selected to the next event"
 
+class KeyAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Key
+        fields = "__all__"
+
+
+class KeyAdmin(admin.ModelAdmin):
+    form = KeyAdminForm
+    list_display = [
+        "number",
+        "name",
+        "current_user",
+        "description",
+    ]
+    readonly_fields = [
+        "last_updated",
+    ]
+
+
+
 
 # Register all models
 admin.site.register(models.Team, TeamAdmin)

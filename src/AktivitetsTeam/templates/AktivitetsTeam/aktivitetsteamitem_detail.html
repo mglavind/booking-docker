@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% load embed_video_tags %}
+    
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamItem_list' %}"> Aktivitetsteam Katalog</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.name }}</li>
+    </ol>
+</nav>
+<br>
+
+<div class="card mb-3 center" style="max-width: 750px;">
+    <!-- <img src="..." class="card-img-top" alt="..."> -->
+    <div class="card-body">
+        <h2 class="card-title">
+            {{ object.name }}
+        </H2>
+        <p class="card-text"> 
+            {{ object.description }}
+        </p>
+
+    </div>
+    <ul class="list-group list-group-flush">
+        {% if object.description_flow %}
+            <li class="list-group-item">Flow: {{ object.description_flow}} </li>
+        {% endif %}
+        {% if object.description_eksempel %}
+            <li class="list-group-item">Eksempel på aktiviteter: {{ object.description_eksempel}} </li>
+        {% endif %}
+        {% if object.description_aktiverede %}
+            <li class="list-group-item">Aktiverede deltagere: {{object.description_aktiverede}} </li>
+        {% endif %}
+        {% if object.youtube_link %}
+            <li class="list-group-item">
+                
+                    <div class="ratio ratio-16x9">
+                        {% video object.youtube_link as my_video %}
+                            {% video my_video '100% x 100%' %}
+                        {% endvideo %}
+                    </div>
+                
+            </li>
+        {% endif %}
+        {% if user.is_staff %}
+            <li class="list-group-item"><a class="btn btn-primary" href="{{ object.get_update_url }}">Rediger</a></li>
+        {% endif %}
+    </ul>
+    <div class="card-footer">
+        <small class="text-body-secondary">Sidst opdateret {{ object.last_updated }}</small>
+      </div>
+</div>
+
+
+
+{% endblock %}

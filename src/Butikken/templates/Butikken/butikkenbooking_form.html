@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+{% load bootstrap_icons %}
+{% load bootstrap5 %}
+{% block content %}
+
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Butikken_ButikkenBooking_list' %}">Butikken bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Ny booking </li>
+    </ol>
+</nav>
+
+<br>
+<h1 class="display-3" >Ny butikken booking</h1>
+
+{% if user.events.first.deadline_mad %}
+    <p>Deadline for butikken bestillinger: <mark> {{user.events.first.deadline_mad}} </mark>.</p>
+{% endif %}
+    
+  
+<form id="form" role="form" method="post">
+    {% csrf_token %}
+    {{ form.errors }}
+
+    </br>
+    
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.item.id_for_label }}">{{ form.item.label }}</label>
+        <div class="col-sm-10">
+            <div class="input-group">
+                {{ form.item }}
+            </div>
+        </div>
+    </div>
+    </br>
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+        <div class="col-sm-10">
+            <div class="input-group">
+                {{ form.quantity }}
+                <span class="input-group-text" id="unit-text">Mængde til 2 personer</span>
+            </div>
+        </div>
+    </div>
+    </br>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
+        <div class="col-sm-10">
+            <div class="input-group">
+                {{ form.unit }}
+                <span class="input-group-text" id="unit-text">Typisk enhed</span>
+            </div>
+        </div>
+    </div>
+    </br>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.for_meal.id_for_label }}">{{ form.for_meal.label }}</label>
+        <div class="col-sm-10">
+            {{ form.for_meal }}
+        </div>
+    </div>
+    </br>
+
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.team.id_for_label }}">{{ form.team.label }}</label>
+        <div class="col-sm-10">
+            {{ form.team }}
+        </div>
+    </div>
+    </br>
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.team_contact.id_for_label }}">{{ form.team_contact.label }}</label>
+        <div class="col-sm-10">
+            {{ form.team_contact }}
+        </div>
+    </div>
+    </br>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.start.id_for_label }}">{{ form.start.label }}</label>
+        <div class="col-sm-10">
+            <!-- Start date -->
+            {% bootstrap_field form.start show_label=False %}
+            {{ form.start.errors }}
+  
+
+        </div>
+    </div>
+    </br>
+    
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="start_time"> {{form.start_time.label}} </label>
+        <div class="col-sm-10">
+            <!-- Start time -->
+            {% bootstrap_field form.start_time show_label=False %}
+            {{ form.start_time.errors }}
+        </div>
+    </div>
+    </br>
+
+    
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="date_used"> {{form.date_used.label}} </label>
+        <div class="col-sm-10">
+            <!-- Start time -->
+            {% bootstrap_field form.date_used show_label=False %}
+            {{ form.date_used.errors }}
+        </div>
+    </div>
+    </br>
+
+
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="{{ form.remarks.id_for_label }}">{{ form.remarks.label }}</label>
+        <div class="col-sm-10">
+            {{ form.remarks }}
+        </div>
+    </div>
+        
+    <br>
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <input type="submit" value="Gem" class="btn btn-primary">
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}

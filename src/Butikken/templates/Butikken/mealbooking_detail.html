@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Butikken_MealBooking_list' %}">Måltids bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> Måltidsbestilling </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >{{ object.team }}'s Måltider </h1>
+
+<br>
+
+
+    
+<table class="table">
+    <tr><td>Kontaktperson</td><td>{{ object.team_contact }}</td></tr>
+    <tr><td>Team</td><td>{{ object.team }}</td></tr>
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if object.status == 'Pending' %}
+                <button class="btn btn-warning btn-sm" disabled>Afventer</button>
+            {% elif object.status == 'Approved' %}
+                <button class="btn btn-success btn-sm" disabled>Godkendt</button>
+            {% elif object.status == 'Rejected' %}
+                <button class="btn btn-danger btn-sm" disabled>Afvist</button>
+            {% endif %}
+        </td>
+    </tr>
+    <tr><td>Oprættet</td><td>{{ object.created }}</td></tr>
+    <tr><td>Sidst opdateret</td><td>{{ object.last_updated }}</td></tr>
+</table>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Meal Plan</th>
+            <th>Meal Option</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for team_meal_plan in team_meal_plans %}
+        <tr>
+            <td>{{ team_meal_plan.meal_plan }}</td>
+            <td>{{ team_meal_plan.meal_option }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Rediger</a>
+
+{% endblock %}
