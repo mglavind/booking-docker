@@ -8,6 +8,8 @@ urlpatterns = [
     path('organization/', include('organization.urls')),
     path('butikken/', include('Butikken.urls')),
     path('aktivitetsteam/', include('AktivitetsTeam.urls')),
+    path('sjak/', include('Sjak.urls')),
+    path('teknik/', include('Teknik.urls')),
     
     # NEW: Comments URLs
     path('comments/', include('django_comments_xtd.urls')),

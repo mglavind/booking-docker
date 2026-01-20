@@ -62,6 +62,34 @@
                                 <li><a class="dropdown-item" href="{% url 'Butikken_Recipe_list' %}">Måltidspakker</a></li>
                             </ul>
                         </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Aktivitetsteam
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Aktiviteter</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'AktivitetsTeam_AktivitetsTeamItem_list' %}">Aktivitetskatalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">Aktivitetsbookinger</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-primary" href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}">Opret ny booking</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Sjak
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Lager & Materialer</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakItem_list' %}">Varekatalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakItemType_list' %}">Kategorier</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Bookinger</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakBooking_list' %}">Alle bookinger</a></li>
+                                <li><a class="dropdown-item text-primary" href="{% url 'Sjak_SjakBooking_create' %}">Opret Sjak booking</a></li>
+                            </ul>
+                        </li>
                     {% endif %}
                 </ul>
 

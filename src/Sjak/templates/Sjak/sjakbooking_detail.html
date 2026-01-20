@@ -1,0 +1,146 @@
+
+{% extends "base.html" %}
+{% load comments %}
+{% load comments_xtd %}
+{% load static %}
+{% load bootstrap_icons %}
+{% block content %}
+
+
+<div class="container ">
+
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Sjak_SjakBooking_list' %}">Sjak bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.item }} booking </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >{{ object.item }} booking til {{ object.team }} </h1>
+
+
+<br>
+
+    
+<table class="table">
+    <tr>
+        <td>Item</td>
+        <td>{{ object.item }}</td>
+    </tr>
+    <tr>
+        <td>Antal</td>
+        <td>{{ object.quantity }}</td>
+    </tr>
+    <tr>
+        <td>Fra</td>
+        <td>{{ object.start }} - {{object.start_time}} </td>
+    </tr>
+    <tr>
+        <td>Til</td>
+        <td>{{ object.end }} - {{object.end_time}} </td>
+    </tr>
+    <tr>
+        <td>Team</td>
+        <td>{{ object.team }}</td>
+    </tr>
+    <tr>
+        <td>Kontaktperson</td>
+        <td>{{ object.team_contact }}</td>
+    </tr>
+    <tr>
+        <td>Bemærkninger</td>
+        <td>{{ object.remarks }}</td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if object.status == 'Pending' %}
+                <button class="btn btn-warning btn-sm" disabled>Afventer</button>
+            {% elif object.status == 'Approved' %}
+                <button class="btn btn-success btn-sm" disabled>Godkendt</button>
+            {% elif object.status == 'Rejected' %}
+                <button class="btn btn-danger btn-sm" disabled>Afvist</button>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Oprettet</td>
+        <td>{{ object.created }}</td>
+    </tr>
+    <tr>
+        <td>Sidst Opdateret</td>
+        <td>{{ object.last_updated }}</td>
+    </tr>
+</table>
+
+
+<br> 
+<div class="container">
+    <div class="row align-items-start">
+        <div class="col col-4">
+            <a class="btn btn-primary btn-block" style="width: 100%" href="{{object.get_update_url}}">Rediger</a>
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'Sjak_SjakBooking_approve' object.pk %}?next={% url 'Sjak_SjakBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-block" style="width: 100%">Godkend</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'Sjak_SjakBooking_reject' object.pk %}?next={% url 'Sjak_SjakBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-block" style="width: 100%">Afvis</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+
+
+<br>
+<br>
+
+</div>
+    <div class="container ">
+
+
+        {% get_comment_count for object as comment_count %}
+        <div class="comment mt-3 mb-5">  
+        <div class="card pt-4">
+            <div class="card-body">
+            <h5 class="card-title">Kommentarer</h5>
+
+      
+
+            {% if comment_count %}
+                <ul class="media-list">
+                {% render_xtdcomment_tree for object %}
+                </ul>
+            {% endif %}
+
+          
+
+            {% render_comment_form for object %}
+
+            
+            <div class="py-4 card-text">
+                <a href="{% url 'Sjak_SjakBooking_list' %}">Tilbage til oversigt</a>
+                &nbsp;&sdot;&nbsp;
+                {{ comment_count }} komment{{ comment_count|pluralize:"ar,arer" }}
+                er givet.
+            </div>
+        </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}

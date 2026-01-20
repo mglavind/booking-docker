@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load bootstrap_icons %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block title %}
+    Sjak Booking - {% if form.instance.pk %}Rediger{% else %}Ny{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mt-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Sjak_SjakBooking_list' %}">Sjak bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+          {% if form.instance.pk %}Rediger booking #{{ form.instance.pk }}{% else %}Ny booking{% endif %}
+      </li>
+    </ol>
+</nav>
+
+<h1 class="display-4">{% if form.instance.pk %}Rediger{% else %}Ny{% endif %} Sjak booking</h1>
+
+{% if user.is_authenticated and user.events.first %}
+    <p class="text-muted">
+        Deadline for Sjak bestillinger: <mark class="px-2 rounded">{{ user.events.first.deadline_sjak|default:"Ikke sat" }}</mark>.
+    </p>
+{% endif %}
+
+<hr class="mb-4">
+
+<div class="row">
+    <div class="col-md-8 col-lg-6">
+        <form id="booking-form" role="form" method="post" class="needs-validation">
+            {% csrf_token %}
+
+            {% bootstrap_form_errors form type='all' %}
+
+            <div class="mb-4">
+                {% bootstrap_field form.item id="item-select" %}
+            </div>
+
+            <div class="card mb-4 bg-light border-0">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-7">
+                            {% bootstrap_field form.start id="start_date" %}
+                        </div>
+                        <div class="col-sm-5">
+                            {% bootstrap_field form.start_time %}
+                        </div>
+                        
+                        <div class="col-sm-7">
+                            {% bootstrap_field form.end id="end_date" %}
+                        </div>
+                        <div class="col-sm-5">
+                            {% bootstrap_field form.end_time %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                {% bootstrap_field form.quantity  %}
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.team_contact.id_for_label }}">Kontaktperson:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">{% bs_icon 'person-vcard' %}</span>
+                        {{ form.team_contact }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.team.id_for_label }}">Team:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">{% bs_icon 'people' %}</span>
+                        {{ form.team }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                {% bootstrap_field form.remarks placeholder='Skriv evt. bemærkninger her...' rows=3 %}
+            </div>
+
+            <div class="d-flex gap-2 mb-5">
+                <button type="submit" class="btn btn-primary px-4">
+                    {% bs_icon 'check2-circle' %} Indsend Booking
+                </button>
+                <a href="{% url 'Sjak_SjakBooking_list' %}" class="btn btn-outline-secondary">Annuller</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

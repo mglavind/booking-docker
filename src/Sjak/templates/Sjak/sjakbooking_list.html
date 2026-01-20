@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+{% load bootstrap_icons %}
+{% load comments %}
+
+<br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Sjak Bookinger</li>
+  </ol>
+</nav>
+
+<br>
+
+{% if request.user.is_authenticated %}
+  <h5>Booking oversigt for team: 
+      {% if volunteer_team_memberships %}
+          {{ volunteer_team_memberships.0.team__name }}
+      {% endif %}
+  </h5>
+{% endif %}
+
+<div>
+  {% if user_events %}
+      Deadline for Sjak bookinger: {{ user_events.0.deadline_sjak }}
+  {% else %}
+      No events found for the user.
+  {% endif %}
+</div>
+  
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Item</th>
+      <th scope="col">Antal</th>
+      <th scope="col">Fra</th>
+      <th scope="col">Til</th>
+      <th scope="col">Booket af</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+      {% if is_staff %}
+        <th scope="col">Godkendelse</th>
+      {% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% if user_team_membership %}
+      {% for object in filtered_object_list %}
+        <tr>
+          <th scope="row">{{ object.id }}</th>
+          <td><a href="{{ object.get_absolute_url }}">{{ object.item }}</a></td>
+          <td>{{ object.quantity }}</td>
+          <td>{{ object.start }} - {{ object.start_time }}</td>
+          <td>{{ object.end }} - {{ object.end_time }}</td>
+          <td>{{ object.team_contact }}</td>
+          <td>
+            {% if object.status == 'Pending' %}
+              <span class="badge bg-warning text-dark">
+                <small>Afventer</small>
+              </span>
+            {% elif object.status == 'Approved' %}
+              <span class="badge bg-success">
+                <small>Godkendt</small>
+              </span>
+            {% elif object.status == 'Rejected' %}
+              <span class="badge bg-danger">
+                <small>Afvist</small>
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            {% if is_staff %}
+              <a href="{% url 'Sjak_SjakBooking_detail' object.pk %}" class="btn btn-primary btn-sm">
+                {% bs_icon 'eye-fill' %}
+              </a>
+              <a href="{% url 'Sjak_SjakBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+                {% bs_icon 'trash' %}
+              </a>
+            </td>
+            <td>
+              <div class="d-flex gap-2 align-items-center">
+                <form method="post" action="{% url 'Sjak_SjakBooking_reject' object.pk %}?next=Sjak_SjakBooking_list" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center">{% bs_icon 'x-lg' %}</button>
+                </form>
+                <form method="post" action="{% url 'Sjak_SjakBooking_approve' object.pk %}?next=Sjak_SjakBooking_list" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-sm d-flex align-items-center">{% bs_icon 'check-circle-fill' %}</button>
+                </form>
+              </div>
+              {% get_comment_count for object as comment_count %}
+              {% if comment_count %}
+                <a href="{{ object.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">
+                  {{ comment_count }} {% bs_icon 'chat-left-dots' %}
+                </a>
+
+              {% endif %}
+            </td>
+
+
+
+            {% else %}
+          
+              <a href="{% url 'Sjak_SjakBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
+                {% bs_icon 'pencil' %}
+              </a>
+              <a href="{% url 'Sjak_SjakBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+                {% bs_icon 'trash' %}
+              </a>
+              
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Pagination controls -->
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    {% if is_paginated %}
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" aria-label="First">
+            <span aria-hidden="true">&laquo;&laquo;</span>
+            <span aria-hidden="true">Første</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span aria-hidden="true">Forrige</span>
+          </a>
+        </li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+            <span aria-hidden="true">Næste</span>
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+            <span aria-hidden="true">Sidste ({{ page_obj.paginator.num_pages }})</span>
+            <span aria-hidden="true">&raquo;&raquo;</span>
+          </a>
+        </li>
+      {% endif %}
+    {% endif %}
+  </ul>
+  <p class="text-center">Side {{ page_obj.number }} af {{ page_obj.paginator.num_pages }}</p>
+</nav>
+{% endblock %}

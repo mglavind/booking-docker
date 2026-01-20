@@ -101,7 +101,9 @@ INSTALLED_APPS = [
     'django_bootstrap_icons',
     'django_admin_listfilter_dropdown',
     'AktivitetsTeam',
-    'Butikken'
+    'Butikken',
+    'Sjak',
+    'Teknik'
 ]
 
 MIDDLEWARE = [
@@ -294,13 +296,49 @@ UNFOLD = {
                 "items": [
                     {
                         "title": _("Bookinger"),
-                        "icon": "calendar_month",
+                        "icon": "calendar_add_on",
                         "link": reverse_lazy("admin:AktivitetsTeam_aktivitetsteambooking_changelist"),
                     },
                     {
                         "title": _("Aktiviteter"),
-                        "icon": "sports_gymnastics",
+                        "icon": "hiking",
                         "link": reverse_lazy("admin:AktivitetsTeam_aktivitetsteamitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Sjak"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Sjak Bookinger"),
+                        "icon": "calendar_add_on",
+                        "link": reverse_lazy("admin:Sjak_sjakbooking_changelist"),
+                    },
+                    {
+                        "title": _("Sjak sager"),
+                        "icon": "home_repair_service",
+                        "link": reverse_lazy("admin:Sjak_sjakitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Teknik"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Teknik Bookinger"),
+                        "icon": "calendar_add_on",
+                        "link": reverse_lazy("admin:Teknik_teknikbooking_changelist"),
+                    },
+                    {
+                        "title": _("Teknik Udstyr"),
+                        "icon": "devices",
+                        "link": reverse_lazy("admin:Teknik_teknikitem_changelist"),
                     },
                 ],
             },

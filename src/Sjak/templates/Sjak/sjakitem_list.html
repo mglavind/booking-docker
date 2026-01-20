@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load bootstrap_icons %}
+
+
+
+<section class="container">
+
+  <br>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Sjak's katalog</li>
+    </ol>
+  </nav>
+  
+  <div class="mt-4">
+      <h1 class="display-4 mb-4">Sjak's katalog</h1>
+  </div>
+  {% load bootstrap_icons %}
+
+<div class="mx-auto my-5 input-group" >
+    <div class="container" >
+        <form>
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"> {% bs_icon 'search' %} </span>
+                <input type="text" 
+                    hx-post="{% url 'search-item' %}" 
+                    hx-target='#results'
+                    hx-trigger="keyup changed delay:100ms"
+                    name="search"
+                    class="form-control form-control-lg" 
+                    placeholder="Søg efter Sjak ting"/>
+              </div>
+
+        </form>
+    </div>
+    <div id="results" class="container"></div>
+
+</div>
+</section>
+
+
+
+{% endblock %}
+
+
+
+
+
+
+

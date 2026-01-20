@@ -1,0 +1,25 @@
+
+{% block app_content %}
+
+<li class="mb-1">
+    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#sjak-collapse" aria-expanded="false">
+        Sjak
+    </button>
+
+    <div class="collapse" id="sjak-collapse">
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+                <a href="{% url 'Sjak_SjakBooking_list' %}"class="link-body-emphasis d-inline-flex text-decoration-none rounded">Bookinger</a>
+            </li>
+            <li>
+                <a href="{% url 'Sjak_SjakItem_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Sager</a>
+            </li>
+            <li>
+                <a href="{% url 'Sjak_SjakBooking_create' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Ny booking</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+
+{% endblock %}
