@@ -10,6 +10,8 @@ urlpatterns = [
     path('aktivitetsteam/', include('AktivitetsTeam.urls')),
     path('sjak/', include('Sjak.urls')),
     path('teknik/', include('Teknik.urls')),
+    path('SOS/', include('SOS.urls')),
+    path('foto/', include('Foto.urls')),
     
     # NEW: Comments URLs
     path('comments/', include('django_comments_xtd.urls')),

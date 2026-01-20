@@ -78,6 +78,32 @@
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                SOS
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Materiel & Typer</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'SOS_SOSItem_list' %}">SOS Katalog</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Bookinger</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'SOS_SOSBooking_list' %}">Vis alle bookinger</a></li>
+                                <li><a class="dropdown-item text-primary" href="{% url 'SOS_SOSBooking_create' %}">Opret SOS booking</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Foto
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Udstyr & Medier</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'Foto_FotoItem_list' %}">Udstyrskatalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Foto_FotoBooking_list' %}">Fotobookinger</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-primary" href="{% url 'Foto_FotoBooking_create' %}">Opret ny booking</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Sjak
                             </a>
                             <ul class="dropdown-menu">

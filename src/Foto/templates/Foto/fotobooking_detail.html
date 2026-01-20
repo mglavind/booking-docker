@@ -1,0 +1,89 @@
+
+{% extends "base.html" %}
+{% load comments %}
+{% load comments_xtd %}
+{% load static %}
+{% block content %}
+    
+<br>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'Foto_FotoBooking_list' %}">Foto bookinger</a></li>
+      <li class="breadcrumb-item active" aria-current="page"> {{ object.item }} booking </li>
+    </ol>
+</nav>
+
+<h1 class="display-3" >{{ object.item }} booking til {{ object.team }} </h1>
+<br>
+    
+<table class="table">
+    <tr><td>Start dato</td><td>{{ object.start_date }}</td></tr>
+    <tr><td>Start tid</td><td>{{ object.start_time }}</td></tr>
+    <tr><td>Slut dato</td><td>{{ object.end_date }}</td></tr>
+    <tr><td>Slut tid</td><td>{{ object.end_time }}</td></tr>
+    <tr><td>remarks</td><td>{{ object.remarks }}</td></tr>
+    <tr><td>location</td><td>{{ object.location }}</td></tr>
+    <tr><td>status</td><td>{{ object.status }}</td></tr>
+    <tr><td>team</td><td>{{ object.team }}</td></tr>
+    <tr><td>item</td><td>{{ object.item }}</td></tr>
+    <tr><td>team_contact</td><td>{{ object.team_contact }}</td></tr>
+</table>
+
+<br> 
+<div class="container">
+    <div class="row align-items-start">
+        <div class="col col-4">
+            <a class="btn btn-primary btn-block" style="width: 100%" href="{{object.get_update_url}}">Rediger</a>
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'Foto_FotoBooking_approve' object.pk %}?next={% url 'Foto_FotoBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-block" style="width: 100%">Godkend</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="col col-4">
+            {% if user.is_staff %}
+            <form method="post" action="{% url 'Foto_FotoBooking_reject' object.pk %}?next={% url 'Foto_FotoBooking_detail' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-block" style="width: 100%">Afvis</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="container ">
+
+    <!-- Comments -->
+        {% get_comment_count for object as comment_count %}
+        <div class="comment mt-3 mb-5">  
+        <div class="card pt-4">
+            <div class="card-body">
+            <h5 class="card-title">Kommentarer</h5>
+
+            <!-- Kommentar træet -->
+
+            {% if comment_count %}
+                <ul class="media-list">
+                {% render_xtdcomment_tree for object %}
+                </ul>
+            {% endif %}
+
+            <!-- Skrivefelt -->
+
+            {% render_comment_form for object %}
+
+            <!-- Optælling -->
+            <div class="py-4 card-text">
+                <a href="{% url 'Foto_FotoBooking_list' %}">Tilbage til oversigt</a>
+                &nbsp;&sdot;&nbsp;
+                {{ comment_count }} komment{{ comment_count|pluralize:"ar,arer" }}
+                er givet.
+            </div>
+        </div>
+        </div>
+
+    </div>
+{% endblock %}

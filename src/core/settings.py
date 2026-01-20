@@ -103,7 +103,9 @@ INSTALLED_APPS = [
     'AktivitetsTeam',
     'Butikken',
     'Sjak',
-    'Teknik'
+    'Teknik',
+    'SOS',
+    'Foto',
 ]
 
 MIDDLEWARE = [
@@ -339,6 +341,42 @@ UNFOLD = {
                         "title": _("Teknik Udstyr"),
                         "icon": "devices",
                         "link": reverse_lazy("admin:Teknik_teknikitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("SOS"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("SOS Bookinger"),
+                        "icon": "calendar_add_on",
+                        "link": reverse_lazy("admin:SOS_sosbooking_changelist"),
+                    },
+                    {
+                        "title": _("SOS Katalog"),
+                        "icon": "menu_book",
+                        "link": reverse_lazy("admin:SOS_sositem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Foto"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Foto Bookinger"),
+                        "icon": "calendar_add_on",
+                        "link": reverse_lazy("admin:Foto_fotobooking_changelist"),
+                    },
+                    {
+                        "title": _("Udstyrskatalog"),
+                        "icon": "photo_camera",
+                        "link": reverse_lazy("admin:Foto_fotoitem_changelist"),
                     },
                 ],
             },

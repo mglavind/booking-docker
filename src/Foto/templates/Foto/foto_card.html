@@ -1,0 +1,25 @@
+
+{% block app_content %}
+<li class="mb-1">
+    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#Foto-collapse" aria-expanded="false">
+        Foto
+    </button>
+
+    <div class="collapse" id="Foto-collapse">
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+                <a href="{% url 'Foto_FotoBooking_list' %}"class="link-body-emphasis d-inline-flex text-decoration-none rounded">Bookinger</a>
+            </li>
+            <li>
+                <a href="{% url 'Foto_FotoItem_list' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Ting</a>
+            </li>
+            <li>
+                <a href="{% url 'Foto_FotoBooking_create' %}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Ny booking</a>
+            </li>
+        </ul>
+    </div>
+</li>
+{% endblock %}
+
+
+

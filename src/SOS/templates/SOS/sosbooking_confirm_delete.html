@@ -1,0 +1,11 @@
+
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <p>Are you sure you want to delete "{{ object }}" of {{ object.quantity }} {{ object.item }}(s) ? </p>
+  <div>
+    <input class="btn btn-danger" value="Delete SOSBooking" type="submit">
+  </div>
+</form>
+{% endblock %}
