@@ -83,7 +83,7 @@ class AktivitetsTeamItemAdmin(ModelAdmin):
 
     def get_urls(self) -> List[URLPattern]:
         urls = super().get_urls()
-        new_urls = [path('upload-csv/', self.upload_csv),]
+        new_urls = [path('upload-csv/', self.admin_site.admin_view(self.upload_csv)),]
         return new_urls + urls
     
     def upload_csv(self, request):
@@ -182,7 +182,7 @@ class AssignedInline(TabularInline):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "volunteer":
             # Get or create the group
-            group, created = Group.objects.get_or_create(name="AktivitetstTeamBookingTildeling")
+            group, created = Group.objects.get_or_create(name="AktivitetsTeamBookingTildeling")
             kwargs["queryset"] = group.user_set.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -193,7 +193,7 @@ class AssignedAktivitetsteamFilter(SimpleListFilter):
 
     def lookups(self, request, model_admin):
         # Provide the filter options
-        volunteers = Volunteer.objects.filter(groups__name="AktivitetstTeamBookingTildeling", is_active=True)
+        volunteers = Volunteer.objects.filter(groups__name="AktivitetsTeamBookingTildeling", is_active=True)
         return [(volunteer.id, volunteer.first_name) for volunteer in volunteers]
 
     def queryset(self, request, queryset):

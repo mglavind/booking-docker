@@ -1,31 +1,45 @@
-# Stage 1: Base build stage
 FROM python:3.13-bookworm
-# Create the app directory
-RUN mkdir /app
 
-# Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
- 
-# Set the working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl
+# 1. Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    gcc \
+    python3-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+# 2. Setup uv and non-root user
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN useradd -m django-user
 
-# Copy the requirements file first (better caching)
-COPY src/requirements.txt .
+# 3. Prepare static volume with correct permissions
+# We do this as root so we can create folders in /vol
+RUN mkdir -p /vol/web/static && \
+    chown -R django-user:django-user /vol && \
+    chmod -R 755 /vol
 
-RUN uv pip install -r requirements.txt --system
+# 4. Install requirements
+COPY src/requirements.txt /app/requirements.txt
+RUN uv pip install --system -r /app/requirements.txt
 
-COPY src/ .
+# 5. Copy source code and fix ownership
+COPY --chown=django-user:django-user src/ /app/
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip 
- 
-# Expose the application port
+# Switch to the non-root user for security
+USER django-user
+
+# 6. Bake static files into the image
+# This requires ENVIRONMENT=production or staging to be passed
+# or for your settings.py to handle a dummy SECRET_KEY if missing.
+RUN python manage.py collectstatic --noinput
+
+RUN chmod +x /app/entrypoint.sh
 EXPOSE 8000 
 
-# Start the application
 CMD ["./entrypoint.sh"]

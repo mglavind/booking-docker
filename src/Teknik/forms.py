@@ -11,22 +11,18 @@ from datetime import time
 class TeknikBookingForm(forms.ModelForm):
     start_date = forms.DateField(
         widget=TextInput(attrs={"type": "date"}),
-        initial=Event.objects.filter(is_active=True).first().start_date,
         label="Afhentning Dato:"
     )
     start_time = forms.TimeField(
         widget=TextInput(attrs={"type": "time"}),
-        initial=Event.objects.filter(is_active=True).first().start_date,
         label="Afhentning tidspunk:"
     )
     end_date = forms.DateField(
         widget=TextInput(attrs={"type": "date"}),
-        initial=Event.objects.filter(is_active=True).first().end_date,
         label="Retur dato:"
     )
     end_time = forms.TimeField(
         widget=TextInput(attrs={"type": "time"}),
-        initial=Event.objects.filter(is_active=True).first().end_date,
         label="Retur tidspunkt:"
     )
     

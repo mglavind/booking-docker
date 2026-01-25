@@ -65,14 +65,21 @@ class FotoBookingForm(forms.ModelForm):
         self.fields["item"].queryset = FotoItem.objects.all()
         self.fields["team"].queryset = Team.objects.all()
         self.fields["team_contact"].queryset = Volunteer.objects.all()
+        
         if user:
             print("A user exists")
-            team_membership = TeamMembership.objects.get(member=user)
-            self.fields["team"].initial = team_membership.team
-            self.fields["team_contact"].queryset = Volunteer.objects.filter(
-                teammembership__team=team_membership.team
-            )
-            self.fields["team_contact"].initial = user
+            # Changed .get() to .filter().first() to prevent 500 errors
+            team_membership = TeamMembership.objects.filter(member=user).first()
+            
+            if team_membership:
+                self.fields["team"].initial = team_membership.team
+                self.fields["team_contact"].queryset = Volunteer.objects.filter(
+                    teammembership__team=team_membership.team
+                )
+                self.fields["team_contact"].initial = user
+            else:
+                # Logs to the docker console so you know why fields are empty
+                print(f"Foto: User {user} has no team membership. Skipping auto-fill.")
         
         def get_next_event():
             now = timezone.now()
@@ -93,8 +100,8 @@ class FotoBookingForm(forms.ModelForm):
             next_event = get_next_event()
             if next_event:
                 self.fields["start_date"].initial = next_event.start_date.strftime('%Y-%m-%d')
-                self.fields["start_time"].initial = time(8, 0)  # Set default time to 08:00 AM
-                self.fields["end_time"].initial = time(8, 0)  # Set default time to 08:00 AM
+                self.fields["start_time"].initial = time(8, 0)
+                self.fields["end_time"].initial = time(8, 0)
                 self.fields["end_date"].initial = next_event.end_date.strftime('%Y-%m-%d')
 
 

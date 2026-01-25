@@ -52,21 +52,17 @@ if ENVIRONMENT in ['staging', 'production']:
             'PORT': os.environ.get('DATABASE_PORT', '5432'),
         }
     }
-else:
-    # Use SQLite for local development
+elif ENVIRONMENT == 'dev':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+else:
+    raise ValueError("ENVIRONMENT variable must be set to 'dev', 'staging', or 'production'")
 
-# -----------------------------
-# Static files
-# -----------------------------
-STATIC_URL = 'static/'
 
-STATIC_ROOT = '/vol/web/static/' 
 
 
 # Application definition
@@ -93,7 +89,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django_webpack_dev_server',
     'frontend',
     'core',
     'django_bootstrap5',
@@ -118,6 +113,51 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# -----------------------------
+# Static files
+# -----------------------------
+STATIC_URL = 'static/'
+
+if ENVIRONMENT in ['staging', 'production']:
+    # WhiteNoise must be right after SecurityMiddleware
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+        'whitenoise.middleware.WhiteNoiseMiddleware'
+    )
+    # Path inside the Linux Docker container
+    STATIC_ROOT = '/vol/web/static/'
+
+    WHITENOISE_MANIFEST_STRICT = False
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.db.models.fields.files.FileField", # Or your media config
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    
+    }
+    # Ensure Django logs errors to the console even when DEBUG is False
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
+else:
+    # Path on your local Mac (avoids the "Read-only /vol" error)
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Ensure Unfold can find its own assets
+WHITENOISE_USE_FINDERS = True
 ROOT_URLCONF = 'core.urls'
 
 
@@ -197,6 +237,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = 'organization.Volunteer'
+# Set the authentication backend to use Django's default ModelBackend
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_URL = 'login_user'
+
+# Set the LOGIN_REDIRECT_URL to the URL where you want to redirect the user after successful login
+LOGIN_REDIRECT_URL = '/'  # Change the URL to '/' for root URL redirection
+
 
 UNFOLD = {
     "SITE_TITLE": "Admin",

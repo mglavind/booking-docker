@@ -35,14 +35,6 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            LogEntry.objects.log_action(
-                user_id=user.pk,
-                content_type_id=ContentType.objects.get_for_model(user).pk,
-                object_id=user.pk,
-                object_repr=str(user),
-                action_flag=ADDITION,
-                change_message=f'User {user.username} logged in at {now()}.',
-            )
             return redirect('index')
         else:
             messages.error(request, "There was an error logging in. Please try again.")

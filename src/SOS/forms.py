@@ -11,19 +11,19 @@ from datetime import time
 class SOSBookingForm(forms.ModelForm):
     start_date = forms.DateField(
         widget=TextInput(attrs={"type": "date"}),
-        initial=Event.objects.filter(is_active=True).first().start_date
+     #   initial=Event.objects.filter(is_active=True).first().start_date
     )
     start_time = forms.TimeField(
         widget=TextInput(attrs={"type": "time"}),
-        initial=Event.objects.filter(is_active=True).first().start_date
+     #   initial=Event.objects.filter(is_active=True).first().start_date
     )
     end_date = forms.DateField(
         widget=TextInput(attrs={"type": "date"}),
-        initial=Event.objects.filter(is_active=True).first().end_date,
+      #  initial=Event.objects.filter(is_active=True).first().end_date,
     )
     end_time = forms.TimeField(
         widget=TextInput(attrs={"type": "time"}),
-        initial=Event.objects.filter(is_active=True).first().end_date
+      #  initial=Event.objects.filter(is_active=True).first().end_date
     )
 
 
@@ -80,20 +80,28 @@ class SOSBookingForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-
+    
     def __init__(self, *args, user=None, **kwargs):
         super(SOSBookingForm, self).__init__(*args, **kwargs)
         self.fields["item"].queryset = SOSItem.objects.all()
         self.fields["team"].queryset = Team.objects.all()
         self.fields["team_contact"].queryset = Volunteer.objects.all()
+        
         if user:
             print("A user exists")
-            team_membership = TeamMembership.objects.get(member=user)
-            self.fields["team"].initial = team_membership.team
-            self.fields["team_contact"].queryset = Volunteer.objects.filter(
-                teammembership__team=team_membership.team
-            )
-            self.fields["team_contact"].initial = user
+            # Use .filter().first() to avoid the 'DoesNotExist' crash
+            team_membership = TeamMembership.objects.filter(member=user).first()
+            
+            if team_membership:
+                # User has a team, apply standard logic
+                self.fields["team"].initial = team_membership.team
+                self.fields["team_contact"].queryset = Volunteer.objects.filter(
+                    teammembership__team=team_membership.team
+                )
+                self.fields["team_contact"].initial = user
+            else:
+                # We log it and let the form load with empty/default fields
+                print(f"User {user} has no TeamMembership yet. Skipping initial team logic.")
         
         def get_next_event():
             now = timezone.now()
@@ -113,8 +121,8 @@ class SOSBookingForm(forms.ModelForm):
             next_event = get_next_event()
             if next_event:
                 self.fields["start_date"].initial = next_event.start_date.strftime('%Y-%m-%d')
-                self.fields["start_time"].initial = time(8, 0)  # Set default time to 08:00 AM
-                self.fields["end_time"].initial = time(8, 0)  # Set default time to 08:00 AM
+                self.fields["start_time"].initial = time(8, 0)
+                self.fields["end_time"].initial = time(8, 0)
                 self.fields["end_date"].initial = next_event.end_date.strftime('%Y-%m-%d')
 
 

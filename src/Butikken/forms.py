@@ -34,23 +34,19 @@ class MealBookingForm(forms.ModelForm):
         super(MealBookingForm, self).__init__(*args, **kwargs)
         self.fields["team_contact"].queryset = Volunteer.objects.all().order_by("first_name")
         self.fields["team"].queryset = Team.objects.all().order_by("name")
-        print("user", user)
+        
         self.fields["team_contact"].initial = user
         if user:
-            print("A user exists")
-            team_membership = TeamMembership.objects.get(member=user)
-            self.fields["team"].initial = team_membership.team
-            self.fields["team_contact"].queryset = Volunteer.objects.filter(
-                teammembership__team=team_membership.team
-            )
-            self.fields["team_contact"].initial = user
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.status = "Pending"
-        if commit:
-            instance.save()
-        return instance
-
+            team_membership = TeamMembership.objects.filter(member=user).first()
+            
+            if team_membership:
+                self.fields["team"].initial = team_membership.team
+                self.fields["team_contact"].queryset = Volunteer.objects.filter(
+                    teammembership__team=team_membership.team
+                )
+                self.fields["team_contact"].initial = user
+            else:
+                print(f"Warning: User {user} has no team membership.")
 
 class MealForm(forms.ModelForm):
     class Meta:
@@ -170,14 +166,19 @@ class ButikkenBookingForm(forms.ModelForm):
         self.fields["item"].queryset = ButikkenItem.objects.all()
         self.fields["team"].queryset = Team.objects.all()
         self.fields["team_contact"].queryset = Volunteer.objects.all()
+        
         if user:
-            print("A user exists")
-            team_membership = TeamMembership.objects.get(member=user)
-            self.fields["team"].initial = team_membership.team
-            self.fields["team_contact"].queryset = Volunteer.objects.filter(
-                teammembership__team=team_membership.team
-            )
-            self.fields["team_contact"].initial = user
+            # CHANGE: Use filter().first() instead of .get()
+            team_membership = TeamMembership.objects.filter(member=user).first()
+            
+            if team_membership:
+                self.fields["team"].initial = team_membership.team
+                self.fields["team_contact"].queryset = Volunteer.objects.filter(
+                    teammembership__team=team_membership.team
+                )
+                self.fields["team_contact"].initial = user
+            else:
+                print(f"Warning: User {user} has no team membership.")
         
 # Function to get the next event
         def get_next_event():

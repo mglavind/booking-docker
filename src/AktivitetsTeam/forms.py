@@ -1,14 +1,12 @@
 from django import forms
 from django.core.validators import MaxValueValidator
 from django.utils import timezone
-from organization.models import Team, TeamMembership, Volunteer, Event, EventMembership
+from organization.models import TeamMembership, Volunteer, Event, EventMembership, Team
 from AktivitetsTeam.models import AktivitetsTeamItem
-from organization.models import Volunteer
 from . import models
-from django.forms import BaseFormSet, TextInput, formset_factory
-from organization.models import Team
-from django.utils import timezone
+from django.forms import TextInput
 from datetime import time
+
 
 class AktivitetsTeamItemForm(forms.ModelForm):
     class Meta:
