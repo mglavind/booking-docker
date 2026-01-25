@@ -1,0 +1,26 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            cd ~/booking-system
+            # Pull the latest image from Docker Hub
+            docker compose pull web
+            # Restart the services with the new image
+            docker compose up -d
+            # Run migrations inside the running container
+            docker compose exec -T web python manage.py migrate --noinput
+            # Optional: Clean up old unused images to save disk space
+            docker image prune -f
