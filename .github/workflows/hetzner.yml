@@ -13,14 +13,29 @@ jobs:
         with:
           host: ${{ secrets.HETZNER_HOST }}
           username: root
-          key: ${{ secrets.HETZNER_SSH_KEY }}
+          # The | ensures the private key format is preserved exactly
+          key: |
+            ${{ secrets.HETZNER_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
+            # Navigate to the project folder we created manually
             cd ~/booking-system
+            
             # Pull the latest image from Docker Hub
+            # Note: Ensure you have logged in to Docker Hub on the server once!
             docker compose pull web
-            # Restart the services with the new image
+            
+            # Restart the services. This will use the new image for 'web'
+            # and keep the 'db' running or restart it if needed.
             docker compose up -d
-            # Run migrations inside the running container
+            
+            # Run database migrations inside the running container
+            # -T is used for non-interactive shells in CI/CD
             docker compose exec -T web python manage.py migrate --noinput
-            # Optional: Clean up old unused images to save disk space
+            
+            # Collect static files (optional, but recommended if you changed CSS/JS)
+            docker compose exec -T web python manage.py collectstatic --noinput
+            
+            # Cleanup unused images to keep the Hetzner disk lean
             docker image prune -f
