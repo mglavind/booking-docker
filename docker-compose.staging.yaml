@@ -16,13 +16,32 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+      image: redis:7-alpine
+      ports:
+        - "6379:6379"
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8001:80"
+    volumes:
+      # This maps your local config file into the container
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # These volumes connect Nginx to the files Django collects
+      - static_volume:/vol/static
+      - media_volume:/vol/media
+    depends_on:
+      - web
+
   web:
     container_name: django_app_staging
     ports:
-      - "8001:8000"
+      - "8000:8000"
     restart: always
     volumes:
       - ./src:/app
+      - static_volume:/app/staticfiles 
+      - media_volume:/app/media
     env_file:
       - .env.staging
     environment:
@@ -36,8 +55,11 @@ services:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
       ENVIRONMENT: ${ENVIRONMENT}
+      REDIS_URL: redis://redis:6379/0
     
     command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   postgres_data_staging:
+  static_volume:        # <--- Add this
+  media_volume:         # <--- Add this

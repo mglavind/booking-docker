@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
+from django.conf import settings
 from . import views
 
 urlpatterns = [
@@ -16,5 +18,6 @@ urlpatterns = [
     # NEW: Comments URLs
     path('comments/', include('django_comments_xtd.urls')),
     path('comments/', include('django_comments.urls')),
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.png')),
 ]
 

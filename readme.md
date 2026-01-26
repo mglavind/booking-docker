@@ -23,6 +23,7 @@ Best for rapid UI/UX changes and logic testing.
 ### 2. Staging (Docker)
 Test production-ready code with a real PostgreSQL instance locally.
 - `docker compose -f docker-compose.yaml -f docker-compose.staging.yaml --env-file .env.staging up -d --build`
+- `docker compose -f docker-compose.yaml -f docker-compose.prod.yaml --env-file .env.prod up -d --build`
 - `docker compose exec web python manage.py migrate`
 
 ---

@@ -18,28 +18,24 @@ RUN apt-get update && apt-get install -y \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN useradd -m django-user
 
-# 3. Prepare static volume with correct permissions
-# We do this as root so we can create folders in /vol
-RUN mkdir -p /vol/web/static && \
-    chown -R django-user:django-user /vol && \
-    chmod -R 755 /vol
-
-# 4. Install requirements
+# 3. Install requirements (Done before copying code to use Docker cache)
 COPY src/requirements.txt /app/requirements.txt
 RUN uv pip install --system -r /app/requirements.txt
 
-# 5. Copy source code and fix ownership
+# 4. Copy source code
 COPY --chown=django-user:django-user src/ /app/
 
-# Switch to the non-root user for security
+# 5. Prepare static/media folders and permissions
+# We create these in /app to match your settings.py STATIC_ROOT = '/app/staticfiles'
+RUN mkdir -p /app/staticfiles /app/media && \
+    chmod +x /app/entrypoint.sh && \
+    chown -R django-user:django-user /app/staticfiles /app/media
+
+# 6. Switch to the non-root user
 USER django-user
 
-# 6. Bake static files into the image
-# This requires ENVIRONMENT=production or staging to be passed
-# or for your settings.py to handle a dummy SECRET_KEY if missing.
-RUN python manage.py collectstatic --noinput
-
-RUN chmod +x /app/entrypoint.sh
+# 7. Final Prep
 EXPOSE 8000 
 
-CMD ["./entrypoint.sh"]
+# Use ENTRYPOINT so the script always runs, and CMD for default arguments
+ENTRYPOINT ["/app/entrypoint.sh"]

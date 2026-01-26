@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils import timezone
-
+from simple_history.models import HistoricalRecords
 
 
 
@@ -45,6 +45,7 @@ class Event(models.Model):
     deadline_foto = models.DateField()
     deadline_lokaler = models.DateField()
     deadline_sos = models.DateField()
+    history = HistoricalRecords()
 
 
     class Meta:
@@ -68,6 +69,7 @@ class Team(models.Model):
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     short_name = models.CharField(max_length=30, db_index=True)   
     events = models.ManyToManyField(Event, through='TeamEventMembership', db_index=True) 
+    history = HistoricalRecords()
 
 
 
@@ -90,6 +92,7 @@ class Volunteer(AbstractUser):
     phone = models.CharField(max_length=30, blank=True, db_index=True)
     events = models.ManyToManyField(Event, through='EventMembership',blank=True, db_index=True)
     teams = models.ManyToManyField(Team, through='TeamMembership', blank=True, db_index=True)
+    history = HistoricalRecords()
 
     class Meta:
         pass
@@ -136,6 +139,7 @@ class EventMembership(models.Model):
     # Fields
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+    history = HistoricalRecords()
 
     class Meta:
         pass
@@ -160,6 +164,7 @@ class Key(models.Model):
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     name = models.CharField(max_length=30)
     number = models.CharField(max_length=30)
+    history = HistoricalRecords()
 
     class Meta:
         pass

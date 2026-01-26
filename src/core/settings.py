@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
+from unfold.contrib.constance.settings import UNFOLD_CONSTANCE_ADDITIONAL_FIELDS
+
 from django.urls import reverse_lazy
 from pathlib import Path
 from dotenv import load_dotenv
@@ -34,8 +36,8 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Allowed hosts
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
 # Environment detection
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 
@@ -50,6 +52,8 @@ if ENVIRONMENT in ['staging', 'production']:
             'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
             'HOST': os.environ.get('DATABASE_HOST', 'db'),
             'PORT': os.environ.get('DATABASE_PORT', '5432'),
+
+            
         }
     }
 elif ENVIRONMENT == 'dev':
@@ -82,6 +86,8 @@ INSTALLED_APPS = [
     'django_comments_xtd',
     'django_comments',
     'django.contrib.sites',  # Required by django-comments
+    'constance',
+    'simple_history',
     'organization',
     'django.contrib.staticfiles',
     'import_export',
@@ -101,6 +107,7 @@ INSTALLED_APPS = [
     'Teknik',
     'SOS',
     'Foto',
+
 ]
 
 MIDDLEWARE = [
@@ -111,56 +118,66 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 # -----------------------------
 # Static files
 # -----------------------------
+
 STATIC_URL = 'static/'
 
 if ENVIRONMENT in ['staging', 'production']:
-    # WhiteNoise must be right after SecurityMiddleware
-    MIDDLEWARE.insert(
-        MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
-        'whitenoise.middleware.WhiteNoiseMiddleware'
-    )
-    # Path inside the Linux Docker container
-    STATIC_ROOT = '/vol/web/static/'
-
-    WHITENOISE_MANIFEST_STRICT = False
-
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.db.models.fields.files.FileField", # Or your media config
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    
-    }
-    # Ensure Django logs errors to the console even when DEBUG is False
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'root': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-    }
+    # The absolute path where collectstatic will dump files
+    # This MUST match the path in your docker-compose web volume
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 else:
-    # Path on your local Mac (avoids the "Read-only /vol" error)
+    # Local development settings
     STATIC_ROOT = BASE_DIR / 'staticfiles'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
-# Ensure Unfold can find its own assets
-WHITENOISE_USE_FINDERS = True
+# These should be outside the if/else unless they change per env
+
 ROOT_URLCONF = 'core.urls'
+MEDIA_URL = '/media/'
 
 
+CONSTANCE_REDIS_CONNECTION = {
+    'host': os.environ.get('REDIS_HOST', 'redis'),
+    'port': int(os.environ.get('REDIS_PORT', 6379)),
+    'db': 0,
+}
+
+# Example for Cache
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CONSTANCE_CONFIG = {
+    'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
+                       'The Universe, and Everything'),
+}
+CONSTANCE_ADDITIONAL_FIELDS = {
+    **UNFOLD_CONSTANCE_ADDITIONAL_FIELDS,
+
+    # Example field configuration for select with choices. Not needed.
+    "choice_field": [
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "unfold.widgets.UnfoldAdminSelectWidget",
+            "choices": (
+                ("light-blue", "Light blue"),
+                ("dark-blue", "Dark blue"),
+            ),
+        },
+    ],
+}
 
 TEMPLATES = [
     {
@@ -178,7 +195,8 @@ TEMPLATES = [
     },
 ]
 
-
+# In settings.py
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
@@ -218,8 +236,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
 
 
 SITE_ID = 1  # Required for django.contrib.sites

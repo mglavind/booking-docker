@@ -1,5 +1,5 @@
 # Core Framework
-Django>=5.2.10
+Django==5.2.10
 djangorestframework>=3.16.1
 asgiref>=3.11.0
 
@@ -26,12 +26,13 @@ urllib3>=2.6.3
 certifi>=2026.1.4
 django-contrib-comments>=2.2.0
 django-comments-xtd>=2.10.11
+django-constance>=4.3.4
 Pillow>=10.0.0
 # Static Files & Compression
 whitenoise>=6.5.0
 django-compressor>=4.3
-
-
+django-simple-history>=3.11.0
+django-redis>=6.0.0
 # Geographic Data
 geopy>=2.4.1
 geographiclib>=2.1

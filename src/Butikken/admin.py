@@ -25,13 +25,30 @@ from .forms import ButikkenBookingForm, MealPlanForm
 class ButikkenItemResource(resources.ModelResource):
     class Meta:
         model = ButikkenItem
-        fields = ('id', 'name', 'type', 'description', 'content_normal', 'content_unit')
-        import_id_fields = ('name',)
+        # 1. Define the fields exactly as they appear in your CSV
+        fields = ('name', 'type', 'content_normal', 'content_unit', 'description')
+        
+        # 2. IMPORTANT: Leave this empty to disable the "check if exists" logic.
+        # This ensures every row becomes a NEW item.
+        import_id_fields = () 
+        
+        # 3. Matches your preferred export order
+        export_order = ('name', 'type', 'content_normal', 'content_unit', 'description')
+
+    def before_import_row(self, row, **kwargs):
+        """
+        Since you want to allow spaces, we do NOT strip the middle of the string.
+        We only strip 'accidental' leading/trailing spaces from the CSV cells.
+        """
+        if 'name' in row and row['name']:
+            # This turns " Karse " into "Karse", 
+            # but keeps "Salt karamel" as "Salt karamel"
+            row['name'] = str(row['name']).strip()
 
 class TeamMealPlanResource(resources.ModelResource):
     class Meta:
         model = TeamMealPlan
-        fields = ('id', 'team__name', 'meal_plan__name', 'meal_option__recipe__name', 'status')
+        fields = ('team__name', 'meal_plan__name', 'meal_option__recipe__name', 'status')
 
 # --- Base Admin with Universal Features ---
 
@@ -94,7 +111,6 @@ class ButikkenItemAdmin(BaseAdmin):
 
 @admin.register(ButikkenBooking)
 class ButikkenBookingAdmin(BaseAdmin):
-    form = ButikkenBookingForm
     list_fullwidth = True
     # FIXED: 'for_meal' used directly as it's a field in your model
     list_display = ["item", "display_status", "team", "for_meal", "formatted_start", "quantity_with_unit"]
