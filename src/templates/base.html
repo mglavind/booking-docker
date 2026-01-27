@@ -53,14 +53,15 @@
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Butikken
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">Varer & Lager</h6></li>
+                            <ul class="dropdown-menu shadow">
                                 <li><a class="dropdown-item" href="{% url 'Butikken_ButikkenItem_list' %}">Varekatalog</a></li>
                                 <li><a class="dropdown-item" href="{% url 'Butikken_ButikkenBooking_list' %}">Varebestillinger</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Butikken_TeamMealPlan_list' %}">Måltidsbestillinger</a><li>                                
+                                
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Mad & Forplejning</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'Butikken_TeamMealPlan_list' %}">Måltidsbestillinger</a></li>
-                                <li><a class="dropdown-item" href="{% url 'Butikken_Recipe_list' %}">Måltidspakker</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Butikken_ButikkenBooking_create' %}"> Ny varebestilling </a></li>
+                                
+
                             </ul>
                         </li>
 
@@ -73,7 +74,7 @@
                                 <li><a class="dropdown-item" href="{% url 'AktivitetsTeam_AktivitetsTeamItem_list' %}">Aktivitetskatalog</a></li>
                                 <li><a class="dropdown-item" href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">Aktivitetsbookinger</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-primary" href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}">Opret ny booking</a></li>
+                                <li><a class="dropdown-item " href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}">Ny bestilling</a></li>
                             </ul>
                         </li>
 
@@ -82,12 +83,13 @@
                                 SOS
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">Materiel & Typer</h6></li>
+
                                 <li><a class="dropdown-item" href="{% url 'SOS_SOSItem_list' %}">SOS Katalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'SOS_SOSBooking_list' %}">SOS Bookinger</a></li>
+
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Bookinger</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'SOS_SOSBooking_list' %}">Vis alle bookinger</a></li>
-                                <li><a class="dropdown-item text-primary" href="{% url 'SOS_SOSBooking_create' %}">Opret SOS booking</a></li>
+
+                                <li><a class="dropdown-item" href="{% url 'SOS_SOSBooking_create' %}">Ny SOS booking</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -95,11 +97,12 @@
                                 Foto
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">Udstyr & Medier</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'Foto_FotoItem_list' %}">Udstyrskatalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Foto_FotoItem_list' %}">Katalog</a></li>
                                 <li><a class="dropdown-item" href="{% url 'Foto_FotoBooking_list' %}">Fotobookinger</a></li>
+
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-primary" href="{% url 'Foto_FotoBooking_create' %}">Opret ny booking</a></li>
+
+                                <li><a class="dropdown-item" href="{% url 'Foto_FotoBooking_create' %}">Opret ny booking</a></li>
                             </ul>
                         </li>
 
@@ -108,13 +111,25 @@
                                 Sjak
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">Lager & Materialer</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakItem_list' %}">Varekatalog</a></li>
-                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakItemType_list' %}">Kategorier</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakItem_list' %}">Sjak's sager</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakBooking_list' %}">Sjak bestillinger</a></li>
+
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Bookinger</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakBooking_list' %}">Alle bookinger</a></li>
-                                <li><a class="dropdown-item text-primary" href="{% url 'Sjak_SjakBooking_create' %}">Opret Sjak booking</a></li>
+
+                                <li><a class="dropdown-item" href="{% url 'Sjak_SjakBooking_create' %}">Ny Sjak bestilling</a></li>
+                            </ul>
+                        </li>
+                                                <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Teknik
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'Teknik_TeknikItem_list' %}">Teknik's Ting</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Teknik_TeknikBooking_list' %}">Teknik bestillinger</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><a class="dropdown-item" href="{% url 'Teknik_TeknikBooking_create' %}">Ny Teknik bestilling</a></li>
                             </ul>
                         </li>
                     {% endif %}

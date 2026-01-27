@@ -2,149 +2,114 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
+
 {% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Ny booking</li>
+        </ol>
+    </nav>
 
-</br>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Ny booking </li>
-    </ol>
-</nav>
-
-</br>
-<h1 class="display-3" >Ny Aktivitetsteam booking</h1>
-{% if user.is_authenticated %}
-<p>Deadline for Aktivitetsteam bestillinger: <mark> {{user.events.first.deadline_aktivitetsteam }} </mark>.</p>
-
-{% endif %}
-    
-<form id="form" role="form" method="post">
-    {% csrf_token %}
-    
-    {{ form.non_field_errors }}
-    
-    <div class="mb-3">
-        {{ form.item.label_tag }}
-        {{ form.item }}
-        {{ form.item.errors }}
-    </div>
-    
-    <div class="mb-3">
-        {{ form.team.label_tag }}
-        {{ form.team }}
-        {{ form.team.errors }}
-    </div>
-    
-    <div class="mb-3">
-        {{ form.team_contact.label_tag }}
-        {{ form.team_contact }}
-        {{ form.team_contact.errors }}
-    </div>
-    
-    <div class="mb-3">
-        {{ form.quantity.label_tag }}
-        {{ form.quantity }}
-        {{ form.quantity.errors }}
-    </div>
-    
-    <div class="mb-3">
-        {{ form.remarks.label_tag }}
-        {{ form.remarks }}
-        {{ form.remarks.errors }}
-    </div>
-    
-    <div class="mb-3">
-        {{ form.location.label_tag }}
-        {{ form.location }}
-        {{ form.location.errors }}
+    <div class="mb-4 mt-2">
+        <h1 class="display-5">Ny Aktivitetsteam booking</h1>
+        {% if user.is_authenticated and user.events.first %}
+            <p class="text-muted">
+                {% bs_icon "info-circle" %} Deadline for Aktivitetsteam bestillinger: 
+                <span class="badge bg-warning text-dark">{{ user.events.first.deadline_aktivitetsteam }}</span>
+            </p>
+        {% endif %}
     </div>
 
-        <!-- Start date -->
-        {% bootstrap_field form.start_date show_label=True %}
-        {{ form.start_date.errors }}
-    
-        <!-- Start time -->
-        {% bootstrap_field form.start_time show_label=True %}
-        {{ form.start_time.errors }}
-    
-    
-        <!-- End date -->
-        {% bootstrap_field form.end_date  show_label=True %}
-        {{ form.end_date.errors }}
-    
-        <!-- End time -->
-        {% bootstrap_field form.end_time show_label=True %}
-        {{ form.end_time.errors }}
-    
+    <form id="form" role="form" method="post" class="needs-validation">
+        {% csrf_token %}
+        
+        {% bootstrap_form_errors form type='non_fields' %}
 
-    
-    <div class="mb-3">
-        <label class="col-sm-2 col-form-label" for="latitude">Lat: </label>
-        <input class="form-control"
-        id="latitude" 
-        name="latitude"
-        type="text"
-        value="{{ object.latitude}}">
-    </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.item %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.team %}
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.team_contact %}
+            </div>
 
-    <div class="mb-3">
-        <label class="col-sm-2 col-form-label" for="longitude">Long: </label>
-        <input class="form-control "
-        type="text" 
-        id="longitude" 
-        name="longitude" 
-        value="{{ object.longitude }}">
-    </div>
-    
-    <div class="mb-3">
-        {{ form.address.label_tag }}
-        {{ form.address }}
-        {{ form.address.errors }}
-    </div>
-    {{ object_dict|json_script:"object_json" }}
-    <div id="map" style="height: 40em;" ></div>
-    </br>
+            <div class="col-12 mb-3">
+                {% bootstrap_field form.remarks %}
+            </div>
 
-    <div class="form-group row">
-        <div class="col-sm-10">
-            <input type="submit" value="Gem" class="btn btn-primary">
+            <hr class="my-4">
+
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.start_date %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {# Remove seconds by setting the HTML5 type and format #}
+                {% bootstrap_field form.start_time field_class="timepicker" %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.end_date %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {% bootstrap_field form.end_time %}
+            </div>
+
+            <hr class="my-4">
+
+            <div class="col-12 mb-3">
+                {% bootstrap_field form.location %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="latitude">Breddegrad (Lat)</label>
+                <input class="form-control" id="latitude" name="latitude" type="text" value="{{ object.latitude|default:'' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="longitude">Længdegrad (Long)</label>
+                <input class="form-control" id="longitude" name="longitude" type="text" value="{{ object.longitude|default:'' }}">
+            </div>
+
+            <div class="col-12 mb-3">
+                {% bootstrap_field form.address %}
+            </div>
         </div>
-    </div>
 
-</form>
+        <div id="map" class="rounded shadow-sm border mb-4" style="height: 400px; width: 100%;"></div>
 
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-5">
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+                {% bs_icon "save" %} Gem booking
+            </button>
+            <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="btn btn-outline-secondary btn-lg">Annuller</a>
+        </div>
+
+        {{ object_dict|json_script:"object_json" }}
+    </form>
+</div>
 
 <script>
-    (g => {
-        var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
-        b = b[c] || (b[c] = {});
-        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
-            await (a = m.createElement("script"));
-            e.set("libraries", [...r] + "");
-            for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
-            e.set("callback", c + ".maps." + q);
-            a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-            d[q] = f;
-            a.onerror = () => h = n(Error(p + " could not load."));
-            a.nonce = m.querySelector("script[nonce]")?.nonce || "";
-            m.head.append(a)
-        }));
-        d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
-    })({
+    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await(a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
         key: "AIzaSyB_gCWQdMQ5CGrarZge8VqOeXzdeuoV-7Q", v: "weekly"
     });
 
     let map, marker;
 
     async function initMap() {
-        const objectDict = JSON.parse(document.getElementById('object_json').textContent);
-        const defaultLat = 56.114951;  // Replace with your default latitude
-        const defaultLng = 9.655592;  // Replace with your default longitude
+        const objectData = document.getElementById('object_json').textContent;
+        const objectDict = objectData ? JSON.parse(objectData) : {};
+        
+        const defaultLat = 56.114951;
+        const defaultLng = 9.655592;
 
-        const initialLat = objectDict.latitude !== 'default_latitude' ? parseFloat(objectDict.latitude) : defaultLat;
-        const initialLng = objectDict.longitude !== 'default_longitude' ? parseFloat(objectDict.longitude) : defaultLng;
+        const initialLat = (objectDict.latitude && objectDict.latitude !== 'default_latitude') ? parseFloat(objectDict.latitude) : defaultLat;
+        const initialLng = (objectDict.longitude && objectDict.longitude !== 'default_longitude') ? parseFloat(objectDict.longitude) : defaultLng;
 
         const position = { lat: initialLat, lng: initialLng };
 
@@ -160,34 +125,37 @@
         marker = new AdvancedMarkerElement({
             map: map,
             position: position,
-            title: "Initial Location",
+            gmpDraggable: true,
+            title: "Lokation",
         });
 
-        // Update form fields with marker's initial position
+        // Sync initial position to inputs
         document.getElementById('latitude').value = initialLat;
         document.getElementById('longitude').value = initialLng;
 
-        // Update marker and form fields on map click
         map.addListener("click", (e) => {
             const lat = e.latLng.lat();
             const lng = e.latLng.lng();
-
-            // Remove the old marker
-            marker.setMap(null);
-
-            // Create a new marker
-            marker = new AdvancedMarkerElement({
-                map: map,
-                position: { lat, lng },
-                title: "New Location",
-            });
-
-            // Update form fields
+            marker.position = { lat, lng };
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
+        });
+
+        // Optional: Update when marker is dragged
+        marker.addListener("dragend", (e) => {
+            const pos = marker.position;
+            document.getElementById('latitude').value = pos.lat;
+            document.getElementById('longitude').value = pos.lng;
         });
     }
 
     initMap();
 </script>
-    {% endblock %}
+
+<style>
+    /* Styling to make time fields look cleaner */
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(130deg) brightness(95%) contrast(80%);
+    }
+</style>
+{% endblock %}

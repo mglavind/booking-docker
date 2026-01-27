@@ -1,24 +1,103 @@
 {% extends "base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
 {% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'organization_Volunteer_list' %}">Frivillige</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ object.get_full_name }}</li>
+        </ol>
+    </nav>
 
-<table class="table">
-    <tr><td>Fornavn</td><td>{{ object.first_name }}</td></tr>
-    <tr><td>Efternavn</td><td>{{ object.last_name }}</td></tr>
-    <tr><td>E-mail</td><td>{{ object.email }}</td></tr>
-    <tr><td>Telefon</td><td>{{ object.phone }}</td></tr>
-    <tr><td>Oprættet</td><td>{{ object.created }}</td></tr>
-    <tr><td>Sidst opdateret</td><td>{{ object.last_updated }}</td></tr>
-    <tr><td>Medlem af følgende teams:</td>
-        <td>
-            <ul>
-                {% for team_membership in object.teammembership_set.all %}
-                    <li>{{ team_membership.team.name }}</li>
-                {% endfor %}
-            </ul>
-        </td>
-    </tr>
-</table>
-<a class="btn btn-primary" href="{{object.get_update_url}}">Rediger</a>
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 pt-5 pb-4 text-center">
+                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+                        <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
+                    </div>
+                    <h2 class="fw-bold mb-1">{{ object.first_name }} {{ object.last_name }}</h2>
+                    <span class="badge bg-light text-secondary border">Frivillig Profil</span>
+                </div>
 
+                <div class="card-body px-4 pb-4">
+                    <div class="d-flex gap-2 justify-content-center mb-4">
+                        <a href="tel:{{ object.phone }}" class="btn btn-outline-primary px-4 rounded-pill">
+                            {% bs_icon "telephone" %} Ring op
+                        </a>
+                        <a href="mailto:{{ object.email }}" class="btn btn-outline-primary px-4 rounded-pill">
+                            {% bs_icon "envelope" %} Send mail
+                        </a>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Kontaktdetaljer</h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light p-2 rounded me-3">{% bs_icon "envelope" %}</div>
+                                <div>
+                                    <small class="text-muted d-block">E-mail</small>
+                                    <span class="fw-medium">{{ object.email }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light p-2 rounded me-3">{% bs_icon "telephone" %}</div>
+                                <div>
+                                    <small class="text-muted d-block">Telefon</small>
+                                    <span class="fw-medium">{{ object.phone }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Team tilknytning</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for team_membership in object.teammembership_set.all %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded">
+                                        {{ team_membership.team.name }}
+                                    </span>
+                                {% empty %}
+                                    <p class="text-muted small fst-italic">Ingen teams registreret.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <p class="text-muted small mb-0">Medlem siden</p>
+                            <p class="fw-medium small">{{ object.created|date:"d. F Y" }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-0">Sidst opdateret</p>
+                            <p class="fw-medium small">{{ object.last_updated|date:"d. F Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light border-0 py-3 text-center">
+                    <small class="text-muted">{% bs_icon "lock" %} Denne profil kan kun redigeres af administratorer</small>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'organization_Volunteer_list' %}" class="btn btn-link text-decoration-none text-muted">
+                    {% bs_icon "arrow-left" %} Tilbage til listen
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-subtle { background-color: #cfe2ff !important; }
+    .text-primary { color: #084298 !important; }
+    .avatar-placeholder { font-size: 2.5rem; text-transform: uppercase; }
+</style>
 {% endblock %}

@@ -107,22 +107,24 @@ class TeknikBookingForm(forms.ModelForm):
             next_event = Event.objects.filter(start_date__gt=now).order_by('start_date').first()
             return next_event
         
-        # Set initial values from instance
+        # 4. Handle Event Dates / Initials
         instance = kwargs.get('instance')
         if instance:
-            self.fields["quantity"].initial = instance.quantity
             self.fields["start_date"].initial = instance.start_date
             self.fields["end_date"].initial = instance.end_date
             self.fields["start_time"].initial = instance.start_time
-            self.fields["end_time"].initial = instance.end_time
+            self.fields["end_time"].initial = instance.end_time            
         else:
-            # Use the next event's start date if no instance or new instance
-            next_event = get_next_event()
-            if next_event:
-                self.fields["start_date"].initial = next_event.start_date.strftime('%Y-%m-%d')
-                self.fields["start_time"].initial = time(8, 0)  # Set default time to 08:00 AM
-                self.fields["end_time"].initial = time(8, 0)  # Set default time to 08:00 AM
-                self.fields["end_date"].initial = next_event.end_date.strftime('%Y-%m-%d')
+            # Safe lookup for active/next event
+            active_event = Event.objects.filter(is_active=True).first()
+            if not active_event:
+                active_event = Event.objects.filter(start_date__gt=timezone.now()).order_by('start_date').first()
+
+            if active_event:
+                self.fields["start_date"].initial = active_event.start_date
+                self.fields["end_date"].initial = active_event.end_date
+                self.fields["start_time"].initial = time(8, 0)
+                self.fields["end_time"].initial = time(8, 0)
                 
         
             # Add other fields similarly

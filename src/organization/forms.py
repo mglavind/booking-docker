@@ -116,20 +116,20 @@ class KeyForm(forms.ModelForm):
             "number",
             "name", 
             "description", 
-            "current_user"]  # add/remove as needed
+            "current_user"] 
         widgets = {
             'number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'readonly': 'readonly'  # Make the field read-only
+                'readonly': 'readonly'
                 }),
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'readonly': 'readonly'  # Make the field read-only
+                'readonly': 'readonly' 
                 }),
             'description': forms.Textarea(attrs={
                 'rows': 3, 
                 'class': 'form-control',
-                'readonly': 'readonly'  # Make the field read-only
+                'readonly': 'readonly' 
                 }),
             'current_user': forms.Select(attrs={'class': 'form-control'}),
         }
@@ -137,7 +137,7 @@ class KeyForm(forms.ModelForm):
             'number': 'Nøgle nummer',
             'name': 'Nøgle navn',
             'description': 'Beskrivelse',
-            'current_user': 'Nuværende bruger',
+            'current_user': 'Udleveret til',
         }
 
     def __init__(self, *args, **kwargs):

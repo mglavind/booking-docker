@@ -30,13 +30,53 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import Volunteer, Team, TeamMembership, TeamEventMembership, EventMembership, Event, Key
 from . import models
 
-# --- Import/Export Resources ---
+from datetime import date
+from import_export import resources, fields
+from import_export.widgets import ManyToManyWidget
+from .models import Volunteer, Team, Event
 
+# 1. Widget specifically for creating Teams on the fly
+class CreateTeamIfNotFoundWidget(ManyToManyWidget):
+    def clean(self, value, row=None, **kwargs):
+        if not value:
+            return self.model.objects.none()
+        
+        names = [n.strip() for n in str(value).split(",") if n.strip()]
+        ids = []
+        
+        for name in names:
+            # We only create if it's a Team model
+            obj, created = self.model.objects.get_or_create(
+                **{self.field: name}, 
+                defaults={'is_active': True}
+            )
+            ids.append(obj.pk)
+            
+        return self.model.objects.filter(pk__in=ids)
+
+# 2. Updated Resource
 class VolunteerResource(resources.ModelResource):
+    # Standard widget: Links to existing events, ignores/skips if not found
+    events = fields.Field(
+        column_name='events',
+        attribute='events',
+        widget=ManyToManyWidget(Event, field='name')
+    )
+    # Custom widget: Links to existing teams OR creates them
+    teams = fields.Field(
+        column_name='teams',
+        attribute='teams',
+        widget=CreateTeamIfNotFoundWidget(Team, field='name')
+    )
+
     class Meta:
         model = Volunteer
-        fields = ('first_name', 'last_name', 'username', 'email', 'phone', 'is_active')
-        export_order = ('first_name', 'last_name', 'username', 'email', 'phone', 'is_active')
+        import_id_fields = ('username',)
+        fields = (
+            'first_name', 'last_name', 'username', 'email', 
+            'phone', 'is_active', 'events', 'teams'
+        )
+        export_order = fields
 
 # --- Inlines (Unfold style) ---
 
@@ -54,10 +94,34 @@ class TeamMembershipInline(TabularInline):
 
 # --- Admin Classes ---
 
+
+from Butikken.models import MealPlan, TeamMealPlan
+
 @admin.register(Team)
 class TeamAdmin(SimpleHistoryAdmin, ModelAdmin):
     list_display = ["id", "name", "short_name", "last_updated", "created"]
     readonly_fields = ["last_updated", "created"]
+    
+    # 1. Reference the method name as a string
+    actions = ["create_team_meal_plans_action"]
+
+    # 2. Define the action inside the class
+    @action(description="Create TeamMealPlan for each MealPlan")
+    def create_team_meal_plans_action(self, request, queryset):
+        meal_plans = MealPlan.objects.all()
+        created_count = 0
+        for team in queryset:
+            for meal_plan in meal_plans:
+                # get_or_create is cleaner here than a manual check
+                obj, created = TeamMealPlan.objects.get_or_create(
+                    team=team, 
+                    meal_plan=meal_plan
+                )
+                if created:
+                    created_count += 1
+        
+        self.message_user(request, f"{created_count} TeamMealPlan objects created successfully.")
+
 
 @admin.register(TeamMembership)
 class TeamMembershipAdmin(ModelAdmin):

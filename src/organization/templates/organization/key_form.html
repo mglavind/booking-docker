@@ -1,26 +1,66 @@
 {% extends "base.html" %}
 {% load static %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
 {% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'organization_Key_list' %}">Nøgle oversigt</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Opdater nøgle</li>
+        </ol>
+    </nav>
 
-</br>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'organization_Key_list' %}">Key Listing</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Opdater nøgle</li>
-    </ol>
-</nav>
+    <div class="mb-4 mt-2">
+        <h1 class="display-5">Opdater nøgle</h1>
+        <div class="alert alert-light" role="alert">
+            {% bs_icon "info-circle" %} Redigerer nuværende placering for nøgle: 
+            <span class="badge bg-primary">{{ object.number }}</span>
+        </div>
+    </div>
 
-</br>
-<h1 class="display-3">Opdater nøgle</h1>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form id="form" role="form" method="post" enctype="multipart/form-data" class="needs-validation">
+                {% csrf_token %}
+                {% bootstrap_form_errors form type='non_fields' %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.errors }}
-    {{ form.as_p }}
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Nøgle Information (Låst)</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        {% bootstrap_field form.number %}
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        {% bootstrap_field form.name %}
+                    </div>
+                    <div class="col-12 mb-3">
+                        {% bootstrap_field form.description %}
+                    </div>
+                </div>
 
-    <input type="submit" value="Gem" class="btn btn-primary">
-</form>
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Udlevering</h5>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {% bootstrap_field form.current_user %}
+                        <small class="text-muted">
+                            {% bs_icon "person-check" %} Vælg den person, der nu har fået nøglen udleveret.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        {% bs_icon "save" %} Gem ændringer
+                    </button>
+                    <a href="{% url 'organization_Key_list' %}" class="btn btn-outline-secondary btn-lg">
+                        Annuller
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

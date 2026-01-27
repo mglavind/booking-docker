@@ -1,136 +1,89 @@
 {% extends "base.html" %}
 {% load static %}
-{% load bootstrap_icons %}
 {% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
 {% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'Butikken_ButikkenBooking_list' %}">Butikken bookinger</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Ny bestilling</li>
+        </ol>
+    </nav>
 
-<br>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'Butikken_ButikkenBooking_list' %}">Butikken bookinger</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Ny booking </li>
-    </ol>
-</nav>
-
-<br>
-<h1 class="display-3" >Ny butikken booking</h1>
-
-{% if user.events.first.deadline_mad %}
-    <p>Deadline for butikken bestillinger: <mark> {{user.events.first.deadline_mad}} </mark>.</p>
-{% endif %}
-    
-  
-<form id="form" role="form" method="post">
-    {% csrf_token %}
-    {{ form.errors }}
-
-    </br>
-    
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.item.id_for_label }}">{{ form.item.label }}</label>
-        <div class="col-sm-10">
-            <div class="input-group">
-                {{ form.item }}
+<div class="mb-4 mt-2">
+        <h1 class="display-5">Bestilling til Butikken</h1>
+        {% if user.is_authenticated and user.events.first %}
+        <div class="alert alert-light" role="alert">
+                {% bs_icon "clock" %} Deadline for madbestillinger: 
+                <span class="badge bg-danger">{{ user.events.first.deadline_mad }}</span>
             </div>
+        {% endif %}
+</div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form id="form" role="form" method="post" class="needs-validation">
+                {% csrf_token %}
+                {% bootstrap_form_errors form type='non_fields' %}
+                <h5 class="border-bottom pb-2 mb-3">Team oplysninger</h5>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        {% bootstrap_field form.team %}
+                    </div>
+                    <div class="col-md-6">
+                        {% bootstrap_field form.team_contact %}
+                    </div>
+                </div>
+
+                <h5 class="border-bottom pb-2 mb-3">Vare detaljer</h5>
+                
+                <div class="row align-items-end">
+                    <div class="form-text" id="basic-addon4">Mængde skal passe til 2 personer</div>
+                    <div class="col-md-2 mb-3">
+                        {% bootstrap_field form.quantity %}
+                    </div>
+                    <div class="col-md-7 mb-3">
+                        {% bootstrap_field form.item %}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        {% bootstrap_field form.unit %}
+                    </div>
+                    
+                    
+                </div>
+
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Afhentning</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {% bootstrap_field form.start%}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {% bootstrap_field form.date_used %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {% bootstrap_field form.start_time %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {% bootstrap_field form.for_meal %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {% bootstrap_field form.remarks %}
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        {% bs_icon "cart-plus" %} Gem bestilling
+                    </button>
+                    <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="btn btn-outline-secondary btn-lg">Annuller</a>
+                </div>
+            </form>
         </div>
     </div>
-    </br>
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
-        <div class="col-sm-10">
-            <div class="input-group">
-                {{ form.quantity }}
-                <span class="input-group-text" id="unit-text">Mængde til 2 personer</span>
-            </div>
-        </div>
-    </div>
-    </br>
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
-        <div class="col-sm-10">
-            <div class="input-group">
-                {{ form.unit }}
-                <span class="input-group-text" id="unit-text">Typisk enhed</span>
-            </div>
-        </div>
-    </div>
-    </br>
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.for_meal.id_for_label }}">{{ form.for_meal.label }}</label>
-        <div class="col-sm-10">
-            {{ form.for_meal }}
-        </div>
-    </div>
-    </br>
-
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.team.id_for_label }}">{{ form.team.label }}</label>
-        <div class="col-sm-10">
-            {{ form.team }}
-        </div>
-    </div>
-    </br>
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.team_contact.id_for_label }}">{{ form.team_contact.label }}</label>
-        <div class="col-sm-10">
-            {{ form.team_contact }}
-        </div>
-    </div>
-    </br>
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.start.id_for_label }}">{{ form.start.label }}</label>
-        <div class="col-sm-10">
-            <!-- Start date -->
-            {% bootstrap_field form.start show_label=False %}
-            {{ form.start.errors }}
-  
-
-        </div>
-    </div>
-    </br>
-    
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="start_time"> {{form.start_time.label}} </label>
-        <div class="col-sm-10">
-            <!-- Start time -->
-            {% bootstrap_field form.start_time show_label=False %}
-            {{ form.start_time.errors }}
-        </div>
-    </div>
-    </br>
-
-    
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="date_used"> {{form.date_used.label}} </label>
-        <div class="col-sm-10">
-            <!-- Start time -->
-            {% bootstrap_field form.date_used show_label=False %}
-            {{ form.date_used.errors }}
-        </div>
-    </div>
-    </br>
-
-
-
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label" for="{{ form.remarks.id_for_label }}">{{ form.remarks.label }}</label>
-        <div class="col-sm-10">
-            {{ form.remarks }}
-        </div>
-    </div>
-        
-    <br>
-    <div class="form-group row">
-        <div class="col-sm-10">
-            <input type="submit" value="Gem" class="btn btn-primary">
-        </div>
-    </div>
-</form>
-
-
+</div>
 {% endblock %}

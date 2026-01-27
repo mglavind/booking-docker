@@ -1,95 +1,107 @@
 {% extends "base.html" %}
-{% block content %}
+{% load static %}
 {% load bootstrap_icons %}
 
-<table class="table table-hover table-striped" id="key-table">
-  <thead>
-    <tr>
-      <th scope="col">
-        <button class="btn btn-link sort-button" data-sort="number">
-          <span class="fw-bold text-dark">Nr.</span> {% bs_icon 'arrow-down-up' %}
-        </button>
-      </th>
-      <th scope="col">
-        <button class="btn btn-link sort-button" data-sort="name">
-          <span class="fw-bold text-dark">Navn</span> {% bs_icon 'arrow-down-up' %}
-        </button>
-      </th>
-      <th scope="col">
-        <button class="btn btn-link sort-button" data-sort="current_user">
-          <span class="fw-bold text-dark">Nuværende bruger</span> {% bs_icon 'arrow-down-up' %}
-        </button>
-      </th>
-      <th scope="col">
-        <button class="btn btn-link sort-button" data-sort="description">
-          <span class="fw-bold text-dark">Beskrivelse</span> {% bs_icon 'arrow-down-up' %}
-        </button>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for key in key_list %}
-      <tr>
-        <td>{{ key.number}}</td>
-        <td>{{ key.name }}</td>
-        <td class="d-flex justify-content-between align-items-center">
-          <span>{{ key.current_user }}</span>
-          
-          {% if user.is_staff %}
-            <a href="{% url 'organization_Key_update' key.id %}" class="btn btn-sm btn-primary ms-2">
-              rediger
-            </a>
-          {% endif %}
-        </td>
-        <td>
-          {{ key.description }}
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Nøgle oversigt</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <div>
+            <h1 class="display-5">Nøgle oversigt</h1>
+            <p class="text-muted">Oversigt over alle registrerede nøgler og deres nuværende placering.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="keyTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nr.</th>
+                            <th scope="col">Navn</th>
+                            <th scope="col">Beskrivelse</th>
+                            <th scope="col">Nuværende Bruger</th>
+                            <th scope="col" class="text-end">Handlinger</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for key in object_list %}
+                      <tr>
+                          <td class="ps-4"><span class="fw-bold">{{ key.number }}</span></td>
+                          <td class="fw-semibold">{{ key.name }}</td>
+                          <td>
+                              <small class="text-muted text-wrap d-block" style="max-width: 300px;">
+                                  {{ key.description|default:"Ingen beskrivelse" }}
+                              </small>
+                          </td>
+                          <td>
+                              {% if key.current_user %}
+                                  <a href="{% url 'organization_Volunteer_detail' key.current_user.pk %}" class="text-decoration-none fw-medium d-flex align-items-center">
+                                      {% bs_icon "person-circle" extra_classes="me-1 text-secondary" %}
+                                      {{ key.current_user.get_full_name|default:key.current_user.username }}
+                                  </a>
+                              {% else %}
+                                  <span class="text-muted small fst-italic">Ledig / Depot</span>
+                              {% endif %}
+                          </td>
+                          <td class="text-end pe-4">
+                              <a href="{% url 'organization_Key_update' key.pk %}" class="btn btn-sm btn-light border">
+                                  {% bs_icon "pencil-square" %} Ret
+                              </a>
+                          </td>
+                      </tr>
+                      {% empty %}
+                      {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const table = document.getElementById("key-table");
-    const sortButtons = table.querySelectorAll(".sort-button");
-    const tbody = table.querySelector("tbody");
-
-    sortButtons.forEach(button => {
-        let ascending = true; // track sort direction
-
-        button.addEventListener("click", function () {
-            const sortBy = button.getAttribute("data-sort");
-            const columnIndex = button.parentElement.cellIndex;
-
-            // get rows as array
-            const rows = [...tbody.querySelectorAll("tr")];
-
-            const sortedRows = rows.sort((a, b) => {
-                const cellA = a.cells[columnIndex].innerText.trim();
-                const cellB = b.cells[columnIndex].innerText.trim();
-
-                // determine type of sorting
-                if (sortBy === "number") {
-                    return ascending 
-                        ? Number(cellA) - Number(cellB)
-                        : Number(cellB) - Number(cellA);
-                } else {
-                    return ascending
-                        ? cellA.localeCompare(cellB)
-                        : cellB.localeCompare(cellA);
-                }
-            });
-
-            // toggle ascending/descending for next click
-            ascending = !ascending;
-
-            // clear tbody and append sorted rows
-            tbody.innerHTML = "";
-            sortedRows.forEach(row => tbody.appendChild(row));
+    document.addEventListener("DOMContentLoaded", function() {
+        const dataTable = new simpleDatatables.DataTable("#keyTable", {
+            searchable: true,
+            fixedHeight: false,
+            paging: false,
+            labels: {
+                placeholder: "Søg i nøgler...",
+                noRows: "Ingen nøgler fundet",
+                info: "Viser {start} til {end} af {rows} nøgler",
+            }
         });
     });
-});
 </script>
 
+<style>
+    /* Styling to match your form designs */
+    .card { border-radius: 12px; }
+    .table thead th { 
+        border-top: none;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+    }
+    .dataTable-input {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+    }
+</style>
 {% endblock %}

@@ -201,17 +201,10 @@ class TeamMembershipDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 class VolunteerListView(LoginRequiredMixin, generic.ListView):
     model = models.Volunteer
-    form_class = forms.VolunteerForm
-    template_name = 'volunteer_list.html'  # Change this to the path of your template
+    template_name = 'volunteer_list.html'
 
     def get_queryset(self):
-        # Fetch all volunteers and annotate them with the team name they are members of
-        queryset = models.Volunteer.objects.annotate(team_name=F('teammembership__team__name'))
-
-        # Sort volunteers based on the team name
-        volunteers_sorted = queryset.order_by('first_name')
-
-        return volunteers_sorted.values('team_name', 'first_name', 'last_name', 'phone', 'email')
+        return models.Volunteer.objects.prefetch_related('teammembership_set__team').order_by('first_name')
 
 
 class VolunteerCreateView(LoginRequiredMixin, generic.CreateView):

@@ -21,7 +21,6 @@ from django.utils import timezone
 
 class ButikkenItemListView(LoginRequiredMixin, generic.ListView):
     model = models.ButikkenItem
-    form_class = forms.ButikkenItemForm
     context_object_name = 'object_list'
     ordering = ['name']
 

@@ -108,23 +108,18 @@ class ButikkenItemForm(forms.ModelForm):
         self.fields["type"].queryset = ButikkenItemType.objects.all()
 
 class ButikkenBookingForm(forms.ModelForm):
-
-
-    # start = forms.DateField(
-    #     widget=TextInput(attrs={"type": "date"}),
-    #     initial=Event.objects.filter(is_active=True).first().start_date,
-    #     label="Afhentning Dato:"
-    # )
-    # start_time = forms.TimeField(
-    #     widget=TextInput(attrs={"type": "time"}),
-    #     initial=Event.objects.filter(is_active=True).first().start_date,
-    #     label="Afhentning tidspunk:"
-    # )
-    # date_used = forms.DateField(
-    #     widget=TextInput(attrs={"type": "date"}),
-    #     initial=Event.objects.filter(is_active=True).first().start_date,
-    #     label="Anvendelsesdato"
-    # )
+    start = forms.DateField(
+        widget=TextInput(attrs={"type": "date"}),
+        label="Afhentning Dato:"
+    )
+    start_time = forms.TimeField(
+        widget=TextInput(attrs={"type": "time"}),
+        label="Afhentning Tidspunkt:"
+    )
+    date_used = forms.DateField(
+        widget=TextInput(attrs={"type": "date"}),
+        label="Anvendelsesdato:"
+    )
     class Meta:
         model = models.ButikkenBooking
         fields =[
@@ -153,6 +148,18 @@ class ButikkenBookingForm(forms.ModelForm):
             "date_used": "Anvendelsesdato",
 
         }
+        widgets = {
+            "item": forms.Select(attrs={"class": "form-control", "data-error": "Please select an item."}),
+            "team": forms.Select(attrs={"class": "form-control", "data-error": "Please select a team."}),
+            "team_contact": forms.Select(attrs={"class": "form-control", "data-error": "Please select a team contact"}),
+            "quantity": forms.NumberInput(attrs={"class": "form-control", "min": "1", "data-error": "Please enter a valid quantity."}),
+            "unit": forms.TextInput(attrs={"class": "form-control", "data-error": "Please enter a unit."}),            
+            "for_meal": forms.Select(attrs={"class": "form-control", "data-error": "Please select a meal."}),
+            "remarks": forms.Textarea(attrs={"class": "form-control", "placeholder": "Additional remarks..."}),
+            "start": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
+            "start_time": forms.TextInput(attrs={"class": "form-control", "type": "time"}),
+            "date_used": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
+        }
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -179,6 +186,22 @@ class ButikkenBookingForm(forms.ModelForm):
                 self.fields["team_contact"].initial = user
             else:
                 print(f"Warning: User {user} has no team membership.")
+        # 4. Handle Event Dates / Initials
+        instance = kwargs.get('instance')
+        if instance:
+            self.fields["start"].initial = instance.start
+            self.fields["start_time"].initial = instance.start_time    
+            self.fields["date_used"].initial = instance.date_used       
+        else:
+            # Safe lookup for active/next event
+            active_event = Event.objects.filter(is_active=True).first()
+            if not active_event:
+                active_event = Event.objects.filter(start_date__gt=timezone.now()).order_by('start_date').first()
+
+            if active_event:
+                self.fields["start"].initial = active_event.start_date
+                self.fields["start_time"].initial = time(8, 0)
+                self.fields["date_used"].initial = active_event.start_date
         
 # Function to get the next event
         def get_next_event():
@@ -197,62 +220,6 @@ class ButikkenBookingForm(forms.ModelForm):
             if next_event:
                 self.fields["start"].initial = next_event.start_date.strftime('%Y-%m-%d')
                 self.fields["start_time"].initial = time(8, 0)  # Set default time to 08:00 AM
-
-
-
-
-class OldButikkenBookingForm(forms.ModelForm):
-    class Meta:
-        model = models.ButikkenBooking
-        fields = [
-            "remarks",
-            "quantity",
-            "start",
-            "item",
-            "team_contact",
-            "team",
-        ]
-
-        widgets = {
-            "item": forms.Select(attrs={"class": "form-control"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control"}),
-            "start": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "remarks": forms.Textarea(attrs={"class": "form-control h-25"}),
-            "team_contact": forms.Select(attrs={"class": "form-control"}),
-            "team": forms.Select(attrs={"class": "form-control"}),
-        }
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.status = "Pending"
-        instance.team_contact = self.user
-        if commit:
-            instance.save()
-        return instance
-
-    def __init__(self, *args, user=None, **kwargs):
-        print("Initializing ButikkenBookingForm")  # Print to terminal when the method is called
-        print("Current user: 0", user) 
-        #user = kwargs.pop('user', None)
-        self.user = user  # Assign the user argument to the form's user attribute
-        print("Current user: 1", user)  # Print to terminal the current user
-
-        super(ButikkenBookingForm, self).__init__(*args, **kwargs)
-
-        if self.user is not None:
-            print("Current user: 2", self.user)  # Print to terminal the current user
-            team = Team.objects.filter(teammembership__member=self.user).first()
-            print("Teams:", team)  # Print to terminal the current user
-
-            self.fields['team_contact'].queryset = Volunteer.objects.filter(teammembership__team=team)
-            self.fields['team_contact'].initial = self.user  # Set the default value to be the user object
-
-            self.fields["team"].queryset = Team.objects.filter(teammembership__member=self.user)
-            self.fields["team"].initial = team
-            
-        self.fields["start"].initial = Event.objects.filter(is_active=True).first()
-        self.fields["item"].queryset = ButikkenItem.objects.all().order_by("name")
-        self.fields["team"].queryset = Team.objects.all().order_by("name")
 
 
 
