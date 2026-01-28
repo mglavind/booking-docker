@@ -1,3 +1,4 @@
+from multiprocessing import context
 from django.views import generic
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -156,11 +157,8 @@ class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         active_event = Event.objects.filter(is_active=True).first()
-        
-        if not active_event:
-            return context
+        if not active_event: return context
 
-        # 1. Timeline configuration
         timeline_start = datetime.combine(active_event.start_date, time.min)
         timeline_end = datetime.combine(active_event.end_date, time.max)
         total_duration = timeline_end - timeline_start
@@ -241,7 +239,6 @@ class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
             'item_rows': item_rows,
             'hours_list': hours_list,
             'hour_width': 40,
-            # CRITICAL: JavaScript needs a standard ISO string to avoid 'Invalid Date'
             'timeline_start_iso': timeline_start.strftime('%Y-%m-%dT%H:%M:%S'),
         })
         return context
@@ -325,7 +322,7 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, 
         return redirect('AktivitetsTeam_AktivitetsTeamBooking_detail', pk=self.object.pk)
     
 
-    
+
 class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, TimelinePreviewMixin, generic.UpdateView):
     model = models.AktivitetsTeamBooking
     form_class = forms.AktivitetsTeamBookingForm
