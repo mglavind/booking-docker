@@ -149,13 +149,14 @@ class ButikkenBookingForm(forms.ModelForm):
 
         }
         widgets = {
-            "item": forms.Select(attrs={"class": "form-control", "data-error": "Please select an item."}),
-            "team": forms.Select(attrs={"class": "form-control", "data-error": "Please select a team."}),
-            "team_contact": forms.Select(attrs={"class": "form-control", "data-error": "Please select a team contact"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control", "min": "1", "data-error": "Please enter a valid quantity."}),
-            "unit": forms.TextInput(attrs={"class": "form-control", "data-error": "Please enter a unit."}),            
-            "for_meal": forms.Select(attrs={"class": "form-control", "data-error": "Please select a meal."}),
-            "remarks": forms.Textarea(attrs={"class": "form-control", "placeholder": "Additional remarks..."}),
+            # Added tom-select class and placeholder
+            "item": forms.Select(attrs={"class": "tom-select", "placeholder": "Søg efter vare..."}),
+            "team": forms.Select(attrs={"class": "form-select"}),
+            "team_contact": forms.Select(attrs={"class": "form-select"}),
+            "quantity": forms.NumberInput(attrs={"class": "form-control", "step": "1"}),
+            "unit": forms.TextInput(attrs={"class": "form-control"}),            
+            "for_meal": forms.Select(attrs={"class": "form-select"}),
+            "remarks": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
             "start": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
             "start_time": forms.TextInput(attrs={"class": "form-control", "type": "time"}),
             "date_used": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
@@ -173,6 +174,7 @@ class ButikkenBookingForm(forms.ModelForm):
         self.fields["item"].queryset = ButikkenItem.objects.all()
         self.fields["team"].queryset = Team.objects.all()
         self.fields["team_contact"].queryset = Volunteer.objects.all()
+        self.fields["item"].empty_label = "Begynd at skrive for at finde en vare..."
         
         if user:
             # CHANGE: Use filter().first() instead of .get()

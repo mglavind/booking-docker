@@ -3,87 +3,163 @@
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
 
+{% block title %}Butikken - Ny bestilling{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .card-custom { border: none; border-radius: 12px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+    
+    /* Tom Select Input Group Integration */
+    .input-group > .ts-wrapper { flex: 1 1 auto; width: 1%; }
+    .input-group > .ts-wrapper .ts-control {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        padding: 0.5rem 0.75rem !important;
+        min-height: calc(1.5em + 1rem + 2px);
+    }
+    #clear-item-btn { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; z-index: 4; }
+    
+    .ts-wrapper.form-control { padding: 0 !important; border: none !important; }
+    .ts-control { border: 1px solid #dee2e6 !important; transition: border-color 0.15s, box-shadow 0.15s; }
+    .ts-wrapper.focus .ts-control { border-color: #86b7fe !important; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important; }
+    .ts-dropdown { z-index: 1050 !important; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
             <li class="breadcrumb-item"><a href="{% url 'Butikken_ButikkenBooking_list' %}">Butikken bookinger</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Ny bestilling</li>
+            <li class="breadcrumb-item active" aria-current="page">{% if form.instance.pk %}Rediger{% else %}Ny{% endif %} bestilling</li>
         </ol>
     </nav>
 
-<div class="mb-4 mt-2">
+    <div class="mb-4 mt-2">
         <h1 class="display-5">Bestilling til Butikken</h1>
         {% if user.is_authenticated and user.events.first %}
-        <div class="alert alert-light" role="alert">
+            <p class="text-muted">
                 {% bs_icon "clock" %} Deadline for madbestillinger: 
                 <span class="badge bg-danger">{{ user.events.first.deadline_mad }}</span>
-            </div>
+            </p>
         {% endif %}
-</div>
+    </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
-            <form id="form" role="form" method="post" class="needs-validation">
-                {% csrf_token %}
-                {% bootstrap_form_errors form type='non_fields' %}
-                <h5 class="border-bottom pb-2 mb-3">Team oplysninger</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {% bootstrap_field form.team %}
-                    </div>
-                    <div class="col-md-6">
-                        {% bootstrap_field form.team_contact %}
+    <form id="form" role="form" method="post" class="needs-validation">
+        {% csrf_token %}
+        {% bootstrap_form_errors form type='non_fields' %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card card-custom mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title border-bottom pb-2 mb-3">Vare detaljer</h5>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Vælg vare</label>
+                            <div class="input-group">
+                                {% bootstrap_field form.item show_label=False wrapper_class="flex-grow-1 mb-0" %}
+                                <button class="btn btn-outline-secondary" type="button" id="clear-item-btn">
+                                    {% bs_icon "x-lg" %}
+                                </button>
+                            </div>
+                            <div class="form-text">Mængde skal passe til 2 personer</div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {% bootstrap_field form.quantity %}
+                            </div>
+                            <div class="col-md-6">
+                                {% bootstrap_field form.unit %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <h5 class="border-bottom pb-2 mb-3">Vare detaljer</h5>
-                
-                <div class="row align-items-end">
-                    <div class="form-text" id="basic-addon4">Mængde skal passe til 2 personer</div>
-                    <div class="col-md-2 mb-3">
-                        {% bootstrap_field form.quantity %}
-                    </div>
-                    <div class="col-md-7 mb-3">
-                        {% bootstrap_field form.item %}
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        {% bootstrap_field form.unit %}
-                    </div>
-                    
-                    
-                </div>
-
-                <h5 class="border-bottom pb-2 mb-3 mt-3">Afhentning</h5>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {% bootstrap_field form.start%}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {% bootstrap_field form.date_used %}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {% bootstrap_field form.start_time %}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {% bootstrap_field form.for_meal %}
+                <div class="card card-custom mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title border-bottom pb-2 mb-3">Afhentning & Brug</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">{% bootstrap_field form.start %}</div>
+                            <div class="col-md-6">{% bootstrap_field form.start_time %}</div>
+                            <div class="col-md-6">{% bootstrap_field form.date_used %}</div>
+                            <div class="col-md-6">{% bootstrap_field form.for_meal %}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    {% bootstrap_field form.remarks %}
+                <div class="card card-custom mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title border-bottom pb-2 mb-3">Ansvarlig</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">{% bootstrap_field form.team %}</div>
+                            <div class="col-md-6">{% bootstrap_field form.team_contact %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card card-custom mb-4 bg-light">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-3">Bemærkninger</h5>
+                        {% bootstrap_field form.remarks show_label=False %}
+                    </div>
                 </div>
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">
                         {% bs_icon "cart-plus" %} Gem bestilling
                     </button>
-                    <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="btn btn-outline-secondary btn-lg">Annuller</a>
+                    <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="btn btn-outline-secondary">Annuller</a>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+{{ unit_map|json_script:"unit-data" }}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dataElement = document.getElementById('unit-data');
+        if (!dataElement) return;
+
+        const unitMap = JSON.parse(dataElement.textContent);
+        const unitField = document.getElementById('id_unit');
+
+        const itemControl = new TomSelect(".tom-select", {
+            create: false,
+            placeholder: "Søg efter vare...",
+            allowEmptyOption: true,
+            sortField: { field: "text", direction: "asc" },
+            onChange: function(value) {
+                // If a value is selected and exists in our map
+                if (value && unitMap[value]) {
+                    unitField.value = unitMap[value];
+                    
+                    // Visual feedback
+                    unitField.classList.add('is-valid');
+                    setTimeout(() => unitField.classList.remove('is-valid'), 800);
+                } else {
+                    unitField.value = ""; // Clear if nothing selected
+                }
+            }
+        });
+
+        // Clear button logic
+        const clearBtn = document.getElementById('clear-item-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                itemControl.clear();
+                unitField.value = '';
+                itemControl.focus();
+            });
+        }
+    });
+</script>
 {% endblock %}

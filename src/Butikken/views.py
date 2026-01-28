@@ -10,7 +10,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import MealBooking, Meal, Day, Option, Recipe, MealPlan, MealOption, TeamMealPlan, MealBooking, TeamMealPlan
 from organization.models import Event
 import logging
-
+from django.contrib.admin.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 logger = logging.getLogger(__name__)
 
 from .forms import TeamMealPlanForm
@@ -112,25 +113,13 @@ class ButikkenBookingCreateView(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         butikken_items = models.ButikkenItem.objects.all()
-        context['butikken_items'] = butikken_items
+        
+        # Use 'content_unit' instead of 'unit'
+        items_data = butikken_items.values_list('id', 'content_unit')
+        unit_map = {str(item_id): (u or "") for item_id, u in items_data}
+        
+        context['unit_map'] = unit_map
         return context
-    
-def create_butikken_booking(request):
-    print("Hello from Def")  # Print to terminal the current user
-    if request.method == 'POST':
-        form = forms.ButikkenBookingForm(request.POST or None)
-        if form.is_valid():
-            ButikkenBooking = form.save()
-            context = {'booking': ButikkenBooking}
-            return render(request, 'Butikken/partials/booking.html', context)
-    return render(request, 'Butikken/partials/form.html' , {'form': forms.ButikkenBookingForm()})
-
-class ButikkenBookingDetailView(LoginRequiredMixin, generic.DetailView):
-    model = models.ButikkenBooking
-    form_class = forms.ButikkenBookingForm
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
 
 class ButikkenBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -149,6 +138,50 @@ class ButikkenBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        butikken_items = models.ButikkenItem.objects.all()
+        
+        # Use 'content_unit' instead of 'unit'
+        items_data = butikken_items.values_list('id', 'content_unit')
+        unit_map = {str(item_id): (u or "") for item_id, u in items_data}
+        
+        context['unit_map'] = unit_map
+        return context
+
+    
+def create_butikken_booking(request):
+    print("Hello from Def")  # Print to terminal the current user
+    if request.method == 'POST':
+        form = forms.ButikkenBookingForm(request.POST or None)
+        if form.is_valid():
+            ButikkenBooking = form.save()
+            context = {'booking': ButikkenBooking}
+            return render(request, 'Butikken/partials/booking.html', context)
+    return render(request, 'Butikken/partials/form.html' , {'form': forms.ButikkenBookingForm()})
+
+
+class ButikkenBookingDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.ButikkenBooking
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            
+            # Get the "Type" of this model so we can filter logs
+            obj_type = ContentType.objects.get_for_model(self.object)
+            
+            # Fetch logs related to this specific object ID
+            context['logs'] = LogEntry.objects.filter(
+                content_type=obj_type,
+                object_id=self.object.pk
+            ).order_by('-action_time')
+            
+            return context
+
 
 
 class ButikkenBookingDeleteView(LoginRequiredMixin, generic.DeleteView):

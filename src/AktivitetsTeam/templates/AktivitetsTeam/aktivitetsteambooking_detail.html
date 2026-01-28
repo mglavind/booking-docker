@@ -3,156 +3,198 @@
 {% load comments_xtd %}
 {% load static %}
 {% load bootstrap_icons %}
+{% load django_bootstrap5 %}
+
+{% block title %}Aktivitet: {{ object.item }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-custom { border: none; border-radius: 12px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+    .status-badge { padding: 0.5rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; }
+    .detail-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .detail-value { font-weight: 500; font-size: 1.1rem; color: #212529; }
+    .sidebar-info { font-size: 0.9rem; border-bottom: 1px solid #eee; padding: 10px 0; }
+    .sidebar-info:last-child { border-bottom: none; }
+    #map { border-radius: 12px; overflow: hidden; border: 1px solid #dee2e6; }
+    .bg-soft-primary {
+        background-color: #e7f1ff;
+        width: 48px;  /* Fixed width */
+        height: 48px; /* Fixed height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0; /* Prevents squishing in flex rows */
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    
-<br>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
-      <li class="breadcrumb-item active" aria-current="page"> {{ object.item }} booking </li>
-    </ol>
-</nav>
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
+            <li class="breadcrumb-item active">Booking #{{ object.pk }}</li>
+        </ol>
+    </nav>
 
-<h1 class="display-3" >{{ object.item }} booking til {{ object.team }} </h1>
-
-
-<br>
-    
-<table class="table">
-    <tr>
-        <td>Aktivitet</td>
-        <td>{{ object.item }}</td>
-    </tr>
-    <tr>
-        <td>Location</td>
-        <td>{{ object.location }}</td>
-    </tr>
-    <tr>
-        <td>Start dato</td>
-        <td>{{ object.start_date }}</td>
-    </tr>
-    <tr>
-        <td>Start tid</td>
-        <td>{{ object.start_time }}</td>
-    </tr>
-    <tr>
-        <td>Slut dato</td>
-        <td>{{ object.end_date }}</td>
-    </tr>
-    <tr>
-        <td>Slut tid</td>
-        <td>{{ object.end_time }}</td>
-    </tr>
-    <tr>
-        <td>Team</td>
-        <td>{{ object.team }}</td>
-    </tr>
-    <tr>
-        <td>Kontaktperson</td>
-        <td>{{ object.team_contact }}</td>
-    </tr>
-    <tr>
-        <td>Bemærkninger</td>
-        <td>{{ object.remarks }}</td>
-    </tr>
-    <tr>
-        <td>Position</td>
-        <td>{{ object_dict.latitude }}. {{ object_dict.longitude }}
-        </br>
-        </br>
-                
-            <a href="https://www.google.com/maps?q={{ object_dict.latitude }},{{ object_dict.longitude }}" target="_blank" class="btn btn-primary">
-                Open in Google Maps
-            </a>
-        </td>
-        
-    </tr>
-    
-    <tr>
-        <td>Status</td>
-        <td>
+    <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+        <div>
+            <span class="text-muted text-uppercase small fw-bold">Aktivitets booking</span>
+            <h1 class="display-5 mb-0">{{ object.item }}</h1>
+            <p class="lead text-muted">Søges af: {{ object.team.name }}</p>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-2">
             {% if object.status == 'Pending' %}
-                <button class="btn btn-warning btn-sm" disabled>Afventer</button>
+                <span class="status-badge bg-warning text-dark">{% bs_icon "clock" %} Afventer</span>
             {% elif object.status == 'Approved' %}
-                <button class="btn btn-success btn-sm" disabled>Godkendt</button>
+                <span class="status-badge bg-success text-white">{% bs_icon "check-circle" %} Godkendt</span>
             {% elif object.status == 'Rejected' %}
-                <button class="btn btn-danger btn-sm" disabled>Afvist</button>
+                <span class="status-badge bg-danger text-white">{% bs_icon "x-circle" %} Afvist</span>
             {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <td>Oprettet</td>
-        <td>{{ object.created }}</td>
-    </tr>
-    <tr>
-        <td>Sidst Opdateret</td>
-        <td>{{ object.last_updated }}</td>
-    </tr>
-</table>
-
-</br>
-{{ object_dict|json_script:"object_json" }}
-<div id="map" style="height: 40em;" ></div>
-
-</br>
-<div class="container">
-    <div class="row align-items-start">
-        <div class="col col-4">
-            <a class="btn btn-primary btn-block" style="width: 100%" href="{{object.get_update_url}}">Rediger</a>
+            
+            <div class="mt-2">
+                {% if user.is_staff or user.teammembership_set.first.team == object.team %}
+                    <a href="{{ object.get_update_url }}" class="btn btn-outline-primary rounded-pill px-4">
+                        {% bs_icon "pencil" %} Rediger
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary rounded-pill px-4" disabled>
+                        {% bs_icon "lock" %} Låst
+                    </button>
+                {% endif %}
+            </div>
         </div>
-        <div class="col col-4">
-            {% if user.is_staff %}
-            <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_approve' object.pk %}?next={% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' object.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-block" style="width: 100%">Godkend</button>
-            </form>
-            {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card card-custom mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-4 border-bottom pb-2">Information om aktiviteten</h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6 border-end">
+                            <div class="detail-label">Starttidspunkt</div>
+                            <div class="detail-value">
+                                {% bs_icon "calendar-check" %} {{ object.start_date|date:"l \d. j. F" }} <br>
+                                <span class="text-dark small">kl. {{ object.start_time|time:"H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Sluttidspunkt</div>
+                            <div class="detail-value">
+                                {% bs_icon "calendar-x" %} {{ object.end_date|date:"l \d. j. F" }} <br>
+                                <span class="text-dark small">kl. {{ object.end_time|time:"H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="detail-label">Lokation</div>
+                        <div class="detail-value">
+                            {% bs_icon "geo-alt" %} {{ object.location|default:"Ingen lokation angivet" }}
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded">
+                        <div class="detail-label">Beskrivelse / Bemærkninger</div>
+                        <div class="mt-2">
+                            {{ object.remarks|default:"<span class='text-muted italic'>Ingen beskrivelse tilføjet.</span>"|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-custom mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Geografisk Position</h5>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ object_dict.latitude }},{{ object_dict.longitude }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                            {% bs_icon "map" %} Åben i Google Maps
+                        </a>
+                    </div>
+                    {{ object_dict|json_script:"object_json" }}
+                    <div id="map" style="height: 350px;"></div>
+                </div>
+            </div>
+
+            <div class="card card-custom mb-5">
+                <div class="card-body p-4">
+                    {% get_comment_count for object as comment_count %}
+                    <h5 class="card-title mb-4 border-bottom pb-2">
+                        Kommentarer <span class="badge bg-secondary rounded-pill ms-2">{{ comment_count }}</span>
+                    </h5>
+                    {% if comment_count %}<div class="mb-4">{% render_xtdcomment_tree for object %}</div>{% endif %}
+                    <div class="bg-light p-3 rounded">{% render_comment_form for object %}</div>
+                </div>
+            </div>
         </div>
-        <div class="col col-4">
+
+        <div class="col-lg-4">
+            <div class="card card-custom mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3 border-bottom pb-2">Kontaktperson</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-soft-primary rounded-circle p-2 me-3">
+                            {% bs_icon "person-circle" extra_classes="fs-3 text-primary" %}
+                        </div>
+                        <div>
+                            <a href="{% url 'organization_Volunteer_detail' object.team_contact.pk %}" class="detail-value text-decoration-none">
+                                {{ object.team_contact }}
+                            </a>
+                            <div class="text-muted small">Primær kontakt</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-info d-flex justify-content-between">
+                        <span class="text-muted">Tilhører Team:</span>
+                        <span class="fw-bold">{{ object.team.name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-custom bg-light mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3 small fw-bold text-uppercase text-muted">Historik</h5>
+                    <div class="sidebar-info d-flex justify-content-between small">
+                        <span>Oprettet:</span>
+                        <span>{{ object.created|date:"d/m-y H:i" }}</span>
+                    </div>
+                    <div class="sidebar-info d-flex justify-content-between small">
+                        <span>Opdateret:</span>
+                        <span>{{ object.last_updated|date:"d/m-y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+
             {% if user.is_staff %}
-            <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_reject' object.pk %}?next={% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' object.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-block" style="width: 100%">Afvis</button>
-            </form>
+            <div class="card card-custom border-primary bg-white shadow">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">
+                        {% bs_icon "shield-check" %} Admin Kontrol
+                    </h5>
+                    <div class="d-grid gap-2">
+                        <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_approve' object.pk %}?next={{ request.path }}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success w-100">Godkend booking</button>
+                        </form>
+                        <form method="post" action="{% url 'AktivitetsTeam_AktivitetsTeamBooking_reject' object.pk %}?next={{ request.path }}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger w-100">Afvis booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
             {% endif %}
+
+            <div class="mt-4 d-grid">
+                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="btn btn-link text-muted">
+                    {% bs_icon "arrow-left" %} Tilbage til listen
+                </a>
+            </div>
         </div>
     </div>
 </div>
-
-<div class="container ">
-
-    <!-- Comments -->
-        {% get_comment_count for object as comment_count %}
-        <div class="comment mt-3 mb-5">  
-        <div class="card pt-4">
-            <div class="card-body">
-            <h5 class="card-title">Kommentarer</h5>
-
-            <!-- Kommentar træet -->
-
-            {% if comment_count %}
-                <ul class="media-list">
-                {% render_xtdcomment_tree for object %}
-                </ul>
-            {% endif %}
-
-            <!-- Skrivefelt -->
-
-            {% render_comment_form for object %}
-
-            <!-- Optælling -->
-            <div class="py-4 card-text">
-                <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">Tilbage til oversigt</a>
-                &nbsp;&sdot;&nbsp;
-                {{ comment_count }} komment{{ comment_count|pluralize:"ar,arer" }}
-                er givet.
-            </div>
-        </div>
-        </div>
-
-    </div>
-
 <script>
     (g => {
         var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
@@ -173,94 +215,29 @@
         key: "AIzaSyB_gCWQdMQ5CGrarZge8VqOeXzdeuoV-7Q", v: "weekly"
     });
 
-    let map, marker, infoWindow;
     async function initMap() {
         const objectDict = JSON.parse(document.getElementById('object_json').textContent);
-        const defaultLat = 56.114951;  // Replace with your default latitude
-        const defaultLng = 9.655592;  // Replace with your default longitude
-
-        const initialLat = objectDict.latitude !== 'default_latitude' ? parseFloat(objectDict.latitude) : defaultLat;
-        const initialLng = objectDict.longitude !== 'default_longitude' ? parseFloat(objectDict.longitude) : defaultLng;
-
-        const position = { lat: initialLat, lng: initialLng };
+        const position = { 
+            lat: parseFloat(objectDict.latitude) || 56.114951, 
+            lng: parseFloat(objectDict.longitude) || 9.655592 
+        };
 
         const { Map } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-        map = new Map(document.getElementById("map"), {
+        const map = new Map(document.getElementById("map"), {
             zoom: 15,
             center: position,
             mapId: "DEMO_MAP_ID",
         });
 
-        const infoWindowContent = `
-            <div>
-                <p>Latitude: ${initialLat}</p>
-                <p>Longitude: ${initialLng}</p>
-                <a href="https://www.google.com/maps/search/?api=1&query=${initialLat},${initialLng}" target="_blank">View on Google Maps</a>
-            </div>
-        `;
-
-        // Initialize InfoWindow
-        infoWindow = new google.maps.InfoWindow({
-            content: infoWindowContent,
-        });
-
-        // Open InfoWindow immediately
-        infoWindow.open(map, marker);
-
-        marker = new AdvancedMarkerElement({
+        new AdvancedMarkerElement({
             map: map,
             position: position,
-            title: "Initial Location",
+            title: "{{ object.item }}",
         });
-
-
-        // Update form fields with marker's initial position
-        document.getElementById('latitude').value = initialLat;
-        document.getElementById('longitude').value = initialLng;
-
-        // Update marker and form fields on map click
-        map.addListener("click", (e) => {
-            const lat = e.latLng.lat();
-            const lng = e.latLng.lng();
-
-            // Remove the old marker
-            marker.setMap(null);
-
-            // Create a new marker
-            marker = new AdvancedMarkerElement({
-                map: map,
-                position: { lat, lng },
-                title: "New Location",
-            });
-
-            // Update InfoWindow content
-            const newInfoWindowContent = `
-                <div>
-                    <p>Latitude: ${lat}</p>
-                    <p>Longitude: ${lng}</p>
-                    <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank">View on Google Maps</a>
-                </div>
-            `;
-            infoWindow.setContent(newInfoWindowContent);
-
-            // Open InfoWindow on new marker click
-            infoWindow.open(map, marker);
-
-            // Update form fields
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-        });
- 
     }
 
     initMap();
 </script>
-
-    
 {% endblock %}
-
-
-
-
