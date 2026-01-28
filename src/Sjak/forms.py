@@ -32,17 +32,22 @@ class SjakBookingForm(forms.ModelForm):
             "start", "start_time", "end", "end_time",
             "team_contact", "item", "team", "remarks", "quantity",
         ]
+        labels = {
+            "item": "Vælg en ting",       # Changed from "Sjak ting"
+            "quantity": "Antal",   # Changed from "Antal"
+            "team": "Team",
+            "team_contact": "Kontaktperson",
+            "start": "Udlånsdato",
+            "end": "Afleveringsdato",
+            "remarks": "Bemærkninger til Sjak",
+        }
         widgets = {
-            "item": forms.Select(attrs={"class": "form-select"}),
+            # Add 'tom-select' class here
+            "item": forms.Select(attrs={"class": "tom-select", "placeholder": "Søg efter ting..."}),
             "team": forms.Select(attrs={"class": "form-select"}),
             "team_contact": forms.Select(attrs={"class": "form-select"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control"}),
+            "quantity": forms.NumberInput(attrs={"class": "form-control", "step": "1", "min": "1"}),
             "remarks": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-        }
-        labels = {
-            "quantity": "Antal",
-            "team": "Team",
-            "item": "Sjak ting",
         }
 
     def __init__(self, *args, user=None, **kwargs):
@@ -52,6 +57,7 @@ class SjakBookingForm(forms.ModelForm):
         self.fields["item"].queryset = SjakItem.objects.all().order_by("name")
         self.fields["team"].queryset = Team.objects.all().order_by("name")
         self.fields["team_contact"].queryset = Volunteer.objects.all().order_by("first_name")
+        self.fields["item"].empty_label = "Begynd at skrive for at filtrere listen..."
 
         # 2. Handle User-specific logic
         if user:
