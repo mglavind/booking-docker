@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5">Aktivitetsplan</h1>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-0 overflow-auto">
+            <div id="gantt-target"></div>
+        </div>
+    </div>
+    
+</div>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tasks = {{ gantt_data_json|safe|default:"[]" }};
+        
+        // Grab the dates from Django (falling back to today if event not found)
+        const eventStart = "{{ gantt_start|default:'' }}";
+        const eventEnd = "{{ gantt_end|default:'' }}";
+
+        if (tasks.length === 0) {
+            document.getElementById('gantt-target').innerHTML = '<div class="p-5 text-center text-muted">Ingen bookinger.</div>';
+            return;
+        }
+
+        const gantt = new Gantt("#gantt-target", tasks, {
+            header_height: 100,
+            column_width: 120, // Wider columns look better for hourly view
+            step: 48,          // 1 hour steps
+            view_mode: 'Day', // In Frappe, 'Day' mode displays hours
+            language: 'en',   // Staying with 'en' for stability
+            readonly: true,
+            view_mode_select: false,
+            on_click: function(task) {
+                window.location.href = `/AktivitetsTeam/AktivitetsTeamBooking/detail/${task.id}/`;
+            }
+        });
+
+        // Set the view range if we have event dates
+        if (eventStart && eventEnd) {
+            // Note: Frappe Gantt doesn't have a direct "set_range" method, 
+            // but it centers on the current date or tasks. 
+            // If you want it to jump to the start:
+            console.log(`Event range: ${eventStart} to ${eventEnd}`);
+        }
+
+    
+    });
+</script>
+
+
+{% endblock %}

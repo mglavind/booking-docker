@@ -4,17 +4,141 @@
 {% load bootstrap_icons %}
 
 {% block content %}
+
+<style>
+    /* TIMELINE PREVIEW STYLES */
+    .timeline-wrapper {
+        position: relative;
+        background-color: #fff;
+        min-height: 100px;
+    }
+
+    .booking-box {
+        position: absolute;
+        height: 44px;
+        border-radius: 6px;
+        padding: 0 10px; /* Remove top/bottom padding to let flex handle centering */
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        
+        /* THE FIX: Vertical and Horizontal Centering */
+        display: flex;
+        align-items: center; 
+        justify-content: flex-start; /* Keeps text to the left, but centered vertically */
+        
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: left 0.3s ease, width 0.3s ease;
+        z-index: 5;
+    }
+
+    /* Solid Grey for Approved */
+    .status-approved-preview {
+        background-color: #6c757d !important;
+        border: 1px solid #495057;
+        color: #ffffff !important;
+    }
+
+    /* Striped Grey for Pending */
+    .status-pending-preview {
+        background: repeating-linear-gradient(
+            45deg,
+            #f8f9fa,
+            #f8f9fa 10px,
+            #e9ecef 10px,
+            #e9ecef 20px
+        ) !important;
+        border: 1px solid #adb5bd;
+        color: #495057 !important; /* Dark text for light stripes */
+    }
+
+    /* Conflict state for the Ghost Bar */
+    .booking-box.conflict {
+        background-color: #dc3545 !important;
+        border: 2px solid #a71d2a;
+        color: white !important;
+        z-index: 20;
+        animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.6); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    /* Grid and Labels */
+    .timeline-label-layer {
+        height: 25px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 11px;
+        color: #6c757d;
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        z-index: 11;
+    }
+
+    .time-label {
+        position: absolute;
+        border-left: 1px solid #eee;
+        padding-left: 4px;
+        height: 100%;
+        white-space: nowrap;
+    }
+
+    .time-label.major-tick {
+        border-left: 2px solid #adb5bd;
+        color: #212529;
+        font-weight: bold;
+    }
+
+    /* Form specific styles */
+    .border-dashed { border: 2px dashed #dee2e6 !important; }
+    
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(130deg) brightness(95%) contrast(80%);
+    }
+
+    /* Utility for labels inside bars */
+    .booking-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+    /* Helper to ensure text inside bars stays centered and clean */
+    .booking-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        line-height: 1.1;
+    }
+
+    .booking-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+        margin-bottom: 1px;
+    }
+</style>
+
 <div class="container py-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
             <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam bookinger</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Ny booking</li>
+            <li class="breadcrumb-item active" aria-current="page">Booking</li>
         </ol>
     </nav>
 
     <div class="mb-4 mt-2">
-        <h1 class="display-5">Ny Aktivitetsteam booking</h1>
+        <h1 class="display-5">Aktivitetsteam booking</h1>
         {% if user.is_authenticated and user.events.first %}
             <p class="text-muted">
                 {% bs_icon "info-circle" %} Deadline for Aktivitetsteam bestillinger: 
@@ -27,7 +151,6 @@
         {% csrf_token %}
         
         {% bootstrap_form_errors form type='non_fields' %}
-
         <div class="row">
             <div class="col-md-6 mb-3">
                 {% bootstrap_field form.item %}
@@ -45,13 +168,35 @@
             </div>
 
             <hr class="my-4">
+                <div class="col-12 mb-4">
+                    <div class="card bg-light border-dashed">
+                        <div class="card-body">
+                            <h6 class="card-title d-flex justify-content-between">
+                                <small class="text-muted">Viser bookinger for valgte aktivitet</small>
+                            </h6>
+                            <div id="timeline-scroll-container" class="timeline-wrapper position-relative overflow-x-auto border rounded bg-white" 
+                                style="--hour-width: 40px; height: 120px;">
+                                
+                                <div id="label-layer" class="timeline-label-layer" style="width: 5000px;"></div>
+
+                                <div id="ghost-bar" class="booking-box bg-primary shadow" style="display:none; opacity: 0.9; z-index: 10; top: 40px; height: 40px;">
+                                    <span class="ps-1">{% bs_icon "plus-circle" %} Din booking</span>
+                                </div>
+
+                                <div id="existing-bookings-layer"></div>
+
+                                <div style="background-image: linear-gradient(to right, #eee 1px, transparent 1px); background-size: 40px 100%; height: 100%; width: 5000px; position: absolute; top: 0; left: 0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
             <div class="col-md-6 mb-3">
                 {% bootstrap_field form.start_date %}
             </div>
             <div class="col-md-6 mb-3">
-                {# Remove seconds by setting the HTML5 type and format #}
-                {% bootstrap_field form.start_time field_class="timepicker" %}
+                {% bootstrap_field form.start_time %}
             </div>
 
             <div class="col-md-6 mb-3">
@@ -60,6 +205,7 @@
             <div class="col-md-6 mb-3">
                 {% bootstrap_field form.end_time %}
             </div>
+            
 
             <hr class="my-4">
 
@@ -95,43 +241,162 @@
 </div>
 
 <script>
+    // 1. TIMELINE LOGIC
+    document.addEventListener('DOMContentLoaded', function() {
+        const timelineStart = new Date("{{ timeline_start_iso }}");
+        const existingBookings = JSON.parse('{{ existing_bookings_json|safe }}');
+        const hourWidth = 40;
+
+        const itemSelect = document.querySelector('[name="item"]');
+        const ghostBar = document.getElementById('ghost-bar');
+        const existingLayer = document.getElementById('existing-bookings-layer');
+        const labelLayer = document.getElementById('label-layer');
+        
+        const inputs = {
+            sd: document.querySelector('[name="start_date"]'),
+            st: document.querySelector('[name="start_time"]'),
+            ed: document.querySelector('[name="end_date"]'),
+            et: document.querySelector('[name="end_time"]')
+        };
+
+        // Create time labels (0-72 hours)
+        const labelContainer = document.getElementById('label-layer');
+        labelContainer.innerHTML = ''; // Clear existing
+
+        // Generate labels for 7 days (168 hours)
+        for (let i = 0; i < 168; i += 2) { 
+            const labelDate = new Date(timelineStart.getTime() + (i * 3600000));
+            
+            const lbl = document.createElement('div');
+            lbl.className = 'time-label';
+            lbl.style.left = (i * hourWidth) + 'px';
+            
+            // Format: "Mon 06:00" or "27. Jan 06:00"
+            const dateStr = labelDate.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' });
+            const timeStr = labelDate.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
+            
+            // Show date only at midnight, otherwise show time
+            if (labelDate.getHours() === 0) {
+                lbl.innerHTML = `<strong>${dateStr}</strong>`;
+                lbl.style.color = '#000';
+            } else {
+                lbl.innerText = timeStr;
+            }
+            
+            labelContainer.appendChild(lbl);
+        }
+
+        let currentItemBookings = []; // To store filtered bookings for collision check
+
+        function renderExisting() {
+            existingLayer.innerHTML = '';
+            const selectedItem = itemSelect.value;
+            if (!selectedItem) return;
+
+            currentItemBookings = existingBookings.filter(b => b.item_id == selectedItem);
+
+            currentItemBookings.forEach(b => {
+                const start = new Date(b.start);
+                const end = new Date(b.end);
+                const offset = (start - timelineStart) / 3600000;
+                const width = (end - start) / 3600000;
+
+                const div = document.createElement('div');
+                const isApproved = b.status === 'approved';
+                const statusClass = isApproved ? 'status-approved-preview' : 'status-pending-preview';
+                const statusText = isApproved ? 'Godkendt' : 'Afventer';
+                
+                div.className = `booking-box ${statusClass}`;
+                // Set height to 44px and top to 40px to align with the labels
+                div.style.cssText = `left: ${offset * hourWidth}px; width: ${width * hourWidth}px; top: 40px; height: 44px; position: absolute;`;
+                
+                // NEW STRUCTURE: Uses the 'booking-content' wrapper for vertical centering
+                div.innerHTML = `
+                    <div class="booking-content" style="pointer-events:none;">
+                        <div class="booking-label">${statusText}</div>
+                        <div style="font-size: 0.75rem;">${b.team}</div>
+                    </div>`;
+                    
+                div.title = `${b.team}: ${isApproved ? 'Godkendt' : 'Afventer'}`;
+                existingLayer.appendChild(div);
+            });
+            
+            updateGhostBar(); 
+        }
+
+        function updateGhostBar() {
+            if (inputs.sd.value && inputs.st.value && inputs.ed.value && inputs.et.value) {
+                const st = inputs.st.value.length === 5 ? inputs.st.value + ':00' : inputs.st.value;
+                const et = inputs.et.value.length === 5 ? inputs.et.value + ':00' : inputs.et.value;
+
+                const start = new Date(`${inputs.sd.value}T${st}`);
+                const end = new Date(`${inputs.ed.value}T${et}`);
+
+                if (end > start) {
+                    const offset = (start - timelineStart) / 3600000;
+                    const width = (end - start) / 3600000;
+
+                    ghostBar.style.display = 'block';
+                    ghostBar.style.left = (offset * hourWidth) + 'px';
+                    ghostBar.style.width = (width * hourWidth) + 'px';
+
+                    // COLLISION DETECTION
+                    let hasConflict = false;
+                    currentItemBookings.forEach(b => {
+                        const bStart = new Date(b.start);
+                        const bEnd = new Date(b.end);
+                        // Standard overlap formula: (StartA < EndB) and (EndA > StartB)
+                        if (start < bEnd && end > bStart) {
+                            hasConflict = true;
+                        }
+                    });
+
+                    ghostBar.style.height = '44px';
+                    ghostBar.style.top = '40px';
+
+                    if (hasConflict) {
+                        ghostBar.classList.add('conflict');
+                        ghostBar.innerHTML = `
+                            <div class="booking-content">
+                                <span>{% bs_icon "exclamation-triangle" %} KONFLIKT</span>
+                            </div>`;
+                    } else {
+                        ghostBar.classList.remove('conflict');
+                        ghostBar.innerHTML = `
+                            <div class="booking-content">
+                                <span>{% bs_icon "plus-circle" %} Din booking</span>
+                            </div>`;
+                    }
+                }
+            }
+        }
+
+        itemSelect.addEventListener('change', renderExisting);
+        Object.values(inputs).forEach(i => i.addEventListener('change', updateGhostBar));
+        
+        renderExisting();
+        updateGhostBar();
+    });
+
+    // 2. GOOGLE MAPS LOGIC
     (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await(a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
         key: "AIzaSyB_gCWQdMQ5CGrarZge8VqOeXzdeuoV-7Q", v: "weekly"
     });
 
     let map, marker;
-
     async function initMap() {
         const objectData = document.getElementById('object_json').textContent;
         const objectDict = objectData ? JSON.parse(objectData) : {};
-        
-        const defaultLat = 56.114951;
-        const defaultLng = 9.655592;
-
-        const initialLat = (objectDict.latitude && objectDict.latitude !== 'default_latitude') ? parseFloat(objectDict.latitude) : defaultLat;
-        const initialLng = (objectDict.longitude && objectDict.longitude !== 'default_longitude') ? parseFloat(objectDict.longitude) : defaultLng;
-
-        const position = { lat: initialLat, lng: initialLng };
+        const position = { 
+            lat: parseFloat(objectDict.latitude) || 56.114951, 
+            lng: parseFloat(objectDict.longitude) || 9.655592 
+        };
 
         const { Map } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-        map = new Map(document.getElementById("map"), {
-            zoom: 15,
-            center: position,
-            mapId: "DEMO_MAP_ID",
-        });
-
-        marker = new AdvancedMarkerElement({
-            map: map,
-            position: position,
-            gmpDraggable: true,
-            title: "Lokation",
-        });
-
-        // Sync initial position to inputs
-        document.getElementById('latitude').value = initialLat;
-        document.getElementById('longitude').value = initialLng;
+        map = new Map(document.getElementById("map"), { zoom: 15, center: position, mapId: "DEMO_MAP_ID" });
+        marker = new AdvancedMarkerElement({ map, position, gmpDraggable: true });
 
         map.addListener("click", (e) => {
             const lat = e.latLng.lat();
@@ -140,22 +405,11 @@
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
         });
-
-        // Optional: Update when marker is dragged
-        marker.addListener("dragend", (e) => {
-            const pos = marker.position;
-            document.getElementById('latitude').value = pos.lat;
-            document.getElementById('longitude').value = pos.lng;
+        marker.addListener("dragend", () => {
+            document.getElementById('latitude').value = marker.position.lat;
+            document.getElementById('longitude').value = marker.position.lng;
         });
     }
-
     initMap();
 </script>
-
-<style>
-    /* Styling to make time fields look cleaner */
-    input[type="time"]::-webkit-calendar-picker-indicator {
-        filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(130deg) brightness(95%) contrast(80%);
-    }
-</style>
 {% endblock %}

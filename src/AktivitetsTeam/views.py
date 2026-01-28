@@ -82,13 +82,61 @@ def gantt_chart_view(request):
     time_ranges = []  # Add your time ranges if needed
     return render(request, 'gantt_chart.html', {'tasks': tasks, 'time_ranges': time_ranges})
 
+import json
+import logging
+from datetime import datetime, timedelta, time
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+
+class TimelinePreviewMixin:
+    """Provides timeline data for booking forms."""
+    def get_timeline_context(self):
+        active_event = Event.objects.filter(is_active=True).first()
+        if not active_event:
+            return {}
+
+        # 1. Base timeline config
+        t_start = datetime.combine(active_event.start_date, time.min)
+        
+        # 2. Get all bookings for the event to check for conflicts
+        # We exclude the current object if we are in UpdateView
+        existing_qs = models.AktivitetsTeamBooking.objects.filter(
+            start_date__gte=active_event.start_date,
+            end_date__lte=active_event.end_date
+        )
+        
+        if hasattr(self, 'object') and self.object:
+            existing_qs = existing_qs.exclude(pk=self.object.pk)
+
+        # Prepare a list of simple dicts for JS
+        bookings_data = []
+        for b in existing_qs.select_related('item'):
+            bookings_data.append({
+                'item_id': b.item_id,
+                'start': datetime.combine(b.start_date, b.start_time).isoformat(),
+                'end': datetime.combine(b.end_date, b.end_time).isoformat(),
+                'team': b.team.name if b.team else "Booking",
+                'status': b.status.lower(),  # ADD THIS LINE
+            })
+
+        return {
+            'timeline_start_iso': t_start.isoformat(),
+            'existing_bookings_json': json.dumps(bookings_data, cls=DjangoJSONEncoder),
+            'hour_width': 30,
+        }
+    
+logger = logging.getLogger(__name__)
 
 class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
     model = models.AktivitetsTeamBooking
-    form_class = forms.AktivitetsTeamBookingForm
     context_object_name = 'object_list'
     template_name = 'AktivitetsTeam/AktivitetsTeamBooking_list.html'
-    paginate_by = 16  # Display 15 items per page
+    paginate_by = 16
+
+
 
     def get_queryset(self):
         user = self.request.user
@@ -105,33 +153,131 @@ class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
             'id', 'team_id', 'team_contact_id', 'start_date', 'start_time', 'end_date', 'end_time', 'item_id', 'status'
         ).order_by('start_date', 'start_time')
         
-        logger.info(f"Fetched {queryset.count()} bookings for user {user.id}")
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
+            context = super().get_context_data(**kwargs)
+            active_event = Event.objects.filter(is_active=True).first()
+            
+            if not active_event:
+                print("\n!!! DEBUG: No Active Event Found !!!\n")
+                return context
 
-        # Fetch the user's team membership once and reuse it
-        user_team_membership = user.teammembership_set.select_related('team').first()
-        context['user_team_membership'] = user_team_membership
+            # 1. Define the Timeline Start (00:00:00 of the first day)
+            timeline_start = datetime.combine(active_event.start_date, time.min)
+            timeline_end = datetime.combine(active_event.end_date, time.max)
+            
+            total_duration = timeline_end - timeline_start
+            total_hours = int(total_duration.total_seconds() / 3600) + 1
 
-        # Fetch the user's events once and reuse them
-        user_events = list(user.events.filter(is_active=True).values('name', 'deadline_aktivitetsteam'))
-        context['user_events'] = user_events
+            print(f"\n{'='*80}")
+            print(f"DEBUG TIMELINE FOR: {active_event}")
+            print(f"Timeline Start: {timeline_start}")
+            print(f"Timeline End:   {timeline_end}")
+            print(f"{'='*80}")
 
-        # Fetch the volunteer team memberships once and reuse them
-        volunteer_team_memberships = list(user.teammembership_set.select_related('team').values('team__name'))
-        context['volunteer_team_memberships'] = volunteer_team_memberships
+            # 3. Group Bookings by Item
+            items = models.AktivitetsTeamItem.objects.all()
+            item_rows = []
+            
+            all_bookings = list(self.get_queryset().filter(
+                start_date__gte=active_event.start_date,
+                end_date__lte=active_event.end_date
+            ).select_related('item', 'team'))
 
-        return context
+            print(f"Found {len(all_bookings)} bookings in event range.")
+
+            for item in items:
+                row_bookings = []
+                # Filter and sort bookings by start time to accurately calculate overlaps
+                item_bookings = [b for b in all_bookings if b.item_id == item.id]
+                item_bookings.sort(key=lambda x: datetime.combine(x.start_date, x.start_time))
+                
+                # This list tracks the end time of the last booking placed in each level/lane
+                levels_end_times = []
+                
+                if item_bookings:
+                    print(f"\nItem: {item.name}")
+                
+                for b in item_bookings:
+                    b_start = datetime.combine(b.start_date, b.start_time)
+                    b_end = datetime.combine(b.end_date, b.end_time)
+
+                    # COLLISION DETECTION: Find the first level where this booking fits
+                    level = 0
+                    assigned = False
+                    for idx, last_end_time in enumerate(levels_end_times):
+                        # If this booking starts after the last one in this level ended
+                        if b_start >= last_end_time:
+                            level = idx
+                            levels_end_times[idx] = b_end
+                            assigned = True
+                            break
+                    
+                    if not assigned:
+                        # No existing level fits, add a new lane
+                        level = len(levels_end_times)
+                        levels_end_times.append(b_end)
+
+                    # Math: Position and Width
+                    offset_hours = (b_start - timeline_start).total_seconds() / 3600
+                    duration_hours = (b_end - b_start).total_seconds() / 3600
+
+                    print(f"  - Booking {b.id} [{b.team}] | Level: {level}")
+                    print(f"    CALC -> Left: {offset_hours:.2f}h | Width: {duration_hours:.2f}h")
+
+                    row_bookings.append({
+                        'id': b.id,
+                        'team_name': b.team.name if b.team else "Booking",
+                        'left_val': "{:.2f}".format(offset_hours),
+                        'width_val': "{:.2f}".format(duration_hours),
+                        'level': level, # Used in CSS to set 'top'
+                        'status': b.status.lower() if b.status else 'pending',
+                        
+                        # Detailed Hover Information for Bootstrap Tooltip
+                        'hover_content': (
+                            f"<strong>{item.name}</strong><br>"
+                            f"<strong>Fra:</strong> {b.start_date.strftime('%d. %b')} kl {b.start_time.strftime('%H:%M')}<br>"
+                            f"<strong>Til:</strong> {b.end_date.strftime('%d. %b')} kl {b.end_time.strftime('%H:%M')}<br>"
+                            f"<strong>Team:</strong> {b.team.name if b.team else 'N/A'}<br>"
+                            f"<strong>Status:</strong> {b.status.capitalize()}<br>"
+                            f"<hr class='my-1'>"
+                            f"<em>{b.remarks or 'Ingen beskrivelse'}</em>"
+                        )
+                    })
+                
+                item_rows.append({
+                    'name': item.name,
+                    'bookings': row_bookings,
+                    'num_levels': len(levels_end_times) or 1  # Used in CSS to set row height
+                })
+
+            print(f"\n{'='*80}\n")
+
+            # Prepare header data
+            hours_list = []
+            for h in range(total_hours):
+                current_dt = timeline_start + timedelta(hours=h)
+                hours_list.append({
+                    'label': current_dt.strftime('%H'),
+                    'is_new_day': current_dt.hour == 0,
+                    'day_label': current_dt.strftime('%d. %b')
+                })
+
+            context.update({
+                'item_rows': item_rows,
+                'hours_list': hours_list,
+                'hour_width': 40,
+            })
+            return context
 
     def get(self, request, *args, **kwargs):
-        logger.info(f"Handling GET request for user {request.user.id} on page {self.request.GET.get('page', 1)}")
+        logger.info(f"Handling GET request for user {request.user.id}")
         return super().get(request, *args, **kwargs)
 
 
-class AktivitetsTeamBookingCreateView(LoginRequiredMixin, generic.CreateView):
+class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, generic.CreateView):
+
     model = models.AktivitetsTeamBooking
     form_class = forms.AktivitetsTeamBookingForm
 
@@ -156,6 +302,8 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, generic.CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Add timeline data
+        context.update(self.get_timeline_context())
         aktivitetsteam_items = models.AktivitetsTeamItem.objects.all()
             # Check if self.object exists
         if hasattr(self, 'object') and self.object is not None:
@@ -167,6 +315,8 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, generic.CreateView):
                 'longitude': '9.655592'  # Replace with your default longitude
             }
             context['aktivitetsteam_items'] = aktivitetsteam_items
+        if not hasattr(self, 'object') or self.object is None:
+            context['object_dict'] = {'latitude': '56.114951', 'longitude': '9.655592'}
         return context
     
     def form_valid(self, form):
@@ -181,33 +331,8 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, generic.CreateView):
             self.object.address = location.address
         self.object.save()
         return redirect('AktivitetsTeam_AktivitetsTeamBooking_detail', pk=self.object.pk)
-
-
-class AktivitetsTeamBookingDetailView(LoginRequiredMixin, generic.DetailView):
-    model = models.AktivitetsTeamBooking
-    form_class = forms.AktivitetsTeamBookingForm
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['object_dict'] = self.object.to_dict()
-        latitude = context['object_dict'].get('latitude')
-        longitude = context['object_dict'].get('longitude')
-        
-        if latitude:
-            context['object_dict']['latitude'] = str(latitude).replace(',', '.')
-        if longitude:
-            context['object_dict']['longitude'] = str(longitude).replace(',', '.')
-        
-        print(context['object_dict']['latitude'])
-        print(context['object_dict']['longitude'])
-        return context
-
-
-class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
+class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, TimelinePreviewMixin, generic.UpdateView):
     model = models.AktivitetsTeamBooking
     form_class = forms.AktivitetsTeamBookingForm
     pk_url_kwarg = "pk"
@@ -263,9 +388,37 @@ class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Add timeline data
+        context.update(self.get_timeline_context())
         instance = self.get_object()
-        context['object_dict'] = instance.to_dict()  # Ensure your model has a to_dict method
+        context['object_dict'] = instance.to_dict()
         return context
+
+
+
+class AktivitetsTeamBookingDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.AktivitetsTeamBooking
+    form_class = forms.AktivitetsTeamBookingForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_dict'] = self.object.to_dict()
+        latitude = context['object_dict'].get('latitude')
+        longitude = context['object_dict'].get('longitude')
+        
+        if latitude:
+            context['object_dict']['latitude'] = str(latitude).replace(',', '.')
+        if longitude:
+            context['object_dict']['longitude'] = str(longitude).replace(',', '.')
+        
+        print(context['object_dict']['latitude'])
+        print(context['object_dict']['longitude'])
+        return context
+
 
 
 class AktivitetsTeamBookingDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -275,3 +428,4 @@ class AktivitetsTeamBookingDeleteView(LoginRequiredMixin, generic.DeleteView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
+    

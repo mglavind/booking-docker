@@ -26,5 +26,6 @@ urlpatterns = (
     path("AktivitetsTeam/AktivitetsTeamBooking/delete/<int:pk>/", views.AktivitetsTeamBookingDeleteView.as_view(), name="AktivitetsTeam_AktivitetsTeamBooking_delete"),
     path("AktivitetsTeam/AktivitetsTeamBooking/approve/<int:pk>/", views.approve_booking, name="AktivitetsTeam_AktivitetsTeamBooking_approve"),
     path("AktivitetsTeam/AktivitetsTeamBooking/reject/<int:pk>/", views.reject_booking, name="AktivitetsTeam_AktivitetsTeamBooking_reject"),
+    
 
 )
