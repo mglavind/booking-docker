@@ -297,3 +297,17 @@ class TeamMealPlanForm(forms.ModelForm):
                 self.fields['team_contact'].queryset = models.Volunteer.objects.filter(teammembership__team=user_team)
                 # Set the default value of team_contact to the current user
                 self.fields['team_contact'].initial = user
+
+class BulkMealForm(forms.ModelForm):
+    class Meta:
+        model = TeamMealPlan
+        fields = ['meal_option', 'team_contact']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.meal_plan:
+            # Filter the dropdown to only show recipes for THIS specific meal plan
+            self.fields['meal_option'].queryset = MealOption.objects.filter(
+                meal_plan=self.instance.meal_plan
+            )
+            self.fields['meal_option'].empty_label = "Vælg et måltid..."

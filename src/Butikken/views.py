@@ -463,3 +463,31 @@ class RecipeDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.Recipe
     success_url = reverse_lazy("Butikken_Recipe_list")
 
+
+
+
+from django.forms import modelformset_factory
+from django.shortcuts import render, redirect
+from .models import TeamMealPlan
+from .forms import BulkMealForm
+
+def bulk_meal_update(request):
+    # Get all meal plans for the team (or all pending ones)
+    queryset = TeamMealPlan.objects.all().order_by('meal_plan__meal_date')
+    
+    # Create the FormSet class
+    MealFormSet = modelformset_factory(
+        TeamMealPlan, 
+        form=BulkMealForm, 
+        extra=0  # Don't show empty rows
+    )
+
+    if request.method == 'POST':
+        formset = MealFormSet(request.POST, queryset=queryset)
+        if formset.is_valid():
+            formset.save()
+            return redirect('Butikken_TeamMealPlan_list')
+    else:
+        formset = MealFormSet(queryset=queryset)
+
+    return render(request, 'butikken/meal_bulk_edit.html', {'formset': formset})

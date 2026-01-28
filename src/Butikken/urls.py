@@ -69,6 +69,7 @@ urlpatterns = (
     path("Butikken/MealBooking/delete/<int:pk>/", views.MealBookingDeleteView.as_view(), name="Butikken_MealBooking_delete"),
 
     path("Butikken/TeamMealPlan/", views.TeamMealPlanListView.as_view(), name="Butikken_TeamMealPlan_list"),
+    path("Butikken/TeamMealPlan/bulk-update/", views.bulk_meal_update, name="Butikken_TeamMealPlan_bulk_update"), # NEW
     path("Butikken/TeamMealPlan/create/", views.TeamMealPlanCreateView.as_view(), name="Butikken_TeamMealPlan_create"),
     path("Butikken/TeamMealPlan/detail/<int:pk>/", views.TeamMealPlanDetailView.as_view(), name="Butikken_TeamMealPlan_detail"),
     path("Butikken/TeamMealPlan/update/<int:pk>/", views.TeamMealPlanUpdateView.as_view(), name="Butikken_TeamMealPlan_update"),

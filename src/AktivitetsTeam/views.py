@@ -129,14 +129,11 @@ class TimelinePreviewMixin:
         }
     
 logger = logging.getLogger(__name__)
-
 class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
     model = models.AktivitetsTeamBooking
     context_object_name = 'object_list'
     template_name = 'AktivitetsTeam/AktivitetsTeamBooking_list.html'
     paginate_by = 16
-
-
 
     def get_queryset(self):
         user = self.request.user
@@ -150,130 +147,108 @@ class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
         queryset = queryset.select_related(
             'team', 'team_contact', 'item'
         ).only(
-            'id', 'team_id', 'team_contact_id', 'start_date', 'start_time', 'end_date', 'end_time', 'item_id', 'status'
+            'id', 'team_id', 'team_contact_id', 'start_date', 'start_time', 
+            'end_date', 'end_time', 'item_id', 'status', 'remarks'
         ).order_by('start_date', 'start_time')
         
         return queryset
 
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            active_event = Event.objects.filter(is_active=True).first()
-            
-            if not active_event:
-                print("\n!!! DEBUG: No Active Event Found !!!\n")
-                return context
-
-            # 1. Define the Timeline Start (00:00:00 of the first day)
-            timeline_start = datetime.combine(active_event.start_date, time.min)
-            timeline_end = datetime.combine(active_event.end_date, time.max)
-            
-            total_duration = timeline_end - timeline_start
-            total_hours = int(total_duration.total_seconds() / 3600) + 1
-
-            print(f"\n{'='*80}")
-            print(f"DEBUG TIMELINE FOR: {active_event}")
-            print(f"Timeline Start: {timeline_start}")
-            print(f"Timeline End:   {timeline_end}")
-            print(f"{'='*80}")
-
-            # 3. Group Bookings by Item
-            items = models.AktivitetsTeamItem.objects.all()
-            item_rows = []
-            
-            all_bookings = list(self.get_queryset().filter(
-                start_date__gte=active_event.start_date,
-                end_date__lte=active_event.end_date
-            ).select_related('item', 'team'))
-
-            print(f"Found {len(all_bookings)} bookings in event range.")
-
-            for item in items:
-                row_bookings = []
-                # Filter and sort bookings by start time to accurately calculate overlaps
-                item_bookings = [b for b in all_bookings if b.item_id == item.id]
-                item_bookings.sort(key=lambda x: datetime.combine(x.start_date, x.start_time))
-                
-                # This list tracks the end time of the last booking placed in each level/lane
-                levels_end_times = []
-                
-                if item_bookings:
-                    print(f"\nItem: {item.name}")
-                
-                for b in item_bookings:
-                    b_start = datetime.combine(b.start_date, b.start_time)
-                    b_end = datetime.combine(b.end_date, b.end_time)
-
-                    # COLLISION DETECTION: Find the first level where this booking fits
-                    level = 0
-                    assigned = False
-                    for idx, last_end_time in enumerate(levels_end_times):
-                        # If this booking starts after the last one in this level ended
-                        if b_start >= last_end_time:
-                            level = idx
-                            levels_end_times[idx] = b_end
-                            assigned = True
-                            break
-                    
-                    if not assigned:
-                        # No existing level fits, add a new lane
-                        level = len(levels_end_times)
-                        levels_end_times.append(b_end)
-
-                    # Math: Position and Width
-                    offset_hours = (b_start - timeline_start).total_seconds() / 3600
-                    duration_hours = (b_end - b_start).total_seconds() / 3600
-
-                    print(f"  - Booking {b.id} [{b.team}] | Level: {level}")
-                    print(f"    CALC -> Left: {offset_hours:.2f}h | Width: {duration_hours:.2f}h")
-
-                    row_bookings.append({
-                        'id': b.id,
-                        'team_name': b.team.name if b.team else "Booking",
-                        'left_val': "{:.2f}".format(offset_hours),
-                        'width_val': "{:.2f}".format(duration_hours),
-                        'level': level, # Used in CSS to set 'top'
-                        'status': b.status.lower() if b.status else 'pending',
-                        
-                        # Detailed Hover Information for Bootstrap Tooltip
-                        'hover_content': (
-                            f"<strong>{item.name}</strong><br>"
-                            f"<strong>Fra:</strong> {b.start_date.strftime('%d. %b')} kl {b.start_time.strftime('%H:%M')}<br>"
-                            f"<strong>Til:</strong> {b.end_date.strftime('%d. %b')} kl {b.end_time.strftime('%H:%M')}<br>"
-                            f"<strong>Team:</strong> {b.team.name if b.team else 'N/A'}<br>"
-                            f"<strong>Status:</strong> {b.status.capitalize()}<br>"
-                            f"<hr class='my-1'>"
-                            f"<em>{b.remarks or 'Ingen beskrivelse'}</em>"
-                        )
-                    })
-                
-                item_rows.append({
-                    'name': item.name,
-                    'bookings': row_bookings,
-                    'num_levels': len(levels_end_times) or 1  # Used in CSS to set row height
-                })
-
-            print(f"\n{'='*80}\n")
-
-            # Prepare header data
-            hours_list = []
-            for h in range(total_hours):
-                current_dt = timeline_start + timedelta(hours=h)
-                hours_list.append({
-                    'label': current_dt.strftime('%H'),
-                    'is_new_day': current_dt.hour == 0,
-                    'day_label': current_dt.strftime('%d. %b')
-                })
-
-            context.update({
-                'item_rows': item_rows,
-                'hours_list': hours_list,
-                'hour_width': 40,
-            })
+        context = super().get_context_data(**kwargs)
+        active_event = Event.objects.filter(is_active=True).first()
+        
+        if not active_event:
             return context
 
+        # 1. Timeline configuration
+        timeline_start = datetime.combine(active_event.start_date, time.min)
+        timeline_end = datetime.combine(active_event.end_date, time.max)
+        total_duration = timeline_end - timeline_start
+        total_hours = int(total_duration.total_seconds() / 3600) + 1
+
+        # 2. Get resources and bookings
+        items = models.AktivitetsTeamItem.objects.all()
+        item_rows = []
+        all_bookings = list(self.get_queryset().filter(
+            start_date__gte=active_event.start_date,
+            end_date__lte=active_event.end_date
+        ).select_related('item', 'team'))
+
+        for item in items:
+            row_bookings = []
+            item_bookings = [b for b in all_bookings if b.item_id == item.id]
+            item_bookings.sort(key=lambda x: datetime.combine(x.start_date, x.start_time))
+            
+            levels_end_times = []
+            
+            for b in item_bookings:
+                b_start = datetime.combine(b.start_date, b.start_time)
+                b_end = datetime.combine(b.end_date, b.end_time)
+
+                # Collision detection for stacking lanes
+                level = 0
+                assigned = False
+                for idx, last_end_time in enumerate(levels_end_times):
+                    if b_start >= last_end_time:
+                        level = idx
+                        levels_end_times[idx] = b_end
+                        assigned = True
+                        break
+                
+                if not assigned:
+                    level = len(levels_end_times)
+                    levels_end_times.append(b_end)
+
+                offset_hours = (b_start - timeline_start).total_seconds() / 3600
+                duration_hours = (b_end - b_start).total_seconds() / 3600
+
+                row_bookings.append({
+                    'id': b.id,
+                    'team_name': b.team.name if b.team else "Booking",
+                    'left_val': "{:.2f}".format(offset_hours),
+                    'width_val': "{:.2f}".format(duration_hours),
+                    'level': level,
+                    'status': b.status.lower() if b.status else 'pending',
+                    'hover_content': (
+                        f"<strong>{item.name}</strong><br>"
+                        f"<strong>Fra:</strong> {b.start_date.strftime('%d. %b')} kl {b.start_time.strftime('%H:%M')}<br>"
+                        f"<strong>Til:</strong> {b.end_date.strftime('%d. %b')} kl {b.end_time.strftime('%H:%M')}<br>"
+                        f"<strong>Team:</strong> {b.team.name if b.team else 'N/A'}<br>"
+                        f"<strong>Status:</strong> {b.status.capitalize()}<br>"
+                        f"<hr class='my-1'>"
+                        f"<em>{b.remarks or 'Ingen beskrivelse'}</em>"
+                    )
+                })
+            
+            item_rows.append({
+                'id': item.id,  # CRITICAL for JS currentItemId
+                'name': item.name,
+                'bookings': row_bookings,
+                'num_levels': len(levels_end_times) or 1
+            })
+
+        # 3. Header data
+        hours_list = []
+        for h in range(total_hours):
+            current_dt = timeline_start + timedelta(hours=h)
+            hours_list.append({
+                'label': current_dt.strftime('%H'),
+                'is_new_day': current_dt.hour == 0,
+                'day_label': current_dt, # Passed as object for |date:"D. j" filter
+            })
+
+        context.update({
+            'item_rows': item_rows,
+            'hours_list': hours_list,
+            'hour_width': 40,
+            # CRITICAL: JavaScript needs a standard ISO string to avoid 'Invalid Date'
+            'timeline_start_iso': timeline_start.strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        return context
+
     def get(self, request, *args, **kwargs):
-        logger.info(f"Handling GET request for user {request.user.id}")
         return super().get(request, *args, **kwargs)
+    
 
 
 class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, generic.CreateView):
@@ -298,6 +273,23 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, 
             item = get_object_or_404(models.AktivitetsTeamItem, id=self.item_id)
             kwargs['initial'] = {'item': item}
         return kwargs
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        
+        # 1. Handle drag-and-drop parameters from the timeline
+        if 'item' in self.request.GET:
+            initial['item'] = self.request.GET.get('item')
+            initial['start_date'] = self.request.GET.get('start_date')
+            initial['start_time'] = self.request.GET.get('start_time')
+            initial['end_date'] = self.request.GET.get('end_date')
+            initial['end_time'] = self.request.GET.get('end_time')
+        
+        # 2. Support for item_id passed via URL path (kwargs)
+        elif self.item_id:
+            initial['item'] = self.item_id
+            
+        return initial
 
     
     def get_context_data(self, **kwargs):
@@ -331,6 +323,8 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, 
             self.object.address = location.address
         self.object.save()
         return redirect('AktivitetsTeam_AktivitetsTeamBooking_detail', pk=self.object.pk)
+    
+
     
 class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, TimelinePreviewMixin, generic.UpdateView):
     model = models.AktivitetsTeamBooking

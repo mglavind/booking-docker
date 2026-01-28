@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
+{% block extra_css %}
+<style>
+    /* Remove the default Bootstrap form margin inside table cells */
+    .table .mb-3 {
+        margin-bottom: 0 !important;
+    }
+    /* Ensure the select and input fields don't stretch the row height awkwardly */
+    .table select, .table input {
+        margin: 0;
+    }
+    .card-custom { border-radius: 12px; border: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="display-6">Måltider</h2>
+        <p class="text-muted">Vælg menuen for hele perioden og gem samlet.</p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        
+        <div class="table-responsive card card-custom p-0 shadow-sm">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Dag</th>
+                        <th>Måltid</th>
+                        <th style="width: 30%;">Dit Valg</th>
+                        <th>Kontaktperson</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                        <tr>
+                            {{ form.id }} 
+                            
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ form.instance.meal_plan.meal_date|date:"l"|capfirst }}</div>
+                                <div class="small text-muted">{{ form.instance.meal_plan.meal_date|date:"j. F" }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ form.instance.meal_plan.name }}</span>
+                            </td>
+                            
+                            <td>
+                                {% bootstrap_field form.meal_option show_label=False wrapper_class="" %}
+                            </td>
+                            
+                            <td>
+                                {% bootstrap_field form.team_contact show_label=False wrapper_class="" %}
+                            </td>
+                            
+                            <td class="text-center">
+                                {% if form.instance.status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3">Afventer</span>
+                                {% elif form.instance.status == 'Approved' %}
+                                    <span class="badge bg-success rounded-pill px-3">Godkendt</span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill px-3">Afvist</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <a href="{% url 'Butikken_TeamMealPlan_list' %}" class="btn btn-link text-muted">
+                {% bs_icon "arrow-left" %} Annuller
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
+                {% bs_icon "check-lg" %} Gem alle ændringer
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

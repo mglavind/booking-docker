@@ -1,76 +1,96 @@
-
 {% extends "base.html" %}
 {% block content %}
 {% load bootstrap_icons %}
 
-<br>
-<h2>Måltider</h2>
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+        <div>
+            <h2 class="display-6 mb-0">Måltidsbestillinger</h2>
+            <p class="text-muted">Oversigt over teamets valgte forplejning</p>
+        </div>
+        <div>
+            <a href="{% url 'Butikken_TeamMealPlan_bulk_update' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                {% bs_icon 'pencil-square' %} Rediger alle måltider
+            </a>
+        </div>
+    </div>
 
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-    <li class="breadcrumb-item current">Måltids bestillinger</li>
-  
-  </ol>
-</nav>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item active">Måltider</li>
+        </ol>
+    </nav>
 
+    <div class="card card-custom shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Dato</th>
+                        <th>Måltid</th>
+                        <th>Valgt Menu / Pakke</th>
+                        <th>Team</th>
+                        <th>Kontaktperson</th>
+                        <th class="text-end pe-4">Status & Handling</th>
+                    </tr>
+                </thead>
+                <tbody id="TeamMealPlan-list">
+                    {% for item in TeamMealPlans %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ item.meal_plan.meal_date|date:"l \d. j. F" }}</div>
+                        </td>
+                        <td>
+                            <div>{{ item.meal_plan.name }}</div>
+                        </td>
+                        <td>
+                            {% if item.meal_option %}
+                                <span>{{ item.meal_option }}</span>
+                            {% else %}
+                                <span>Intet valgt endnu</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.team }}</td>
+                        <td>
+                            <span>{% bs_icon 'person' %} {{ item.team_contact }}</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                {% if item.status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark px-3">Afventer</span>
+                                {% elif item.status == 'Approved' %}
+                                    <span class="badge bg-success px-3">Godkendt</span>
+                                {% elif item.status == 'Rejected' %}
+                                    <span class="badge bg-danger px-3">Afvist</span>
+                                {% endif %}
 
-<div class="table-responsive">
-<table class="table table-hover">
-  <thead>
-      <tr>
-        <th>Måltid</th>
-        <th>Dato</th>
-        <th>Valgt pakke</th>
-        <th>Team</th>
-        <th>Kontaktperson</th>
-        <th></th>
-
-      </tr>
-  </thead>
-  <tbody id="TeamMealPlan-list">
-
-        {% for TeamMealPlan in TeamMealPlans %}
-          <tr>
-            <td class="align-middle">{{ TeamMealPlan.meal_plan }}</td>
-            <td class="align-middle">{{ TeamMealPlan.meal_plan.meal_date }}</td> <!-- Accessing date from MealPlan -->
-            <td class="align-middle">{{ TeamMealPlan.meal_option }}</td>
-            <td class="align-middle">{{ TeamMealPlan.team }}</td>
-            <td class="align-middle">{{ TeamMealPlan.team_contact }}</td>
-            <td class="align-middle">
-                {% if TeamMealPlan.status == 'Pending' %}
-                    <span class="badge bg-warning text-dark">
-                    Afventer
-                    </span>
-                {% elif TeamMealPlan.status == 'Approved' %}
-                    <span class="badge bg-success">
-                    Godkendt
-                    </span>
-                {% elif TeamMealPlan.status == 'Rejected' %}
-                    <span class="badge bg-danger">
-                    Afvist
-                    </span>
-                {% endif %}
-                <a href="{% url 'Butikken_TeamMealPlan_update' TeamMealPlan.pk %}" class="btn btn-outline-warning btn-sm">
-                    {% bs_icon 'pencil' %}  
-                </a>
-                {% if user.is_staff %}
-                  <a href="{% url 'Butikken_TeamMealPlan_delete' TeamMealPlan.pk %}" class="btn btn-outline-danger btn-sm">
-                      {% bs_icon 'trash' %}  
-                  </a>
-                {% endif %}
-        
-            </td class="align-middle">
-        
-        </tr>
-        {% endfor %}
-
-    
-  </tbody>
-</table>
+                                <div class="btn-group">
+                                    <a href="{% url 'Butikken_TeamMealPlan_update' item.pk %}" class="btn btn-outline-secondary btn-sm" title="Rediger denne">
+                                        {% bs_icon 'pencil' %}
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            {% bs_icon 'calendar-x' extra_classes="display-4 d-block mb-2" %}
+                            Ingen måltidsplaner fundet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-
-
+<style>
+    .card-custom { border-radius: 12px; overflow: hidden; }
+    .table thead th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .fw-500 { font-weight: 500; }
+</style>
 
 {% endblock %}

@@ -2,49 +2,83 @@
 {% load static %}
 {% load bootstrap_icons %}
 
-{% block content %}
+{% block title %}Aktivitetsplan{% endblock %}
 
-
-
+{% block extra_css %}
 <style>
+    /* Full-width UX Fixes */
+    .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    .timeline-wrapper::-webkit-scrollbar {
+        height: 10px;
+    }
+    .timeline-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 10px;
+        border: 2px solid #fff;
+    }
+
     .timeline-wrapper {
         display: flex;
         overflow-x: auto;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1rem;
     }
+
     .timeline-sidebar {
         width: 180px;
         flex-shrink: 0;
         background: #f8f9fa;
-        border-right: 2px solid #ddd;
+        border-right: 2px solid #dee2e6;
         position: sticky;
         left: 0;
         z-index: 10;
     }
+
     .timeline-content {
         position: relative;
         background: white;
     }
+
     .timeline-header {
         display: flex;
-        border-bottom: 2px solid #ddd;
-        height: 50px;
+        border-bottom: 2px solid #dee2e6;
+        height: 60px;
         background: #f8f9fa;
     }
+
     .hour-col {
         flex-shrink: 0;
-        width: var(--hour-width); /* Uses the variable */
+        width: var(--hour-width);
         border-right: 1px solid #eee;
         text-align: center;
         font-size: 11px;
-        padding-top: 15px;
-        color: #999;
+        padding-top: 25px;
+        color: #6c757d;
+        position: relative;
     }
+
     .hour-col.new-day {
-        border-left: 2px solid #000;
-        color: #000;
+        border-left: 2px solid #212529;
+        color: #212529;
         font-weight: bold;
+        background-color: #f1f3f5;
+    }
+
+    .day-label-text {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #212529;
+        display: block;
+        margin-left: 5px;
+        margin-top: -11px;
     }
 
     .timeline-row {
@@ -53,108 +87,241 @@
         min-height: 50px;
         border-bottom: 1px solid #eee;
         width: fit-content;
-        background-image: linear-gradient(to right, #f0f0f0 1px, transparent 1px);
+        background-image: linear-gradient(to right, #f8f9fa 1px, transparent 1px);
         background-size: var(--hour-width) 100%;
     }
+
     .row-item-name {
         height: calc(var(--num-levels, 1) * 50px); 
         min-height: 50px;
-        padding: 0 15px; /* Removed top/bottom padding to allow flex centering */
+        padding: 0 15px;
         font-weight: 600;
         border-bottom: 1px solid #eee;
         display: flex;
         align-items: center;
         background: #f8f9fa;
-        transition: height 0.3s ease; /* Smooth transition if levels change */
+        font-size: 0.85rem;
+        color: #495057;
     }
 
-    /* THE BOOKING BOX */
     .booking-box {
         position: absolute;
-        /* This moves the box down 50px per level */
-        top: calc(var(--level, 0) * 50px + 10px); 
-        height: 36px; /* Fixed height for the bar itself */
-        border-radius: 4px;
+        top: calc(var(--level, 0) * 50px + 8px); 
+        height: 34px; 
+        border-radius: 6px;
         z-index: 5;
-        padding: 6px 10px;
+        padding: 5px 10px;
         color: white;
-        font-size: 12px;
-        font-weight: 500;
+        font-size: 11px;
+        font-weight: 600;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.12);
         cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0,0,0,0.1);
     }
-    .tooltip-inner {
-    max-width: 250px;
-    text-align: left; /* Better for reading descriptions */
-    padding: 10px;
+
+    .booking-box:hover {
+        filter: brightness(1.05);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        z-index: 20;
     }
-    .status-approved { background: #198754; }
-    .status-pending { background: #ffc107; color: #000; }
+
+    .status-approved { background-color: #198754; }
+    .status-pending { background-color: #f59e0b; color: #212529; }
+    .status-new { background-color: var(--bs-primary) !important; }
+    .status-rejected { background-color: #dc3545; }
+
+    .legend-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .container-fluid { padding-left: 1rem; padding-right: 1rem; }
+        .timeline-sidebar { width: 130px; }
+        .row-item-name { font-size: 0.75rem; }
+    }
 </style>
+{% endblock %}
+
+{% block content %}
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-5">Aktivitetsplan</h1>
-    </div>
     
-
-
-<div class="timeline-wrapper" style="--hour-width: {{ hour_width }}px;">
-    <div class="timeline-sidebar">
-        <div style="height: 50px; border-bottom: 2px solid #ddd;"></div>
-        {% for row in item_rows %}
-            <div class="row-item-name" style="--num-levels: {{ row.num_levels }};">
-                {{ row.name }}
-            </div>
-        {% endfor %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+        <div>
+            <h1 class="display-5 mb-0">Booking Oversigt</h1>
+            <p class="text-muted mb-0">For alle aktivitetsteam bookinger</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                {% bs_icon "plus-lg" %} Ny booking
+            </a>
+        </div>
     </div>
 
-    <div class="timeline-content">
-        <div class="timeline-header">
-            {% for h in hours_list %}
-                <div class="hour-col {% if h.is_new_day %}new-day{% endif %}">
-                    {% if h.is_new_day %}{{ h.day_label }}{% else %}{{ h.label }}{% endif %}
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}">AktivitetsTeam</a></li>
+            <li class="breadcrumb-item active">Booking oversigt</li>
+        </ol>
+    </nav>
+
+    <div class="timeline-wrapper" style="--hour-width: {{ hour_width }}px;">
+        <div class="timeline-sidebar">
+            <div style="height: 60px; border-bottom: 2px solid #dee2e6; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                <span class="small fw-bold text-uppercase text-muted">Aktivitet</span>
+            </div>
+            {% for row in item_rows %}
+                <div class="row-item-name" style="--num-levels: {{ row.num_levels }};">
+                    {{ row.name }}
                 </div>
             {% endfor %}
         </div>
 
-        {% for row in item_rows %}
-            <div class="timeline-row" style="--num-levels: {{ row.num_levels }};">
-                <div class="d-flex h-100">
-                    {% for h in hours_list %}
-                        <div style="width:{{ hour_width }}px; border-right:1px solid #f0f0f0;"></div>
-                    {% endfor %}
-                </div>
-
-                {% for b in row.bookings %}
-                    <div class="booking-box status-{{ b.status }}" 
-                        style="--level: {{ b.level }}; 
-                                left: calc({{ b.left_val }} * var(--hour-width)); 
-                                width: calc({{ b.width_val }} * var(--hour-width));"
-                        data-bs-toggle="tooltip" 
-                        data-bs-html="true" 
-                        title="{{ b.hover_content|safe }}"
-                        onclick="location.href='{% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' pk=b.id %}'">
-                        
-                        <span class="px-2">{{ b.team_name }}</span>
+        <div class="timeline-content">
+            <div class="timeline-header">
+                {% for h in hours_list %}
+                    <div class="hour-col {% if h.is_new_day %}new-day{% endif %}">
+                        {% if h.is_new_day %}
+                            <span class="day-label-text">{{ h.day_label|date:"D. j" }}</span>
+                        {% else %}
+                            {{ h.label }}
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
-        {% endfor %}
+
+            {% for row in item_rows %}
+                <div class="timeline-row" data-item-id="{{ row.id }}" style="--num-levels: {{ row.num_levels }};">
+                    <div class="d-flex h-100">
+                        {% for h in hours_list %}
+                            <div style="width:{{ hour_width }}px; border-right:1px solid #f1f3f5;"></div>
+                        {% endfor %}
+                    </div>
+
+                    {% for b in row.bookings %}
+                        <div class="booking-box status-{{ b.status|lower }}" 
+                            style="--level: {{ b.level }}; 
+                                    left: calc({{ b.left_val }} * var(--hour-width)); 
+                                    width: calc({{ b.width_val }} * var(--hour-width));"
+                            data-bs-toggle="tooltip" 
+                            data-bs-html="true" 
+                            title="<strong>{{ b.team_name }}</strong><br>{{ b.hover_content|safe }}"
+                            onclick="location.href='{% url 'AktivitetsTeam_AktivitetsTeamBooking_detail' pk=b.id %}'">
+                            
+                            <span class="px-1 text-truncate d-block">
+                                {% if b.status == 'approved' %}{% bs_icon "check-circle-fill" size="10" %}{% endif %}
+                                {{ b.team_name }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-4 mt-2 px-2 small text-muted">
+        <div class="d-flex align-items-center">
+            <span class="legend-dot bg-success"></span> Godkendt
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="legend-dot bg-warning"></span> Afventer
+        </div>
+        <div class="ms-md-auto">
+            {% bs_icon "info-circle" %} <em>Tip: Klik og træk i tidsplanen for at oprette en ny booking.</em>
+        </div>
     </div>
 </div>
-</div>
-
-
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el) });
+
+    // 2. Constants & Initial Data
+    const hourWidth = parseInt("{{ hour_width }}") || 40;
+    const timelineStartStr = "{{ timeline_start_iso|safe }}";
+    const timelineStart = new Date(timelineStartStr);
+
+    if (isNaN(timelineStart.getTime())) {
+        console.error("Timeline Start Date is invalid. Check Django context.");
+    }
+
+    const rows = document.querySelectorAll('.timeline-row');
+    let isDrawing = false;
+    let startX = 0;
+    let ghostBox = null;
+    let currentItemId = null;
+
+    // Helper to format date as YYYY-MM-DD and HH:MM
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const formatTime = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    rows.forEach(row => {
+        row.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.booking-box')) return;
+            
+            isDrawing = true;
+            currentItemId = this.dataset.itemId;
+            
+            const rect = this.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+
+            ghostBox = document.createElement('div');
+            ghostBox.className = 'booking-box status-new shadow-lg';
+            ghostBox.style.cssText = `opacity:0.7; left:${startX}px; width:0px; pointer-events:none; z-index:1000;`;
+            ghostBox.innerHTML = '<span class="px-1 small">Ny booking...</span>';
+            
+            this.appendChild(ghostBox);
+        });
     });
+
+    window.addEventListener('mousemove', function(e) {
+        if (!isDrawing || !ghostBox) return;
+        const rect = ghostBox.parentElement.getBoundingClientRect();
+        let currentX = e.clientX - rect.left;
+        let width = currentX - startX;
+        if (width > 0) {
+            ghostBox.style.width = width + 'px';
+        }
+    });
+
+    window.addEventListener('mouseup', function() {
+        if (!isDrawing || !ghostBox) return;
+        isDrawing = false;
+
+        const finalWidth = parseInt(ghostBox.style.width);
+
+        if (finalWidth > 15 && !isNaN(timelineStart.getTime()) && currentItemId) {
+            const startHours = startX / hourWidth;
+            const durationHours = finalWidth / hourWidth;
+
+            let sObj = new Date(timelineStart.getTime() + (startHours * 3600000));
+            let eObj = new Date(sObj.getTime() + (durationHours * 3600000));
+
+            // Rounding to nearest 30 mins
+            const round = (d) => new Date(Math.round(d.getTime() / (1000 * 60 * 30)) * (1000 * 60 * 30));
+            sObj = round(sObj);
+            eObj = round(eObj);
+
+            const baseUrl = "{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}";
+            const finalUrl = `${baseUrl}?item=${currentItemId}&start_date=${formatDate(sObj)}&start_time=${formatTime(sObj)}&end_date=${formatDate(eObj)}&end_time=${formatTime(eObj)}`;
+            
+            window.location.href = finalUrl;
+        } else {
+            ghostBox.remove();
+        }
+    });
+});
 </script>
 {% endblock %}
