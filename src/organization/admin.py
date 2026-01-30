@@ -1,39 +1,38 @@
-from typing import List
 import csv
+import time
 from datetime import date
+from typing import List
 
-from django.contrib import admin, messages
-from django.utils.translation import ngettext
-from django.contrib.auth.models import Group
-from django.urls import path
-from django.shortcuts import render
-from django.http import HttpResponse
 from django import forms
-from django.urls.resolvers import URLPattern
+from django.contrib import admin, messages
+from django.contrib.auth.models import Group
 from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.urls import path
+from django.urls.resolvers import URLPattern
 from django.utils.html import strip_tags
+from django.utils.translation import ngettext
 
-# Unfold Imports
-from unfold.admin import ModelAdmin, TabularInline
-from unfold.decorators import action
-from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
-
-# Import-Export Integration
+from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
-from import_export import resources
-
-# Simple History
-from simple_history.admin import SimpleHistoryAdmin
-
-# Local Models
-from .models import Volunteer, Team, TeamMembership, TeamEventMembership, EventMembership, Event, Key
-from . import models
-
-from datetime import date
-from import_export import resources, fields
 from import_export.widgets import ManyToManyWidget
-from .models import Volunteer, Team, Event
+from simple_history.admin import SimpleHistoryAdmin
+from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
+from unfold.decorators import action
+
+from . import models
+from .models import (
+    Event,
+    EventMembership,
+    Key,
+    Team,
+    TeamEventMembership,
+    TeamMembership,
+    Volunteer,
+)
 
 # 1. Widget specifically for creating Teams on the fly
 class CreateTeamIfNotFoundWidget(ManyToManyWidget):
@@ -149,7 +148,6 @@ class KeyAdmin(SimpleHistoryAdmin, ModelAdmin):
     readonly_fields = ["last_updated"]
 
 # --- Volunteer Admin (Unfold + Import/Export + Simple History) ---
-
 @admin.register(Volunteer)
 class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
     # Resource for django-import-export
@@ -201,15 +199,56 @@ class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
             volunteer.groups.add(group)
         self.message_user(request, "Group assignment complete.")
 
-    @action(description="Send 'Hjælp til at komme igang' email")
+    
+
+
+
+    @admin.action(description="Send 'Hjælp til at komme igang' email")
     def send_email_action(self, request, queryset):
-        email_template = "organization/reset_password_guide_email.html"
-        for volunteer in queryset:
-            subject = "Velkommen til Seniorkursus Slettens booking system"
-            context = {'volunteer': volunteer, 'first_team': volunteer.teams.first()}
-            message = render_to_string(email_template, context)
-            send_mail(subject, strip_tags(message), 'seniorkursussletten@gmail.com', [volunteer.email], html_message=message)
-        self.message_user(request, f"Emails sent to {queryset.count()} volunteers.")
+        MAX_EMAILS = 50  # Safety cap for Gmail
+        count = queryset.count()
+
+        if count > MAX_EMAILS:
+            self.message_user(
+                request, 
+                f"FEJL: Du har valgt {count} personer. Max grænsen er {MAX_EMAILS} for at undgå at blive blokeret af Gmail.", 
+                level=messages.ERROR
+            )
+            return
+
+        sent_count = 0
+        last_volunteer = None
+
+        try:
+            for volunteer in queryset:
+                subject = "Velkommen til Seniorkursus Slettens booking system"
+                email_template = "organization/reset_password_guide_email.html"
+                context = {'volunteer': volunteer, 'first_team': volunteer.teams.first()}
+                message = render_to_string(email_template, context)
+
+                # send_mail returns 1 on success
+                success = send_mail(
+                    subject, 
+                    strip_tags(message), 
+                    'slettenbooking@gmail.com', 
+                    [volunteer.email], 
+                    html_message=message
+                )
+                
+                if success:
+                    sent_count += 1
+                    last_volunteer = volunteer
+                    time.sleep(1) # 1 second pause between emails (Safe for Gmail)
+
+            self.message_user(request, f"Succes: {sent_count} emails blev sendt.")
+
+        except Exception as e:
+            # If Google blocks us halfway, we tell the user exactly where we stopped
+            self.message_user(
+                request, 
+                f"PROCES AFBRUDT: Kun {sent_count} blev sendt. Sidste succesfulde var {last_volunteer}. Fejl: {str(e)}", 
+                level=messages.ERROR
+            )
 
     @action(description="Deactivate selected volunteers")
     def deactivate_volunteers(self, request, queryset):
