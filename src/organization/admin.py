@@ -52,21 +52,82 @@ class CreateTeamIfNotFoundWidget(ManyToManyWidget):
             ids.append(obj.pk)
             
         return self.model.objects.filter(pk__in=ids)
+class AppendOrCreateWidget(ManyToManyWidget):
+    def clean(self, value, row=None, **kwargs):
+        if not value:
+            return self.model.objects.none()
+        
+        names = [n.strip() for n in str(value).split(",") if n.strip()]
+        incoming_ids = []
+        
+        for name in names:
+            if self.model == Team:
+                # Create Team with short_name = name if it doesn't exist
+                obj, created = self.model.objects.get_or_create(
+                    name=name,
+                    defaults={'short_name': name[:30]} 
+                )
+            elif self.model == Event:
+                # Create Event with dummy dates to satisfy model constraints
+                today = date.today()
+                obj, created = self.model.objects.get_or_create(
+                    name=name,
+                    defaults={
+                        'start_date': today,
+                        'end_date': today,
+                        'deadline_sjak': today,
+                        'deadline_teknik': today,
+                        'deadline_mad': today,
+                        'deadline_aktivitetsteam': today,
+                        'deadline_foto': today,
+                        'deadline_lokaler': today,
+                        'deadline_sos': today,
+                    }
+                )
+            else:
+                obj, created = self.model.objects.get_or_create(**{self.field: name})
+            
+            incoming_ids.append(obj.pk)
+        
+        # APPEND LOGIC: Fetch current memberships from the Volunteer instance
+        username = row.get('username')
+        existing_ids = []
+        if username:
+            try:
+                volunteer = Volunteer.objects.get(username=username)
+                # Look up the attribute name we stored in the resource init
+                attr_name = getattr(self, 'volunteer_attr_name', None)
+                if attr_name:
+                    existing_ids = list(getattr(volunteer, attr_name).values_list('pk', flat=True))
+            except Volunteer.DoesNotExist:
+                pass
+        
+        final_ids = set(incoming_ids + existing_ids)
+        return self.model.objects.filter(pk__in=final_ids)
+    
 
-# 2. Updated Resource
 class VolunteerResource(resources.ModelResource):
-    # Standard widget: Links to existing events, ignores/skips if not found
     events = fields.Field(
         column_name='events',
         attribute='events',
-        widget=ManyToManyWidget(Event, field='name')
+        widget=AppendOrCreateWidget(Event, field='name')
     )
-    # Custom widget: Links to existing teams OR creates them
+    
     teams = fields.Field(
         column_name='teams',
         attribute='teams',
-        widget=CreateTeamIfNotFoundWidget(Team, field='name')
+        widget=AppendOrCreateWidget(Team, field='name')
     )
+
+    def __init__(self, *args, **kwargs):
+        # Pass all arguments (like 'form') up to the base Resource class
+        super().__init__(*args, **kwargs)
+        
+        # Now set your custom widget properties
+        if 'events' in self.fields:
+            self.fields['events'].widget.volunteer_attr_name = 'events'
+        if 'teams' in self.fields:
+            self.fields['teams'].widget.volunteer_attr_name = 'teams'
 
     class Meta:
         model = Volunteer
@@ -75,9 +136,8 @@ class VolunteerResource(resources.ModelResource):
             'first_name', 'last_name', 'username', 'email', 
             'phone', 'is_active', 'events', 'teams'
         )
-        export_order = fields
+        skip_unchanged = True    
 
-# --- Inlines (Unfold style) ---
 
 class TeamEventMembershipInline(TabularInline):
     model = TeamEventMembership
@@ -163,6 +223,7 @@ class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
         "first_name",
         "last_name",
         "username",
+        "email",
         "display_events",
         "display_teams",
         "is_active",
@@ -170,9 +231,12 @@ class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
     ]
     
     search_fields = ['first_name', 'last_name', 'email', 'username']
-    list_filter = ['is_active', 'events', 'teams', 'last_updated']
+    list_filter = ['is_active',
+                    'events',
+                    'teams',
+                    'last_updated']
     readonly_fields = ["created", "last_updated"]
-    ordering = ['first_name', 'last_name']
+    ordering = ['first_name', 'last_name', 'username', 'events', 'teams']
 
     actions = [
         "send_email_action",

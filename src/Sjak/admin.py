@@ -18,11 +18,37 @@ from .models import SjakItem, SjakBooking, SjakItemType, SjakItemLocation
 from .forms import SjakBookingForm, SjakItemForm
 
 # --- Resources ---
+from import_export import fields, resources
+from import_export.widgets import ForeignKeyWidget
 
+class CreateIfNotFoundWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, **kwargs):
+        if not value:
+            return None
+        # This will find "Værktøj" or create it if it doesn't exist
+        obj, created = self.model.objects.get_or_create(
+            **{self.field: value}
+        )
+        return obj
+    
 class SjakItemResource(resources.ModelResource):
+    item_type = fields.Field(
+        column_name='item_type',
+        attribute='item_type',
+        widget=CreateIfNotFoundWidget(SjakItemType, 'name')
+    )
+    location = fields.Field(
+        column_name='location',
+        attribute='location',
+        widget=CreateIfNotFoundWidget(SjakItemLocation, 'name')
+    )
+
     class Meta:
         model = SjakItem
-        fields = ('name', 'item_type__name', 'location__name', 'quantity_lager')
+        # 'name' is used to determine if we update an existing item or create a new one
+        import_id_fields = ('name',) 
+        fields = ('name', 'item_type', 'location', 'quantity_lager', 'description')
+        export_order = fields
 
 # --- Base Admin ---
 
@@ -62,7 +88,7 @@ class SjakBaseAdmin(ModelAdmin, ImportExportModelAdmin):
 @admin.register(SjakItem)
 class SjakItemAdmin(SjakBaseAdmin):
     resource_class = SjakItemResource
-    list_display = ["display_image", "name", "display_item_type", "display_location", "quantity_lager", "last_updated"]
+    list_display = ["name", "display_item_type", "display_location", "display_image", "quantity_lager", "last_updated"]
     list_filter = ["item_type", "location"]
     search_fields = ["name", "description"]
 
