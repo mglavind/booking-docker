@@ -8,6 +8,9 @@
     
     --bs-secondary: #FF733C;
     --bs-secondary-rgb: 255, 115, 60;
+
+    --bs-tertiary: #4678C8;
+    --bs-tertiary-rgb: 70, 120, 200;
     
     --bs-success: #7DC855;
     --bs-success-rgb: 125, 200, 85;
@@ -17,6 +20,12 @@
     
     --bs-warning: #FFB91E;
     --bs-warning-rgb: 255, 185, 30;
+
+    --bs-tertiary: #4678C8;
+    --bs-tertiary-rgb: 70, 120, 200;
+
+    --bs-grey: #7D878C;
+    --bs-grey-rgb: 125, 135, 140;
 
     /* Typography */
     --bs-body-font-family: 'Work Sans', sans-serif;
@@ -67,6 +76,32 @@ body {
     --bs-btn-hover-bg: #e6a519; /* Darkened Warning */
     --bs-btn-hover-border-color: #e6a519;
 }
+
+/* --- TERTIARY & GREY BUTTONS --- */
+
+.btn-tertiary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--bs-tertiary);
+    --bs-btn-border-color: var(--bs-tertiary);
+    --bs-btn-hover-bg: #3563a8; /* Darkened Tertiary */
+    --bs-btn-hover-border-color: #3563a8;
+}
+
+.btn-grey {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--bs-grey);
+    --bs-btn-border-color: var(--bs-grey);
+    --bs-btn-hover-bg: #636c70; /* Darkened Grey */
+    --bs-btn-hover-border-color: #636c70;
+}
+
+/* Background Utilities */
+.bg-tertiary { background-color: var(--bs-tertiary) !important; }
+.bg-grey { background-color: var(--bs-grey) !important; }
+
+/* Text Utilities */
+.text-tertiary { color: var(--bs-tertiary) !important; }
+.text-grey { color: var(--bs-grey) !important; }
 
 /* Fix for Outline Buttons */
 .btn-outline-primary {

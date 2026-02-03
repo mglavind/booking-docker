@@ -1,85 +1,133 @@
-{% extends 'base.html' %}
-{% load bootstrap_icons %}
-
+{% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="display-4">Hej {{ user.first_name }}!</h1>
-            <p class="lead">
-                Velkommen til bookingsystemet. Her kan du administrere dit teams bestillinger.
-            </p>
-        </div>
+<div class="container py-4">
+    <div class="mb-5 text-center text-md-start">
+        <h1 class="h2 fw-bold text-primary mb-1">Velkommen, {{ user.first_name|default:"Spejder" }}</h1>
+        <p class="text-muted">Hvad skal du booke i dag?</p>
     </div>
 
     <div class="row g-4">
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded me-3 text-primary">
-                            {% bs_icon 'cart' size='1.5em' %}
-                        </div>
-                        <h5 class="card-title mb-0">Butikken</h5>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-secondary text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-shop fs-1"></bs_icon>
                     </div>
-                    <p class="card-text text-muted">Bestil varer, udstyr og materialer til dit team.</p>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'Butikken_ButikkenItem_list' %}" class="btn btn-outline-primary">Se varekatalog</a>
-                        <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="btn btn-primary">Mine bestillinger</a>
-                    </div>
+                    <h4 class="fw-bold text-dark">Butikken</h4>
+                    <p class="text-muted small mb-0">Mad og måltider</p>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0 bg-light">
-                <div class="card-body">
-                    <h5 class="card-title">Hjælp & Support</h5>
-                    <p class="card-text small">Har du problemer med en bestilling? Kontakt din områdeleder eller brug support-knappen nederst til højre.</p>
-                    <a href="{% url 'organization_Volunteer_list' %}" class="btn btn-link px-0">Find kontaktinfo</a>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-universal-access fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Aktiviteter</h4>
+                    <p class="text-muted small mb-0">Klatring, kanoer og aktiviteter</p>
                 </div>
-            </div>
+            </a>
         </div>
-    </div>
 
-    <div class="row mt-5">
-        <div class="col">
-            <h3>Dit overblik</h3>
-            <div class="table-responsive bg-white rounded shadow-sm">
-                <table class="table align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Sidst opdateret</th>
-                            <th class="text-end">Handling</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if recent_bookings %}
-                            {% for booking in recent_bookings %}
-                            <tr>
-                                <td>{{ booking.item.name }}</td>
-                                <td>
-                                    <span class="badge rounded-pill {% if booking.status == 'Approved' %}bg-success{% elif booking.status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                        {{ booking.status }}
-                                    </span>
-                                </td>
-                                <td>{{ booking.last_updated|date:"d/m H:i" }}</td>
-                                <td class="text-end">
-                                    <a href="{% url 'Butikken_ButikkenBooking_detail' booking.pk %}" class="btn btn-sm btn-light">Se detaljer</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center py-4 text-muted">Du har ingen aktive bestillinger i øjeblikket.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'Sjak_SjakBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-warning text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-tools fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Sjak</h4>
+                    <p class="text-muted small mb-0">Værktøj, materialer og Sjak sager</p>
+                </div>
+            </a>
         </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'SOS_SOSBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-danger text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-heart-pulse fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">SOS</h4>
+                    <p class="text-muted small mb-0">Førstehjælp, tryghed og assistance.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'Teknik_TeknikBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-tertiary text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-cpu fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Teknik</h4>
+                    <p class="text-muted small mb-0">IT, lyd og lys.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'Foto_FotoBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-grey text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-camera fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Foto</h4>
+                    <p class="text-muted small mb-0">Foto og video</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'organization_VolunteerAppointment_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-success text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-balloon-heart fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Legeaftaler</h4>
+                    <p class="text-muted small mb-0">Skal vi lege?</p>
+                </div>
+            </a>
+        </div>
+
     </div>
 </div>
+
+<style>
+    /* Ensure the grid looks balanced */
+    .dashboard-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 1.25rem !important;
+        background-color: #fff;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08) !important;
+    }
+
+    .icon-box {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Color branding for the Info/Dark cards since they aren't in your :root variables */
+    .bg-info { background-color: #0dcaf0 !important; }
+    .bg-dark { background-color: #212529 !important; }
+
+    @media (max-width: 576px) {
+        .icon-box {
+            width: 60px;
+            height: 60px;
+        }
+        .icon-box bs_icon {
+            font-size: 1.5rem !important;
+        }
+    }
+</style>
 {% endblock %}
