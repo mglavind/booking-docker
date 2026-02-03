@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.admin.models import LogEntry, ADDITION
 from django.contrib.contenttypes.models import ContentType
@@ -10,12 +10,13 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, PasswordResetView
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.views import generic
 from django.urls import reverse_lazy
 from .forms import RegisterUserForm
 from . import models
 from . import forms
-from django.db.models import F
+from django.db.models import F, Q
 from .models import Team, TeamMembership
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
@@ -282,3 +283,55 @@ class KeyUpdateView(LoginRequiredMixin, generic.UpdateView):
 class KeyDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.Key
     success_url = reverse_lazy("organization_Key_list")
+
+
+
+class VolunteerAppointmentListView(LoginRequiredMixin, generic.ListView):
+    model = models.VolunteerAppointment
+    context_object_name = 'appointments'
+
+class VolunteerAppointmentCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.VolunteerAppointment
+    form_class = forms.AppointmentForm
+    success_url = reverse_lazy("organization_VolunteerAppointment_list")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.requester = self.request.user
+        form.instance.status = 'pending'
+        return super().form_valid(form)
+
+class VolunteerAppointmentDetailView(LoginRequiredMixin, generic.DetailView):
+    model = models.VolunteerAppointment
+
+class VolunteerAppointmentUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = models.VolunteerAppointment
+    form_class = forms.AppointmentForm
+    # Fallback redirect if get_absolute_url isn't used
+    success_url = reverse_lazy("organization_VolunteerAppointment_list") 
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class VolunteerAppointmentDeleteView(LoginRequiredMixin, generic.DeleteView):
+    model = models.VolunteerAppointment
+    success_url = reverse_lazy("organization_VolunteerAppointment_list")
+
+
+
+
+@login_required
+@require_POST
+def appointment_status_update(request, pk, new_status):
+    # Only the receiver should be able to trigger this
+    appointment = get_object_or_404(models.VolunteerAppointment, pk=pk, receiver=request.user)
+    if new_status in ['accepted', 'rejected', 'pending']:
+        appointment.status = new_status
+        appointment.save()
+    return redirect('organization_VolunteerAppointment_detail', pk=pk)

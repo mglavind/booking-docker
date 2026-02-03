@@ -74,4 +74,11 @@ urlpatterns = [
      path("organization/Key/detail/<int:pk>/", views.KeyDetailView.as_view(), name="organization_Key_detail"),
      path("organization/Key/update/<int:pk>/", views.KeyUpdateView.as_view(), name="organization_Key_update"),
      path("organization/Key/delete/<int:pk>/", views.KeyDeleteView.as_view(), name="organization_Key_delete"),
+
+     path('appointment/', views.VolunteerAppointmentListView.as_view(), name='organization_VolunteerAppointment_list'),
+     path('appointment/create/', views.VolunteerAppointmentCreateView.as_view(), name='organization_VolunteerAppointment_create'),
+     path('appointment/<int:pk>/', views.VolunteerAppointmentDetailView.as_view(), name='organization_VolunteerAppointment_detail'),
+     path('appointment/<int:pk>/update/', views.VolunteerAppointmentUpdateView.as_view(), name='organization_VolunteerAppointment_update'),
+     path('appointment/<int:pk>/delete/', views.VolunteerAppointmentDeleteView.as_view(), name='organization_VolunteerAppointment_delete'),
+     path('appointment/<int:pk>/status/<str:new_status>/', views.appointment_status_update, name='appointment_status_update'),
 ]

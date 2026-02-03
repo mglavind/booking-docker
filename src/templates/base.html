@@ -132,6 +132,18 @@
                                 <li><a class="dropdown-item" href="{% url 'Teknik_TeknikBooking_create' %}">Ny Teknik bestilling</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Legeaftaler
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'organization_VolunteerAppointment_list' %}">Mine legeaftaler</a></li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><a class="dropdown-item" href="{% url 'organization_VolunteerAppointment_create' %}">Ny legeaftale</a></li>
+                            </ul>
+                        </li>
                     {% endif %}
                 </ul>
 

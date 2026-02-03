@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'organization_VolunteerAppointment_list' %}">Legeaftaler</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Detaljer</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <div>
+            <h1 class="display-5">Legeaftale Detaljer</h1>
+            <p class="text-muted">Oprettet {{ object.created|date:"d. M Y" }}</p>
+        </div>
+        <div>
+            {% if object.status == 'accepted' %}
+                <span class="badge bg-success fs-5 px-4 py-2">{% bs_icon "check-circle" %} {{ object.get_status_display }}</span>
+            {% elif object.status == 'rejected' %}
+                <span class="badge bg-danger fs-5 px-4 py-2">{% bs_icon "x-circle" %} {{ object.get_status_display }}</span>
+            {% else %}
+                <span class="badge bg-warning text-dark fs-5 px-4 py-2">{% bs_icon "clock" %} {{ object.get_status_display }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            
+            <h5 class="border-bottom pb-2 mb-3 mt-3">Deltagere</h5>
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted small d-block">Afsender</label>
+                    <span class="fs-5">{% bs_icon "person" %} {{ object.requester.get_full_name|default:object.requester.username }}</span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted small d-block">Modtager</label>
+                    <span class="fs-5">{% bs_icon "person-fill" %} {{ object.receiver.get_full_name|default:object.receiver.username }}</span>
+                </div>
+            </div>
+
+            <h5 class="border-bottom pb-2 mb-3 mt-3">Tidspunkt</h5>
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted small d-block">Start</label>
+                    <span class="fs-5">{{ object.start_date|date:"l d. M Y" }} kl. {{ object.start_time|time:"H:i" }}</span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted small d-block">Slut</label>
+                    <span class="fs-5">{{ object.end_date|date:"l d. M Y" }} kl. {{ object.end_time|time:"H:i" }}</span>
+                </div>
+            </div>
+
+            <h5 class="border-bottom pb-2 mb-3 mt-3">Aftalens indhold</h5>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="p-3 border rounded bg-light">
+                        {{ object.description|linebreaks|default:"Ingen beskrivelse angivet." }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-5">
+                {% if user == object.requester %}
+                    <a href="{{ object.get_update_url }}" class="btn btn-warning btn-lg px-4">
+                        {% bs_icon "pencil" %} Rediger
+                    </a>
+                    <a href="{% url 'organization_VolunteerAppointment_delete' object.pk %}" class="btn btn-danger btn-lg px-4">
+                        {% bs_icon "trash" %} Slet
+                    </a>
+                {% endif %}
+
+                {% if user == object.receiver %}
+                    <form action="{% url 'appointment_status_update' object.pk 'accepted' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-lg px-4">{% bs_icon "check-lg" %} Ja</button>
+                    </form>
+                    <form action="{% url 'appointment_status_update' object.pk 'rejected' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg px-4">{% bs_icon "x-lg" %} Nej</button>
+                    </form>
+                    <form action="{% url 'appointment_status_update' object.pk 'pending' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-lg px-4">Måske</button>
+                    </form>
+                {% endif %}
+
+                <a href="{% url 'organization_VolunteerAppointment_list' %}" class="btn btn-outline-secondary btn-lg px-4 ms-md-auto">
+                    {% bs_icon "arrow-left" %} Tilbage
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

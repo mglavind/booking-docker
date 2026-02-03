@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'organization_VolunteerAppointment_list' %}">Legeaftaler</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if object %}Rediger{% else %}Ny{% endif %} legeaftale</li>
+        </ol>
+    </nav>
+
+    <div class="mb-4 mt-2">
+        <h1 class="display-5">{% if object %}Rediger{% else %}Ny{% endif %} legeaftale</h1>
+        {% if user.is_authenticated and user.events.first %}
+        <div class="alert alert-light" role="alert">
+            {% bs_icon "info-circle" %} Du opretter en aftale for eventet: 
+            <span class="badge bg-primary">{{ user.events.first.name }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form id="form" role="form" method="post" class="needs-validation">
+                {% csrf_token %}
+                {% bootstrap_form_errors form type='non_fields' %}
+
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Information</h5>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {% bootstrap_field form.receiver %}
+                        <div class="form-text">Vælg den person, du gerne vil lave en aftale med.</div>
+                    </div>
+                </div>
+
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Tidspunkt</h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        {% bootstrap_field form.start_date %}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        {% bootstrap_field form.start_time %}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        {% bootstrap_field form.end_date %}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        {% bootstrap_field form.end_time %}
+                    </div>
+                </div>
+
+                <h5 class="border-bottom pb-2 mb-3 mt-3">Aftalens indhold</h5>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        {% bootstrap_field form.description %}
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-5 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        {% bs_icon "send" %} {% if object %}Opdater{% else %}Send{% endif %} anmodning
+                    </button>
+                    <a href="{% url 'organization_VolunteerAppointment_list' %}" class="btn btn-outline-secondary btn-lg">Annuller</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
