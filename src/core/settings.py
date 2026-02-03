@@ -120,6 +120,7 @@ INSTALLED_APPS = [
     'Teknik',
     'SOS',
     'Foto',
+    #"debug_toolbar",
 
 ]
 
@@ -132,28 +133,34 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    #"debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
-
+INTERNAL_IPS = [
+    # ...
+    #"127.0.0.1",
+    # ...
+]
 # -----------------------------
 # Static files
 # -----------------------------
 
 STATIC_URL = 'static/'
 
+# This is where your custom CSS/JS lives (Source)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 if ENVIRONMENT in ['staging', 'production']:
-    # The absolute path where collectstatic will dump files
-    # This MUST match the path in your docker-compose web volume
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+    # Change 'static/' to 'staticfiles/' to avoid the overlap error
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/') 
 else:
     # Local development settings
     STATIC_ROOT = BASE_DIR / 'staticfiles'
-    MEDIA_ROOT = BASE_DIR / 'media'
-
-# These should be outside the if/else unless they change per env
-
-ROOT_URLCONF = 'core.urls'
+    
+MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
-
+ROOT_URLCONF = 'core.urls'  # <--- THIS IS WHAT WAS MISSING
 
 CONSTANCE_REDIS_CONNECTION = {
     'host': os.environ.get('REDIS_HOST', 'redis'),
