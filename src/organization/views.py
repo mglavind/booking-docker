@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.admin.models import LogEntry, ADDITION
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
@@ -226,23 +226,19 @@ class VolunteerDetailView(LoginRequiredMixin, generic.DetailView):
     success_url = reverse_lazy("organization_Volunteer_detail")
 
 
-class VolunteerUpdateView(LoginRequiredMixin, generic.UpdateView):
+
+class VolunteerUpdateView(UserPassesTestMixin, generic.UpdateView):
     model = models.Volunteer
-    form_class = forms.VolunteerForm
-    pk_url_kwarg = "pk"
-    
+    fields = ['first_name', 'last_name', 'phone']
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(pk=self.request.user.pk)  # Filter by logged-in user's pk
-
-    def dispatch(self, request, *args, **kwargs):
+    def test_func(self):
+        # Only allow the user to edit their own profile
         obj = self.get_object()
+        return self.request.user == obj
 
-        if obj != self.request.user:  # Make sure the user is editing their own profile
-            raise Http404
-
-        return super().dispatch(request, *args, **kwargs)
+    def handle_no_permission(self):
+        # Redirect them back to their own profile if they try to edit someone else's
+        return redirect('volunteer_detail', pk=self.request.user.pk)
 
 
 class VolunteerDeleteView(generic.DeleteView):

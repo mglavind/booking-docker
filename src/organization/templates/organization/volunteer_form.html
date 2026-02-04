@@ -1,62 +1,116 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="text-center mb-5">
+                <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                    <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
+                </div>
+                <h2 class="fw-bold mb-1">{{ object.get_full_name }}</h2>
+                <p class="text-muted small">Medlem siden {{ object.created|date:"M Y" }}</p>
+            </div>
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.errors }}
-    
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <label class="col-form-label" for="first_name">Fornavn:</label>
-        </div>
-        <div class="col-md-10">
-            <input class="form-control" id="first_name" type="text" name="first_name" value="{{ object.first_name }}">
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <label class="col-form-label" for="last_name">Efternavn:</label>
-        </div>
-        <div class="col-md-10">
-            <input class="form-control" id="last_name" type="text" name="last_name" value="{{ object.last_name }}">
-        </div>
-    </div>
-    
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <label class="col-form-label" for="email">E-mail:</label>
-        </div>
-        <div class="col-md-10">
-            <input class="form-control" id="email" type="text" name="email" value="{{ object.email }}" readonly>
-        </div>
-    </div>
-    
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <label class="col-form-label" for="phone">Telefon:</label>
-        </div>
-        <div class="col-md-10">
-            <input class="form-control" id="phone" type="text" name="phone" value="{{ object.phone }}">
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <label class="col-form-label" for="username">Brugernavn:</label>
-        </div>
-        <div class="col-md-10">
-            <input class="form-control" id="username" type="text" name="username" value="{{ object.username }}" readonly>
-        </div>
-    </div>
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger border-0 small rounded-3 mb-4">
+                            <bs_icon class="bi bi-exclamation-circle me-2"></bs_icon> Der opstod en fejl. Tjek venligst felterne nedenfor.
+                        </div>
+                    {% endif %}
 
-    <div class="row mb-3 mt-3">
-        <div class="col-md-2"></div>
-        <div class="col-md-10">
-            <input type="submit" value="Gem" class="btn btn-primary">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-secondary-subtle p-2 rounded-3 me-3 text-secondary">
+                                <bs_icon class="bi bi-person-badge fs-4"></bs_icon>
+                            </div>
+                            <h5 class="fw-bold mb-0">Personlige oplysninger</h5>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">Fornavn</label>
+                                <input type="text" name="first_name" class="form-control bg-light border-0 py-2" value="{{ object.first_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">Efternavn</label>
+                                <input type="text" name="last_name" class="form-control bg-light border-0 py-2" value="{{ object.last_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">E-mail (Kan ikke ændres)</label>
+                                <input type="email" class="form-control bg-white border-0 py-2 text-muted" value="{{ object.email }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">Telefon</label>
+                                <input type="text" name="phone" class="form-control bg-light border-0 py-2" value="{{ object.phone }}">
+                            </div>
+                        </div>
+
+                        <hr class="my-5 opacity-10">
+
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary-subtle p-2 rounded-3 me-3 text-primary">
+                                <bs_icon class="bi bi-shield-lock fs-4"></bs_icon>
+                            </div>
+                            <h5 class="fw-bold mb-0">Sikkerhed</h5>
+                        </div>
+                        
+                        <div class="bg-light p-4 rounded-4 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="fw-bold mb-0">Kodeord</p>
+                                    <p class="text-muted small mb-0">Skift dit kodeord jævnligt for at beskytte din konto.</p>
+                                </div>
+                                <a href="{% url 'password_change' %}" class="btn btn-white btn-sm shadow-sm border-0 px-3 rounded-pill text-primary fw-bold">
+                                    Skift kodeord
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <a href="{% url 'index' %}" class="text-muted text-decoration-none small">
+                                <bs_icon class="bi bi-arrow-left me-1"></bs_icon> Afbryd
+                            </a>
+                            <button type="submit" class="btn btn-secondary px-5 py-2 rounded-pill fw-bold shadow-sm">
+                                Gem ændringer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 text-center">
+                <p class="text-muted small mb-2 text-uppercase fw-bold ls-wide">Dine Teams</p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    {% for membership in object.teammembership_set.all %}
+                        <span class="badge bg-white border text-dark fw-normal rounded-pill px-3 py-2 shadow-xs">
+                            {{ membership.team.name }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
     </div>
-</form>
+</div>
 
+<style>
+    /* Styling to match your branding */
+    .bg-secondary-subtle { background-color: rgba(255, 115, 60, 0.1) !important; }
+    .bg-primary-subtle { background-color: rgba(0, 50, 85, 0.1) !important; }
+    .btn-white { background-color: #fff; }
+    .ls-wide { letter-spacing: 0.05em; }
+    
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 115, 60, 0.15);
+        border: 1px solid var(--bs-secondary) !important;
+    }
+</style>
 {% endblock %}
-
-

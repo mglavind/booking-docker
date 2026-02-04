@@ -1,51 +1,59 @@
 {% extends "base.html" %}
 {% load static %}
-{% load django_bootstrap5 %}
-{% load bootstrap_icons %}
+{# Note: Using your custom 'bs_icon' tag as requested #}
 
 {% block content %}
 <div class="container py-4">
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'organization_Volunteer_list' %}">Frivillige</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ object.get_full_name }}</li>
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'organization_Volunteer_list' %}" class="text-decoration-none">Frivillige</a></li>
+            <li class="breadcrumb-item active">{{ object.get_full_name }}</li>
         </ol>
     </nav>
 
     <div class="row justify-content-center mt-4">
         <div class="col-lg-7">
-            <div class="card shadow-sm border-0" style="border-radius: 15px;">
-                <div class="card-header bg-white border-0 pt-5 pb-4 text-center">
-                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-5 pb-4 text-center position-relative">
+                    
+                    {% if request.user == object %}
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <a href="{% url 'organization_Volunteer_update' object.pk %}" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                            <bs_icon class="bi bi-gear-fill text-muted"></bs_icon>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
                         <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
                     </div>
-                    <h2 class="fw-bold mb-1">{{ object.first_name }} {{ object.last_name }}</h2>
-                    <span class="badge bg-light text-secondary border">Frivillig Profil</span>
+                    <h2 class="fw-bold mb-1">{{ object.get_full_name }}</h2>
+                    <span class="badge bg-light text-secondary border rounded-pill px-3">Frivillig Profil</span>
                 </div>
 
                 <div class="card-body px-4 pb-4">
                     <div class="d-flex gap-2 justify-content-center mb-4">
-                        <a href="tel:{{ object.phone }}" class="btn btn-outline-primary px-4 rounded-pill">
-                            {% bs_icon "telephone" %} Ring op
+                        <a href="tel:{{ object.phone }}" class="btn btn-outline-primary px-4 rounded-pill fw-bold">
+                            <bs_icon class="bi bi-telephone me-1"></bs_icon> Ring op
                         </a>
-                        <a href="mailto:{{ object.email }}" class="btn btn-outline-primary px-4 rounded-pill">
-                            {% bs_icon "envelope" %} Send mail
+                        <a href="mailto:{{ object.email }}" class="btn btn-outline-primary px-4 rounded-pill fw-bold">
+                            <bs_icon class="bi bi-envelope me-1"></bs_icon> Send mail
                         </a>
                     </div>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Kontaktdetaljer</h6>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3 ls-1">Kontaktdetaljer</h6>
                             <div class="d-flex align-items-center mb-3">
-                                <div class="bg-light p-2 rounded me-3">{% bs_icon "envelope" %}</div>
+                                <div class="bg-light p-2 rounded-3 me-3"><bs_icon class="bi bi-envelope text-primary"></bs_icon></div>
                                 <div>
                                     <small class="text-muted d-block">E-mail</small>
                                     <span class="fw-medium">{{ object.email }}</span>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center mb-3">
-                                <div class="bg-light p-2 rounded me-3">{% bs_icon "telephone" %}</div>
+                                <div class="bg-light p-2 rounded-3 me-3"><bs_icon class="bi bi-telephone text-primary"></bs_icon></div>
                                 <div>
                                     <small class="text-muted d-block">Telefon</small>
                                     <span class="fw-medium">{{ object.phone }}</span>
@@ -54,10 +62,10 @@
                         </div>
 
                         <div class="col-md-6">
-                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Team tilknytning</h6>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3 ls-1">Team tilknytning</h6>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for team_membership in object.teammembership_set.all %}
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-3">
                                         {{ team_membership.team.name }}
                                     </span>
                                 {% empty %}
@@ -67,28 +75,37 @@
                         </div>
                     </div>
 
-                    <hr class="my-4">
+                    <hr class="my-4 opacity-10">
 
                     <div class="row g-2 text-center">
-                        <div class="col-6">
+                        <div class="col-6 border-end">
                             <p class="text-muted small mb-0">Medlem siden</p>
-                            <p class="fw-medium small">{{ object.created|date:"d. F Y" }}</p>
+                            <p class="fw-medium small mb-0">{{ object.created|date:"d. F Y" }}</p>
                         </div>
                         <div class="col-6">
                             <p class="text-muted small mb-0">Sidst opdateret</p>
-                            <p class="fw-medium small">{{ object.last_updated|date:"d. F Y" }}</p>
+                            <p class="fw-medium small mb-0">{{ object.last_updated|date:"d. F Y" }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer bg-light border-0 py-3 text-center">
-                    <small class="text-muted">{% bs_icon "lock" %} Denne profil kan kun redigeres af administratorer</small>
+                <div class="card-footer bg-light border-0 py-4 text-center">
+                    {% if request.user == object %}
+                        <a href="{% url 'organization_Volunteer_update' object.pk %}" class="btn btn-secondary px-5 rounded-pill fw-bold shadow-sm">
+                            <bs_icon class="bi bi-pencil-square me-2"></bs_icon> Rediger mine oplysninger
+                        </a>
+                    {% else %}
+                        <small class="text-muted">
+                            <bs_icon class="bi bi-lock-fill me-1"></bs_icon> 
+                            Denne profil kan kun redigeres af {{ object.first_name }} eller en administrator
+                        </small>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="text-center mt-4">
-                <a href="{% url 'organization_Volunteer_list' %}" class="btn btn-link text-decoration-none text-muted">
-                    {% bs_icon "arrow-left" %} Tilbage til listen
+                <a href="{% url 'organization_Volunteer_list' %}" class="text-muted text-decoration-none small">
+                    <bs_icon class="bi bi-arrow-left me-1"></bs_icon> Tilbage til listen
                 </a>
             </div>
         </div>
@@ -96,8 +113,8 @@
 </div>
 
 <style>
-    .bg-primary-subtle { background-color: #cfe2ff !important; }
-    .text-primary { color: #084298 !important; }
+    .ls-1 { letter-spacing: 0.05rem; }
+    .bg-primary-subtle { background-color: rgba(0, 50, 85, 0.1) !important; }
     .avatar-placeholder { font-size: 2.5rem; text-transform: uppercase; }
 </style>
 {% endblock %}

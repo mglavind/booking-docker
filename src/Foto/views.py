@@ -32,9 +32,9 @@ class FotoItemCreateView(LoginRequiredMixin,generic.CreateView):
         event = Event.objects.filter(is_active=True).first()
         self.item_id = kwargs.get('item_id')
 
-        if event and event.deadline_aktivitetsteam < timezone.now().date():
+        if event and event.deadline_foto < timezone.now().date():
             messages.error(request, 'Deadline for booking overskredet')
-            return redirect('AktivitetsTeam_AktivitetsTeamBooking_list')  # replace with the name of your list view url
+            return redirect('Foto_FotoBooking_list')  # replace with the name of your list view url
         return super().dispatch(request, *args, **kwargs)
 
 

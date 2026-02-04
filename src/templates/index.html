@@ -7,6 +7,17 @@
     </div>
 
     <div class="row g-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'organization_Volunteer_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
+                        <bs_icon class="bi bi-person-lines-fill fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Kontaktbog</h4>
+                    <p class="text-muted small mb-0">Who Ya Gonna Call?</p>
+                </div>
+            </a>
+        </div>
         
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
@@ -23,7 +34,7 @@
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-success text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-universal-access fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Aktiviteter</h4>
@@ -83,7 +94,7 @@
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'organization_VolunteerAppointment_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-success text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-danger text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-balloon-heart fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Legeaftaler</h4>
@@ -91,6 +102,8 @@
                 </div>
             </a>
         </div>
+
+
 
     </div>
 </div>
