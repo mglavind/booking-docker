@@ -30,7 +30,7 @@ class SjakBookingForm(forms.ModelForm):
         model = models.SjakBooking
         fields = [
             "start", "start_time", "end", "end_time",
-            "team_contact", "item", "team", "remarks", "quantity",
+            "team_contact", "item", "team", "remarks", "quantity",'image'
         ]
         labels = {
             "item": "Vælg en ting",       # Changed from "Sjak ting"

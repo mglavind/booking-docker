@@ -3,6 +3,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponse
 from django.urls import path
 from django.shortcuts import render
+from django.utils.safestring import mark_safe
 
 # Unfold & Import/Export
 from unfold.admin import ModelAdmin
@@ -12,7 +13,9 @@ from import_export import resources
 
 # Unfold Contrib for styled Import/Export forms
 from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
-
+from django_comments_xtd.models import XtdComment
+from django.contrib import admin
+from unfold.admin import GenericStackedInline, GenericTabularInline  # Using Unfold's styled inline
 # Models & Forms
 from .models import SjakItem, SjakBooking, SjakItemType, SjakItemLocation
 from .forms import SjakBookingForm, SjakItemForm
@@ -106,9 +109,36 @@ class SjakItemAdmin(SjakBaseAdmin):
     def display_location(self, obj):
         return obj.location.name if obj.location else "Lager"
 
+
+class CommentInline(GenericTabularInline):
+    model = XtdComment
+    ct_field = "content_type"
+    ct_fk_field = "object_pk"
+    extra = 1
+    fields = ("user", "comment", "submit_date", "is_public")
+    readonly_fields = ("submit_date", "user") # Keep user read-only to prevent spoofing
+    tab = False
+
+    def has_change_permission(self, request, obj=None):
+        # If we are looking at a specific comment
+        if obj and isinstance(obj, XtdComment):
+            # Only allow editing if the user is the author OR a superuser
+            return obj.user == request.user or request.user.is_superuser
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        # Only allow deleting if the user is the author OR a superuser
+        if obj and isinstance(obj, XtdComment):
+            return obj.user == request.user or request.user.is_superuser
+        return super().has_delete_permission(request, obj)
+
+
+
 @admin.register(SjakBooking)
 class SjakBookingAdmin(SjakBaseAdmin):
+    inlines = [CommentInline]
     list_fullwidth = True
+    
     list_display = [
         "item", "quantity", "team", 
         "display_status", "display_internal_status", 
@@ -116,6 +146,14 @@ class SjakBookingAdmin(SjakBaseAdmin):
     ]
     list_filter = ["status", "status_internal", "team", "item", "start"]
     search_fields = ["item__name", "team__name", "team_contact__first_name"]
+    readonly_fields = ["image_preview"]
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" style="max-height: 200px; border-radius: 8px;" />')
+        return "Intet billede"
+    
+    image_preview.short_description = "Forhåndsvisning"
     
     # Custom Internal Status Actions
     actions = SjakBaseAdmin.actions + ["set_klar", "set_igang"]
@@ -148,6 +186,33 @@ class SjakBookingAdmin(SjakBaseAdmin):
     @admin.action(description="Sæt Intern status: Igang")
     def set_igang(self, request, queryset):
         queryset.update(status_internal="Igang")
+
+    def save_formset(self, request, form, formset, change):
+        """
+        Catches the inline formset and injects the SITE_ID and 
+        the current user into any new comments.
+        """
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, XtdComment):
+                # 1. Inject Site ID
+                if not instance.site_id:
+                    from django.conf import settings
+                    instance.site_id = getattr(settings, "SITE_ID", 1)
+                
+                # 2. Inject Current User if none is set
+                if not instance.user:
+                    instance.user = request.user
+                
+                # Optional: Force the user's name/email into the required fields 
+                # if the model uses them for guest tracking
+                if not instance.user_name:
+                    instance.user_name = request.user.get_full_name() or request.user.username
+                if not instance.user_email:
+                    instance.user_email = request.user.email
+
+            instance.save()
+        formset.save_m2m()
 
 @admin.register(SjakItemType)
 class SjakItemTypeAdmin(SjakBaseAdmin):

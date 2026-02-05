@@ -14,7 +14,7 @@ from unfold.contrib.import_export.forms import ImportForm, SelectableFieldsExpor
 
 # Comments
 from django_comments_xtd.models import XtdComment
-from django.contrib.contenttypes.admin import GenericTabularInline
+from django.contrib.contenttypes.admin import GenericTabularInline, GenericStackedInline
 
 from .models import TeknikItem, TeknikBooking, TeknikType
 from organization.models import Team, Volunteer
@@ -36,16 +36,42 @@ class TeknikBookingResource(resources.ModelResource):
 
 # --- Inlines ---
 
-class TeknikCommentInline(GenericTabularInline):
+class CommentInline(GenericTabularInline):
     model = XtdComment
-    # These two lines fix the (admin.E303) error:
     ct_field = "content_type"
-    ct_fk_field = "object_pk" 
-    
-    extra = 0
-    classes = ["tab"] 
-    fields = ('user', 'comment', 'submit_date', 'is_public', 'is_removed')
-    readonly_fields = ('submit_date', 'user')
+    ct_fk_field = "object_pk"
+    extra = 1
+    fields = ("user", "comment", "submit_date", "is_public")
+    readonly_fields = ("submit_date", "user") # Keep user read-only to prevent spoofing
+    tab = False
+
+    def get_readonly_fields(self, request, obj=None):
+        # Default readonly fields
+        readonly = ["submit_date"]
+        
+        # 'obj' in a GenericInline is the child instance (the comment)
+        # If the comment exists and doesn't belong to the current user...
+        if obj and obj.pk:
+            is_owner = (obj.user == request.user)
+            is_admin = request.user.is_superuser
+            
+            if not is_owner and not is_admin:
+                # Return ALL fields as readonly if not owner or admin
+                return [f.name for f in self.model._meta.fields] + readonly
+        
+        # Always make user read-only on existing comments to prevent "identity theft"
+        if obj and obj.pk:
+            readonly.append("user")
+            
+        return readonly
+
+    def has_delete_permission(self, request, obj=None):
+        # Also remove the "Delete" checkbox for non-owners
+        if obj and obj.pk:
+            return obj.user == request.user or request.user.is_superuser
+        return super().has_delete_permission(request, obj)
+
+
 
 # --- Base Admin ---
 
@@ -71,7 +97,7 @@ class TeknikBookingAdmin(TeknikBaseAdmin):
     resource_class = TeknikBookingResource
     list_fullwidth = True
     
-    inlines = [TeknikCommentInline]
+    inlines = [CommentInline]
     
     list_display = [
         "item", "quantity", "team", "display_status",
@@ -112,6 +138,33 @@ class TeknikBookingAdmin(TeknikBaseAdmin):
     @display(description="Levering", label={"True": "info", "False": "neutral"})
     def delivery_badge(self, obj):
         return "Ja" if obj.delivery_needed else "Nej"
+    
+    def save_formset(self, request, form, formset, change):
+        """
+        Catches the inline formset and injects the SITE_ID and 
+        the current user into any new comments.
+        """
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, XtdComment):
+                # 1. Inject Site ID
+                if not instance.site_id:
+                    from django.conf import settings
+                    instance.site_id = getattr(settings, "SITE_ID", 1)
+                
+                # 2. Inject Current User if none is set
+                if not instance.user:
+                    instance.user = request.user
+                
+                # Optional: Force the user's name/email into the required fields 
+                # if the model uses them for guest tracking
+                if not instance.user_name:
+                    instance.user_name = request.user.get_full_name() or request.user.username
+                if not instance.user_email:
+                    instance.user_email = request.user.email
+
+            instance.save()
+        formset.save_m2m()
 
 @admin.register(TeknikItem)
 class TeknikItemAdmin(TeknikBaseAdmin):

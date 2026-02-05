@@ -16,12 +16,17 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
-    /* Integration of Tom Select into Bootstrap Input Group */
-    .input-group > .ts-wrapper {
-        flex: 1 1 auto;
-        width: 1%;
+    /* Image Preview Styling in Form */
+    .form-image-preview {
+        max-height: 200px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
     }
 
+    /* Tom Select Integration */
+    .input-group > .ts-wrapper { flex: 1 1 auto; width: 1%; }
     .input-group > .ts-wrapper .ts-control {
         border-top-right-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
@@ -29,22 +34,13 @@
         min-height: calc(1.5em + 1rem + 2px); 
         z-index: 1;
     }
-
-    #clear-item-btn {
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-        z-index: 4; 
-    }
-
-    /* Clean up Tom Select borders to match Bootstrap focus */
+    #clear-item-btn { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; z-index: 4; }
     .ts-wrapper.form-control { padding: 0 !important; border: none !important; }
     .ts-control { border: 1px solid #dee2e6 !important; }
     .ts-wrapper.focus .ts-control {
         border-color: #86b7fe !important;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
-
-    /* Ensure dropdown appears above other cards */
     .ts-dropdown { z-index: 1050 !important; }
 </style>
 {% endblock %}
@@ -55,7 +51,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
             <li class="breadcrumb-item"><a href="{% url 'Sjak_SjakBooking_list' %}">Sjak bookinger</a></li>
-            <li class="breadcrumb-item active" aria-current="page">
+            <li class="breadcrumb-item active">
                 {% if form.instance.pk %}Rediger #{{ form.instance.pk }}{% else %}Ny booking{% endif %}
             </li>
         </ol>
@@ -71,7 +67,7 @@
         {% endif %}
     </div>
 
-    <form id="booking-form" role="form" method="post" class="needs-validation">
+    <form id="booking-form" role="form" method="post" enctype="multipart/form-data" class="needs-validation">
         {% csrf_token %}
         {% bootstrap_form_errors form type='non_fields' %}
 
@@ -113,9 +109,25 @@
             </div>
 
             <div class="col-lg-4">
+                <div class="card card-custom mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-3 h6 fw-bold text-uppercase">Dokumentation / Billede</h5>
+                        
+                        {% if form.instance.image %}
+                            <div class="mb-3 text-center">
+                                <img src="{{ form.instance.image.url }}" alt="Booking billede" class="form-image-preview">
+                                <p class="small text-muted mt-2">Nuværende billede</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% bootstrap_field form.image show_label=False %}
+                        <div class="form-text small">Upload et billede af placering eller specifikke ønsker.</div>
+                    </div>
+                </div>
+
                 <div class="card card-custom mb-4 bg-light">
                     <div class="card-body p-4">
-                        <h5 class="card-title mb-3">Bemærkninger</h5>
+                        <h5 class="card-title mb-3 h6 fw-bold text-uppercase">Bemærkninger</h5>
                         {% bootstrap_field form.remarks show_label=False %}
                     </div>
                 </div>
@@ -134,21 +146,22 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Initialize Tom Select on the item field
-        const itemControl = new TomSelect(".tom-select", {
-            create: false,
-            placeholder: "Søg efter ting...",
-            allowEmptyOption: true,
-            sortField: { field: "text", direction: "asc" }
-        });
-
-        // Manual Clear Button logic
-        const clearBtn = document.getElementById('clear-item-btn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-                itemControl.clear();
-                itemControl.focus();
+        const itemSelect = document.querySelector('select[name="item"]');
+        if (itemSelect) {
+            const itemControl = new TomSelect(itemSelect, {
+                create: false,
+                placeholder: "Søg efter ting...",
+                allowEmptyOption: true,
+                sortField: { field: "text", direction: "asc" }
             });
+
+            const clearBtn = document.getElementById('clear-item-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    itemControl.clear();
+                    itemControl.focus();
+                });
+            }
         }
     });
 </script>

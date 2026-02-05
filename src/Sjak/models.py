@@ -105,7 +105,7 @@ class SjakBooking(models.Model):
     remarks = models.TextField(blank=True)  # Blank allows for an empty value
     remarks_internal = models.TextField(blank=True)  # Blank allows for an empty value
     status_internal = models.CharField(max_length=10, choices=INTERNAL_STATUS_CHOICES, default='Afventer')
-    
+    image = models.ImageField(upload_to='sjak_bookings/', null=True, blank=True, verbose_name="Billede")
 
 
     class Meta:

@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     #"debug_toolbar",
 
 ]
+SITE_ID = 1 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -261,7 +262,7 @@ USE_TZ = True
 
 
 
-SITE_ID = 1  # Required for django.contrib.sites
+ # Required for django.contrib.sites
 
 # Basic XTD Settings
 COMMENTS_APP = 'django_comments_xtd'
