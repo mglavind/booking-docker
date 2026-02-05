@@ -5,7 +5,7 @@ from unfold.decorators import display
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from unfold.contrib.import_export.forms import ImportForm, SelectableFieldsExportForm
-from icalendar import Calendar, Event
+from icalendar import Calendar, Event as ICalEvent
 from datetime import datetime
 
 from .models import FotoItem, FotoBooking
@@ -15,7 +15,7 @@ from .models import FotoItem, FotoBooking
 class FotoBookingResource(resources.ModelResource):
     class Meta:
         model = FotoBooking
-        fields = ('id', 'item__name', 'team__name', 'location', 'start_date', 'status')
+        fields = ('id', 'item__name', 'team__name', 'team_contact__first_name', 'location', 'start_date', 'status', 'remarks')
 
 # --- Admin Classes ---
 
@@ -26,13 +26,28 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
     export_form_class = SelectableFieldsExportForm
     
     list_fullwidth = True
+    list_filter_submit = True  # Adds a 'Filter' button for better performance
+    
     list_display = [
-        "item", "display_status", "location", "formatted_start", "formatted_end", "last_updated"
+        "item", "team", "display_status", "location", "formatted_start", "formatted_end", "last_updated"
     ]
-    list_filter = ["status", "item", "team"]
-    search_fields = ["item__name", "location", "remarks"]
+    list_filter = ["status", "item", "team", "start_date"]
+    search_fields = ["item__name", "team__name", "location", "remarks"]
     readonly_fields = ["created", "last_updated"]
     actions = ["approve_selected", "reject_selected", "export_selected_to_ical"]
+
+    # --- Detail View Layout ---
+    fieldsets = (
+        ("Information", {
+            "fields": ("item", "status", "team", "team_contact")
+        }),
+        ("Tid og Sted", {
+            "fields": (("start_date", "start_time"), ("end_date", "end_time"), "location"),
+        }),
+        ("Yderligere", {
+            "fields": ("remarks", "created", "last_updated"),
+        }),
+    )
 
     @display(description="Status", label={
         "Approved": "success", "Pending": "warning", "Rejected": "danger",
@@ -48,6 +63,7 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
     def formatted_end(self, obj):
         return f"{obj.end_date.strftime('%d/%m')} {obj.end_time.strftime('%H:%M')}"
 
+    # --- Actions ---
     @admin.action(description="Godkend valgte")
     def approve_selected(self, request, queryset):
         queryset.update(status="Approved")
@@ -62,10 +78,14 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
     def export_selected_to_ical(self, request, queryset):
         calendar = Calendar()
         for booking in queryset:
-            event = Event()
-            event.add('summary', f"Foto: {booking.item} v. {booking.location}")
+            event = ICalEvent()
+            event.add('summary', f"Foto: {booking.item.name} ({booking.team.name})")
+            event.add('description', booking.remarks or "Ingen bemærkninger")
+            event.add('location', booking.location)
+            
             start = datetime.combine(booking.start_date, booking.start_time)
             end = datetime.combine(booking.end_date, booking.end_time)
+            
             event.add('dtstart', start)
             event.add('dtend', end)
             calendar.add_component(event)

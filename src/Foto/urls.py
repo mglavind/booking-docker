@@ -19,6 +19,7 @@ urlpatterns = (
 
     path("Foto/FotoBooking/", views.FotoBookingListView.as_view(), name="Foto_FotoBooking_list"),
     path("Foto/FotoBooking/create/", views.FotoBookingCreateView.as_view(), name="Foto_FotoBooking_create"),
+    path("Foto/FotoBooking/create/<int:item_id>/", views.FotoBookingCreateView.as_view(), name="Foto_FotoBooking_create_with_item"),
     path("Foto/FotoBooking/detail/<int:pk>/", views.FotoBookingDetailView.as_view(), name="Foto_FotoBooking_detail"),
     path("Foto/FotoBooking/update/<int:pk>/", views.FotoBookingUpdateView.as_view(), name="Foto_FotoBooking_update"),
     path("Foto/FotoBooking/delete/<int:pk>/", views.FotoBookingDeleteView.as_view(), name="Foto_FotoBooking_delete"),

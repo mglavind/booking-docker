@@ -66,19 +66,32 @@ class TeknikBaseAdmin(ModelAdmin, ImportExportModelAdmin):
         self.message_user(request, "Valgte bookinger er afvist.", messages.WARNING)
 
 # --- Admin Classes ---
-
 @admin.register(TeknikBooking)
 class TeknikBookingAdmin(TeknikBaseAdmin):
     resource_class = TeknikBookingResource
     list_fullwidth = True
     
-    # Adding the Comment Inline here
     inlines = [TeknikCommentInline]
     
     list_display = [
-        "id", "item", "display_status", "quantity", "team", 
+        "item", "quantity", "team", "display_status",
         "formatted_start", "assistance_badge", "delivery_badge"
     ]
+
+    fields = [
+        ("item", "status"),
+        ("team", "quantity"),
+        ("start_date", "start_time"),
+        ("end_date", "end_time"),
+        "team_contact", 
+        ("assistance_needed", "delivery_needed"),
+        "remarks_internal",
+        "location",
+    ]
+
+    # REMOVE the 'fields = [...]' line entirely. 
+    # It was causing the unhashable type error and conflict.
+
     list_filter = ["status", "item", "team", "start_date"]
     search_fields = ["item__name", "team__name", "team_contact__first_name"]
 

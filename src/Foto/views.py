@@ -114,6 +114,38 @@ class FotoBookingCreateView(LoginRequiredMixin, generic.CreateView):
         kwargs['user'] = self.request.user
         print(self.request.user)
         return kwargs
+    
+class FotoBookingCreateView(LoginRequiredMixin, generic.CreateView):
+    model = models.FotoBooking
+    form_class = forms.FotoBookingForm
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        event = Event.objects.filter(is_active=True).first()
+        self.item_id = kwargs.get('item_id')
+
+        # Fixed: Changed from deadline_aktivitetsteam to deadline_foto
+        if event and event.deadline_foto < timezone.now().date():
+            messages.error(request, 'Deadline for booking overskredet')
+            return redirect('Foto_FotoBooking_list')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        
+        # ADD THIS: This pre-selects the camera/item in the dropdown
+        if self.item_id:
+            item = get_object_or_404(models.FotoItem, id=self.item_id)
+            kwargs.setdefault('initial', {})['item'] = item
+            
+        return kwargs
+
+    def form_valid(self, form):
+        # Save and redirect to detail view
+        self.object = form.save()
+        messages.success(self.request, 'Booking oprettet!')
+        return redirect('Foto_FotoBooking_detail', pk=self.object.pk)
 
 
 class FotoBookingDetailView(LoginRequiredMixin, generic.DetailView):
@@ -133,6 +165,11 @@ class FotoBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
             messages.error(request, 'Deadline for booking overskredet')
             return redirect('Foto_FotoBooking_list')  # replace with the name of your list view url
         return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, 'Booking opdateret!')
+        return redirect('Foto_FotoBooking_detail', pk=self.object.pk)
 
 
 class FotoBookingDeleteView(LoginRequiredMixin, generic.DeleteView):

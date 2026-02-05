@@ -256,9 +256,9 @@ class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
 
     # --- Unfold Decorated Actions ---
 
-    @action(description="Assign to AktivitetstTeamBookingTildeling group")
+    @action(description="Assign to AktivitetsTeamBookingTildeling group")
     def assign_to_aktivitetsteam_group(self, request, queryset):
-        group, _ = Group.objects.get_or_create(name="AktivitetstTeamBookingTildeling")
+        group, _ = Group.objects.get_or_create(name="AktivitetsTeamBookingTildeling")
         for volunteer in queryset:
             volunteer.groups.add(group)
         self.message_user(request, "Group assignment complete.")

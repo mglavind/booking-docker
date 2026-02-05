@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import Group
 from django.urls import reverse
 import datetime
+from map_location.fields import LocationField
 
 class TeknikBooking(models.Model):
 
@@ -29,12 +30,22 @@ class TeknikBooking(models.Model):
     remarks_internal = models.TextField(blank=True)  # Blank allows for an empty value
     assistance_needed = models.BooleanField(default=False, blank=True)
     delivery_needed = models.BooleanField(default=False, blank=True)
-
-    latitude = models.FloatField(blank=True, default="56.114951")
-    longitude = models.FloatField(blank=True, default="9.655592")
-    address = models.CharField(max_length=300, blank=True)
-
-
+    location = LocationField(
+        "Lokation",
+        blank=True,
+        null=True,
+        default="56.114951,9.655592", # Your default Teknik location
+        options={
+            'map': {
+                'center': [56.114951, 9.655592],
+                'zoom': 13,
+            },
+            'marker': {
+                'draggable': True,
+                'position': [56.114951, 9.655592],
+            }
+        }
+    )
 
 
     class Meta:
@@ -58,14 +69,28 @@ class TeknikBooking(models.Model):
         queryset.update(status="Rejected")
 
     reject_bookings.short_description = "Rejected selected bookings"
+    @property
+    def coords_list(self):
+        """Splits the 'lat,lng' string from LocationField into a float list."""
+        if self.location:
+            try:
+                # LocationField usually stores as a string "56.11,9.66"
+                parts = str(self.location).split(',')
+                return [float(parts[0]), float(parts[1])]
+            except (ValueError, IndexError):
+                return [56.113991, 9.665244] # Your default center
+        return [56.113991, 9.665244]
+
     def to_dict(self):
+        """Used for JSON serialization and API-like context."""
+        coords = self.coords_list
         return {
-            'name': self.item.name,
-            'last_updated': self.last_updated.isoformat(),
-            'created': self.created.isoformat(),
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            # Add other fields as necessary
+            'id': self.id,
+            'item': str(self.item),
+            'team': str(self.team),
+            'latitude': coords[0],
+            'longitude': coords[1],
+            'status': self.status,
         }
 
 

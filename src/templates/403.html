@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5 min-vh-75 d-flex align-items-center justify-content-center">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="position-relative mb-5">
+                <div class="error-blob bg-danger opacity-10 position-absolute top-50 start-50 translate-middle rounded-circle" style="width: 200px; height: 200px;"></div>
+                <div class="icon-box bg-dark text-white rounded-4 shadow-lg mb-4 mx-auto d-flex align-items-center justify-content-center position-relative shake-animation" style="width: 120px; height: 120px;">
+                    <bs_icon class="bi bi-shield-lock-fill display-3"></bs_icon>
+                </div>
+            </div>
+
+            <h1 class="display-1 fw-black text-outline mb-0" style="letter-spacing: -5px; font-weight: 900;">403</h1>
+            <h2 class="h1 fw-bold text-dark mt-n4 position-relative">Er det en DELTAGER!?!?</h2>
+            
+            <div class="mt-4 p-4 border-start border-danger border-4 bg-light rounded-end shadow-sm text-start mx-auto" style="max-width: 500px;">
+                <p class="text-dark fw-bold mb-1">Stop en halv!</p>
+                <p class="text-muted mb-0">
+                    Du har ikke de fornødne mærker til denne side. 
+                    Hvis du er en vildfaren deltager, så find venligst din gruppe. 
+                    Ellers, kontakt din <strong>teamleder</strong>.
+                </p>
+            </div>
+
+            <div class="mt-5 d-flex gap-3 justify-content-center">
+                <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm hover-lift">
+                    Tilbage til forsiden
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom "Pop" Styles */
+    .fw-black { font-weight: 900; }
+    
+    /* Subtle shake animation for the lock */
+    .shake-animation {
+        animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both infinite;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+        animation-delay: 2s; /* Only shakes every few seconds */
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* Blob pulse in the background */
+    .error-blob {
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.2); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-3px);
+        transition: transform 0.2s ease;
+    }
+
+    .text-outline {
+        -webkit-text-stroke: 2px #000;
+        color: transparent;
+    }
+</style>
+{% endblock %}

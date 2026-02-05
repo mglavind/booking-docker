@@ -1,101 +1,141 @@
 {% extends "base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
+{% load l10n %}
+
+{# Standard Leaflet CSS for the map #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<style>
+    /* Consistency with your other forms */
+    .map-container { 
+        border-radius: 1rem; 
+        overflow: hidden; 
+        border: 1px solid #dee2e6;
+        margin-bottom: 1.5rem;
+        height: 400px !important; 
+    }
+
+    .location-map, .leaflet-container { 
+        height: 400px !important; 
+        width: 100% !important; 
+        display: block !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before { content: "›"; font-size: 1.2rem; vertical-align: middle; }
+</style>
+
 {% block content %}
-    
-<br>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'Foto_FotoBooking_list' %}">Foto bookinger</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Ny booking </li>
-    </ol>
-</nav>
+{# Necessary for the LocationField map to load #}
+{{ form.media }}
 
-<br>
-<h1 class="display-3" >Ny Foto booking</h1>
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-light p-3 rounded-pill shadow-sm px-4">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none text-muted">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'Foto_FotoBooking_list' %}" class="text-decoration-none text-muted">Foto bookinger</a></li>
+            <li class="breadcrumb-item active fw-bold text-secondary" aria-current="page">
+                {% if object %}Rediger{% else %}Ny{% endif %} booking
+            </li>
+        </ol>
+    </nav>
 
-{% if user.events.first.deadline_mad %}
-    <p>Deadline for FOTO bestillinger: <mark> {{user.events.first.deadline_foto}} </mark>.</p>
-{% endif %}
-    
-    
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.errors }}
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="item">{{ form.item.label }}</label>
-        <div class="col-sm-10">
-            {{ form.item }}
+    <div class="mb-4 mt-2">
+        <h1 class="display-5 fw-bold">{% if object %}Rediger{% else %}Ny{% endif %} Foto booking</h1>
+        {% if user.is_authenticated and user.events.first %}
+        <div class="alert alert-light border shadow-sm rounded-4" role="alert">
+            <bs_icon class="bi bi-clock-history me-2 text-danger"></bs_icon>
+            Deadline for Foto bestillinger: 
+            <span class="badge bg-danger rounded-pill">{{ user.events.first.deadline_foto }}</span>
         </div>
+        {% endif %}
     </div>
 
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="{{ form.location.id_for_label }}">Placering:</label>
-        <div class="col-sm-10">
-            {{ form.location}}
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-body p-4 p-md-5">
+            <form id="form" role="form" method="post" enctype="multipart/form-data" class="needs-validation">
+                {% csrf_token %}
+                {% bootstrap_form_errors form type='non_fields' %}
+
+                <h5 class="fw-bold border-bottom pb-2 mb-3 mt-3">
+                    <bs_icon class="bi bi-camera me-2"></bs_icon>Udstyr & Team
+                </h5>
+                <div class="row">
+                    <div class="col-md-8 mb-3">{% bootstrap_field form.item %}</div>
+                    <div class="col-md-6 mb-3">{% bootstrap_field form.team %}</div>
+                    <div class="col-md-6 mb-3">{% bootstrap_field form.team_contact %}</div>
+                </div>
+
+                <h5 class="fw-bold border-bottom pb-2 mb-3 mt-4">
+                    <bs_icon class="bi bi-calendar-range me-2"></bs_icon>Tidsperiode
+                </h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">{% bootstrap_field form.start_date %}</div>
+                    <div class="col-md-3 mb-3">{% bootstrap_field form.start_time %}</div>
+                    <div class="col-md-3 mb-3">{% bootstrap_field form.end_date %}</div>
+                    <div class="col-md-3 mb-3">{% bootstrap_field form.end_time %}</div>
+                </div>
+
+                {% if form.location %}
+                <h5 class="fw-bold border-bottom pb-2 mb-3 mt-4">
+                    <bs_icon class="bi bi-geo-alt me-2"></bs_icon>Lokation
+                </h5>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <label class="form-label fw-bold small text-uppercase">Vælg placering på kortet</label>
+                        <div class="map-container">
+                            {% bootstrap_field form.location show_label=False %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <h5 class="fw-bold border-bottom pb-2 mb-3 mt-4">
+                    <bs_icon class="bi bi-chat-dots me-2"></bs_icon>Yderligere Information
+                </h5>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        {% bootstrap_field form.remarks %}
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+                        <bs_icon class="bi bi-send me-2"></bs_icon>Indsend booking
+                    </button>
+                    <a href="{% url 'Foto_FotoBooking_list' %}" class="btn btn-outline-secondary btn-lg rounded-pill">Annuller</a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="{{ form.start_date.id_for_label }}">Start dato:</label>
-        <div class="col-sm-10">
-            {{ form.start_date}}
-        </div>
-    </div>
+<script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.dispatchEvent(new Event('resize'));
+            
+            var map;
+            if (window.map_location) {
+                map = window.map_location;
+            } else if (typeof L !== 'undefined') {
+                L.Map.eachExistingInstance(function(instance) { map = instance; });
+            }
 
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="{{ form.start_time.id_for_label }}">Start tid:</label>
-        <div class="col-sm-10">
-            {{ form.start_time}}
-        </div>
-    </div>
-
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="{{ form.end_date.id_for_label }}">Slut dato:</label>
-        <div class="col-sm-10">
-            {{ form.end_date}}
-        </div>
-    </div>
-
-
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="{{ form.end_time.id_for_label }}">Slut tid:</label>
-        <div class="col-sm-10">
-            {{ form.end_time}}
-        </div>
-    </div>
-
-
-      
-
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="team">Team:</label>
-        <div class="col-sm-10">
-            {{ form.team }}
-        </div>
-    </div>
-
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="team_contact">Kontaktperson:</label>
-        <div class="col-sm-10">
-            {{ form.team_contact }}
-        </div>
-    </div>
-
-
-    <div class="form-group row mb-2">
-        <label class="col-sm-2 col-form-label" for="remarks">Bemærkninger:</label>
-        <div class="col-sm-10">
-            <textarea class="form-control" id="remarks" name="remarks" rows="4">{{ object.remarks }}</textarea>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <div class="col-sm-10 offset-sm-2">
-            <input type="submit" value="Indsend" class="btn btn-primary">
-        </div>
-    </div>
-</form>
-
-
+            if (map) {
+                map.invalidateSize();
+                // Click-to-move functionality
+                map.on('click', function(e) {
+                    var input = document.getElementById('id_location');
+                    if (input) {
+                        input.value = e.latlng.lat.toFixed(6) + "," + e.latlng.lng.toFixed(6);
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    var marker = window.marker_location;
+                    if (marker) { marker.setLatLng(e.latlng); }
+                });
+            }
+        }, 500);
+    });
+</script>
 {% endblock %}

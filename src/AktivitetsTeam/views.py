@@ -19,14 +19,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# views.py
 class AktivitetsTeamItemListView(LoginRequiredMixin, generic.ListView):
     model = models.AktivitetsTeamItem
-    form_class = forms.AktivitetsTeamItemForm
     context_object_name = 'object_list'
 
     def get_queryset(self):
-        queryset = models.AktivitetsTeamItem.objects.all().order_by('name')  # Order by the 'name' field
+        # Use select_related to join the category table efficiently
+        queryset = models.AktivitetsTeamItem.objects.filter(is_active=True).select_related('category').order_by('name')
+        
+        # Filter by the slug of the category
+        category_slug = self.request.GET.get('category')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+            
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pull all types from the DB for the filter buttons
+        context['categories'] = models.AktivitetsTeamItemType.objects.all()
+        context['current_category'] = self.request.GET.get('category', '')
+        return context
 
 
 class AktivitetsTeamItemCreateView(LoginRequiredMixin, generic.CreateView):
@@ -294,33 +308,8 @@ class AktivitetsTeamBookingCreateView(LoginRequiredMixin, TimelinePreviewMixin, 
         # Add timeline data
         context.update(self.get_timeline_context())
         aktivitetsteam_items = models.AktivitetsTeamItem.objects.all()
-            # Check if self.object exists
-        if hasattr(self, 'object') and self.object is not None:
-            context['object_dict'] = self.object.to_dict()
-        else:
-            # Provide default values for object_dict
-            context['object_dict'] = {
-                'latitude': '56.114951',  # Replace with your default latitude
-                'longitude': '9.655592'  # Replace with your default longitude
-            }
-            context['aktivitetsteam_items'] = aktivitetsteam_items
-        if not hasattr(self, 'object') or self.object is None:
-            context['object_dict'] = {'latitude': '56.114951', 'longitude': '9.655592'}
         return context
-    
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        print(form.cleaned_data)
-        latitude = form.cleaned_data['latitude']
-        longitude = form.cleaned_data['longitude']
-        geolocator = Nominatim(user_agent="SKSBooking/1.0 (slettenbooking@gmail.com)")
-        location = geolocator.reverse((latitude, longitude))
-        print(location)
-        if location:
-            self.object.address = location.address
-        self.object.save()
-        return redirect('AktivitetsTeam_AktivitetsTeamBooking_detail', pk=self.object.pk)
-    
+
 
 
 class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, TimelinePreviewMixin, generic.UpdateView):
@@ -351,27 +340,6 @@ class AktivitetsTeamBookingUpdateView(LoginRequiredMixin, TimelinePreviewMixin, 
         form.fields["team_contact"].initial = form.instance.team_contact
         
         return form
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        print(form.cleaned_data)
-        latitude = form.cleaned_data['latitude']
-        longitude = form.cleaned_data['longitude']
-        latitude = str(latitude).replace(',', '.')
-        longitude = str(longitude).replace(',', '.')
-        geolocator = Nominatim(user_agent="SKSBooking/1.0 (slettenbooking@gmail.com)")
-        
-        try:
-            location = geolocator.reverse((latitude, longitude))
-            print(location)
-            if location:
-                self.object.address = location.address
-        except Exception as e:
-            messages.error(self.request, 'Geolocation lookup failed: {}'.format(e))
-            return self.form_invalid(form)
-        
-        self.object.save()
-        messages.success(self.request, 'Booking updated successfully')
-        return redirect('AktivitetsTeam_AktivitetsTeamBooking_detail', pk=self.object.pk)
 
     def form_invalid(self, form):
         messages.error(self.request, 'There was an error updating the booking')
@@ -398,16 +366,6 @@ class AktivitetsTeamBookingDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object_dict'] = self.object.to_dict()
-        latitude = context['object_dict'].get('latitude')
-        longitude = context['object_dict'].get('longitude')
-        
-        if latitude:
-            context['object_dict']['latitude'] = str(latitude).replace(',', '.')
-        if longitude:
-            context['object_dict']['longitude'] = str(longitude).replace(',', '.')
-        
-        print(context['object_dict']['latitude'])
-        print(context['object_dict']['longitude'])
         return context
 
 

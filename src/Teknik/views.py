@@ -86,27 +86,8 @@ class TeknikBookingCreateView(LoginRequiredMixin, generic.CreateView):
         if hasattr(self, 'object') and self.object is not None:
             context['object_dict'] = self.object.to_dict()
         else:
-            # Provide default values for object_dict
-            context['object_dict'] = {
-                'latitude': '56.114951',  # Replace with your default latitude
-                'longitude': '9.655592'  # Replace with your default longitude
-            }
             context['items'] = items
         return context
-    
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        print(form.cleaned_data)
-        latitude = form.cleaned_data['latitude']
-        longitude = form.cleaned_data['longitude']
-        geolocator = Nominatim(user_agent="SKSBooking/1.0 (slettenbooking@gmail.com)")
-        location = geolocator.reverse((latitude, longitude))
-        print(location)
-        if location:
-            self.object.address = location.address
-        self.object.save()
-        return redirect('Teknik_TeknikBooking_detail', pk=self.object.pk)
-
 
 class TeknikBookingDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.TeknikBooking
@@ -119,16 +100,6 @@ class TeknikBookingDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object_dict'] = self.object.to_dict()
-        latitude = context['object_dict'].get('latitude')
-        longitude = context['object_dict'].get('longitude')
-        
-        if latitude:
-            context['object_dict']['latitude'] = str(latitude).replace(',', '.')
-        if longitude:
-            context['object_dict']['longitude'] = str(longitude).replace(',', '.')
-        
-        print(context['object_dict']['latitude'])
-        print(context['object_dict']['longitude'])
         return context
 
 
@@ -163,23 +134,6 @@ class TeknikBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
         form.fields["item"].initial = form.instance.item
         form.fields["team_contact"].initial = form.instance.team_contact
         return form
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        print(form.cleaned_data)
-        latitude = form.cleaned_data['latitude']
-        longitude = form.cleaned_data['longitude']
-        latitude = str(latitude).replace(',', '.')
-        longitude = str(longitude).replace(',', '.')
-        geolocator = Nominatim(user_agent="SKSBooking/1.0 (slettenbooking@gmail.com)")
-        
-        try:
-            location = geolocator.reverse((latitude, longitude))
-            print(location)
-            if location:
-                self.object.address = location.address
-        except Exception as e:
-            messages.error(self.request, 'Geolocation lookup failed: {}'.format(e))
-            return self.form_invalid(form)
         
         self.object.save()
         messages.success(self.request, 'Booking updated successfully')

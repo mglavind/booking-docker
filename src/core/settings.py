@@ -101,6 +101,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',  # Required by django-comments
     'constance',
     'simple_history',
+    'embed_video',
+    'map_location',
     'organization',
     'django.contrib.staticfiles',
     'import_export',

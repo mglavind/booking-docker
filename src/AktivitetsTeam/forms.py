@@ -62,9 +62,8 @@ class AktivitetsTeamBookingForm(forms.ModelForm):
         model = models.AktivitetsTeamBooking
         fields = [
             "item", "team", "team_contact", "remarks", 
-            "location", "start_date", "start_time", 
-            "end_date", "end_time", "latitude", 
-            "longitude", "address",
+            "start_date", "start_time", 
+            "end_date", "end_time","location", 
         ]
         widgets = {
             "item": forms.Select(attrs={"class": "form-select"}),
@@ -73,11 +72,7 @@ class AktivitetsTeamBookingForm(forms.ModelForm):
             "remarks": forms.Textarea(attrs={
                 "class": "form-control",
                 "placeholder": "Hvad er jeres formål... (forkortet for læsbarhed)"
-            }),
-            "location": forms.TextInput(attrs={"class": "form-control"}),
-            "latitude": forms.TextInput(attrs={"class": "form-control"}),
-            "longitude": forms.TextInput(attrs={"class": "form-control"}),
-            "address": forms.TextInput(attrs={"class": "form-control"}),            
+            }),         
         }
         labels = {
             "item": "Aktivitet",
@@ -85,7 +80,6 @@ class AktivitetsTeamBookingForm(forms.ModelForm):
             "team_contact": "Kontaktperson",
             "remarks": "Bemærkninger",
             "location": "Lokation",
-            "address": "Adresse",
         }
 
     def __init__(self, *args, user=None, **kwargs):

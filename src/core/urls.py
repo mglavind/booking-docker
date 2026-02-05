@@ -3,7 +3,13 @@ from django.urls import path, include
 from django.views.generic.base import RedirectView
 from django.conf import settings
 from . import views
+from django.shortcuts import render
 #from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf.urls import handler404, handler500, handler403
+
+handler404 = 'django.views.defaults.page_not_found'
+handler500 = 'django.views.defaults.server_error'
+handler403 = 'django.views.defaults.permission_denied'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,5 +27,8 @@ urlpatterns = [
     path('comments/', include('django_comments_xtd.urls')),
     path('comments/', include('django_comments.urls')),
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.png')),
+    path('test-404/', lambda r: render(r, '404.html')),
+    path('test-500/', lambda r: render(r, '500.html')),
+    path('test-403/', lambda r: render(r, '403.html')),
 ] #+ debug_toolbar_urls()
 

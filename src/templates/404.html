@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5 min-vh-75 d-flex align-items-center justify-content-center">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="position-relative mb-5">
+                <div class="error-blob bg-warning opacity-10 position-absolute top-50 start-50 translate-middle rounded-circle" style="width: 200px; height: 200px;"></div>
+                <div class="icon-box bg-warning text-white rounded-4 shadow-lg mb-4 mx-auto d-flex align-items-center justify-content-center position-relative compass-animation" style="width: 120px; height: 120px;">
+                    <bs_icon class="bi bi-compass-fill display-3"></bs_icon>
+                </div>
+            </div>
+
+            <h1 class="display-1 fw-black text-outline mb-0" style="letter-spacing: -5px; font-weight: 900;">404</h1>
+            <h2 class="h1 fw-bold text-dark mt-n4 position-relative">Her var der ingen post...</h2>
+            
+            <div class="mt-4 p-4 border-start border-warning border-4 bg-light rounded-end shadow-sm text-start mx-auto" style="max-width: 500px;">
+                <p class="text-dark fw-bold mb-1">Hvor blev kortet af?</p>
+                <p class="text-muted mb-0">
+                    Det er helt sikkert instruktørerne, der har hængt posten et forkert sted. 
+                    Eller måske er den blæst væk? <br>
+                    <span class="small italic text-opacity-75">Det er i hvert fald ikke dig, der er gået forkert!</span>
+                </p>
+            </div>
+
+            <div class="mt-5 d-flex gap-3 justify-content-center">
+                <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm hover-lift">
+                    Find tilbage til lejren
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-black { font-weight: 900; }
+    
+    /* Compass Needle spinning animation */
+    .compass-animation {
+        animation: spin-wobble 3s ease-in-out infinite;
+    }
+
+    @keyframes spin-wobble {
+        0% { transform: rotate(0deg); }
+        20% { transform: rotate(15deg); }
+        40% { transform: rotate(-10deg); }
+        60% { transform: rotate(5deg); }
+        100% { transform: rotate(0deg); }
+    }
+
+    .error-blob {
+        animation: pulse-yellow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-yellow {
+        0% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.2; }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-3px);
+        transition: transform 0.2s ease;
+    }
+
+    .text-outline {
+        -webkit-text-stroke: 2px #ffc107; /* Bootstrap Warning Yellow */
+        color: transparent;
+    }
+</style>
+{% endblock %}

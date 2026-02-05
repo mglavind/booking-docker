@@ -4,9 +4,28 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
+from django.utils.text import slugify
+from map_location.fields import LocationField
 
 
+class AktivitetsTeamItemType(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    bs_icon = models.CharField(max_length=50, default="bi-tag", help_text="Bootstrap icon name (f.eks. bi-rocket)")
+    slug = models.SlugField(unique=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+    @property
+    def coords(self):
+        if self.location:
+            return self.location.split(',')
+        return None
+    
 class AktivitetsTeamItem(models.Model):
 
     # Fields
@@ -14,11 +33,40 @@ class AktivitetsTeamItem(models.Model):
     short_description = models.TextField(max_length=200)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
-    youtube_link = models.TextField(max_length=2000)
+    youtube_link = models.URLField(
+        max_length=2000, 
+        blank=True, 
+        null=True,
+        help_text="Indsæt link til YouTube video (valgfrit)"
+    )
     description_flow = models.TextField(max_length=200, blank=True)
     description_eksempel = models.TextField(max_length=200, blank=True)
     description_aktiverede = models.TextField(max_length=200, blank=True)
     name = models.CharField(max_length=100)
+    category = models.ForeignKey(
+        AktivitetsTeamItemType, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name="items"
+    )
+    is_active = models.BooleanField(default=True)
+    location = LocationField(
+        "Placering", 
+        blank=True, 
+        null=True,
+        default="56.113991,9.665244", # This sets the initial text value
+        options={
+            'map': {
+                'center': [56.113991, 9.665244], # Centers the map here
+                'zoom': 13, # A closer zoom level for accuracy
+            },
+            'marker': {
+                'draggable': True,
+                'position': [56.113991, 9.665244], # Places the pin here
+            }
+        }
+    )
 
     image = models.ImageField(upload_to='AktivitetstTeamItem/', blank=True, null=True)
 
@@ -41,6 +89,16 @@ class AktivitetsTeamItem(models.Model):
             'longitude': self.longitude,
             # Add other fields as necessary
         }
+    @property
+    def coords_list(self):
+        if self.location:
+            # Most mapping objects have .lat and .lng attributes
+            try:
+                return [self.location.lat, self.location.lng]
+            except AttributeError:
+                # Fallback to string split if attributes aren't present
+                return [float(x.strip()) for x in str(self.location).split(',')]
+        return None
 
 
 
@@ -63,7 +121,6 @@ class AktivitetsTeamBooking(models.Model):
     )
 
     # Fields
-    location = models.CharField(max_length=100)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     remarks = models.TextField(blank=True, max_length=2000)  # Set an appropriate max length
     start_date = models.DateField(default=timezone.now)
@@ -73,15 +130,51 @@ class AktivitetsTeamBooking(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     remarks_internal = models.TextField(blank=True, max_length=500)  # Set an appropriate max length
-    latitude = models.FloatField(blank=True)
-    longitude = models.FloatField(blank=True)
-    address = models.CharField(max_length=300, blank=True)
+    location = LocationField(
+        "Lokation",
+        blank=True,
+        null=True,
+        default="56.114951,9.655592", # Your default Teknik location
+        options={
+            'map': {
+                'center': [56.114951, 9.655592],
+                'zoom': 13,
+            },
+            'marker': {
+                'draggable': True,
+                'position': [56.114951, 9.655592],
+            }
+        }
+    )
+
 
     class Meta:
         pass
 
     def __str__(self):
         return str(self.pk)
+    @property
+    def coords_list(self):
+        """
+        Safely splits the location string. 
+        If the data is broken ('56.123' without a comma), it returns the default 
+        instead of crashing the entire site.
+        """
+        default_coords = [56.114951, 9.655592]
+        
+        if not self.location:
+            return default_coords
+            
+        try:
+            # Ensure we are working with a string and split it
+            parts = str(self.location).split(',')
+            if len(parts) == 2:
+                return [float(parts[0].strip()), float(parts[1].strip())]
+        except (ValueError, IndexError, AttributeError):
+            # If split fails or float conversion fails, return default
+            pass
+            
+        return default_coords
 
     def get_absolute_url(self):
         return reverse("AktivitetsTeam_AktivitetsTeamBooking_detail", args=(self.pk,))
@@ -128,13 +221,15 @@ class AktivitetsTeamBooking(models.Model):
     reject_bookings.short_description = "Reject selected bookings"
     
     def to_dict(self):
+        """Safe dictionary conversion for JSON/Maps."""
+        coords = self.coords_list  # Uses the safe property above
         return {
-            'name': self.item.name,
-            'last_updated': self.last_updated.isoformat(),
-            'created': self.created.isoformat(),
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            # Add other fields as necessary
+            'id': self.id,
+            'item': str(self.item.name) if self.item else "Unknown",
+            'team': str(self.team.name) if self.team else "Unknown",
+            'latitude': coords[0],
+            'longitude': coords[1],
+            'status': self.status,
         }
 
 

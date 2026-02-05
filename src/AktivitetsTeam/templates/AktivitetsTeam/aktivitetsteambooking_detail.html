@@ -4,11 +4,32 @@
 {% load static %}
 {% load bootstrap_icons %}
 {% load django_bootstrap5 %}
-
+{% load l10n %}
 {% block title %}Aktivitet: {{ object.item }}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
+    /* Force height on the container wrapper */
+    .map-container { 
+        height: 400px !important;
+        min-height: 400px !important;
+        border-radius: 1rem; 
+        overflow: hidden; 
+        border: 1px solid #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Force height on the Leaflet generated div */
+    #detail-map, 
+    .leaflet-container, 
+    .location-map, 
+    .map_location-map { 
+        height: 400px !important; 
+        min-height: 400px !important;
+        width: 100% !important; 
+        display: block !important;
+    }
     .card-custom { border: none; border-radius: 12px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
     .status-badge { padding: 0.5rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; }
     .detail-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
@@ -106,18 +127,25 @@
                 </div>
             </div>
 
-            <div class="card card-custom mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">Geografisk Position</h5>
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ object_dict.latitude }},{{ object_dict.longitude }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                            {% bs_icon "map" %} Åben i Google Maps
-                        </a>
-                    </div>
-                    {{ object_dict|json_script:"object_json" }}
-                    <div id="map" style="height: 350px;"></div>
-                </div>
-            </div>
+                    {% if object.location %}
+                        <div class="mt-5">
+                            <h4 class="fw-bold mb-3"><bs_icon class="bi bi-geo-alt me-2"></bs_icon>Lokation</h4>
+                            
+                            <div id="detail-map" class="rounded-4 shadow-sm border mb-3" style="height: 400px !important; width: 100%; position: relative;"></div>
+                            
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ object.coords_list.0|unlocalize }},{{ object.coords_list.1|unlocalize }}" 
+                                target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <bs_icon class="bi bi-google me-1"></bs_icon>Åbn i Google Maps
+                                </a>
+
+                                <a href="https://www.openstreetmap.org/?mlat={{ object.coords_list.0|unlocalize }}&mlon={{ object.coords_list.1|unlocalize }}#map=17/{{ object.coords_list.0|unlocalize }}/{{ object.coords_list.1|unlocalize }}" 
+                                target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                    <bs_icon class="bi bi-map me-1"></bs_icon>Se på OpenStreetMap
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
 
             <div class="card card-custom mb-5">
                 <div class="card-body p-4">
@@ -195,49 +223,28 @@
         </div>
     </div>
 </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-    (g => {
-        var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
-        b = b[c] || (b[c] = {});
-        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
-            await (a = m.createElement("script"));
-            e.set("libraries", [...r] + "");
-            for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
-            e.set("callback", c + ".maps." + q);
-            a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-            d[q] = f;
-            a.onerror = () => h = n(Error(p + " could not load."));
-            a.nonce = m.querySelector("script[nonce]")?.nonce || "";
-            m.head.append(a)
-        }));
-        d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
-    })({
-        key: "AIzaSyB_gCWQdMQ5CGrarZge8VqOeXzdeuoV-7Q", v: "weekly"
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if object.coords_list %}
+            // Use unlocalize to prevent commas in coordinates
+            var lat = {{ object.coords_list.0|unlocalize }};
+            var lng = {{ object.coords_list.1|unlocalize }};
+            
+            var map = L.map('detail-map').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('<b>{{ object.item|escapejs }}</b>')
+                .openPopup();
+
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 200);
+        {% endif %}
     });
-
-    async function initMap() {
-        const objectDict = JSON.parse(document.getElementById('object_json').textContent);
-        const position = { 
-            lat: parseFloat(objectDict.latitude) || 56.114951, 
-            lng: parseFloat(objectDict.longitude) || 9.655592 
-        };
-
-        const { Map } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-        const map = new Map(document.getElementById("map"), {
-            zoom: 15,
-            center: position,
-            mapId: "DEMO_MAP_ID",
-        });
-
-        new AdvancedMarkerElement({
-            map: map,
-            position: position,
-            title: "{{ object.item }}",
-        });
-    }
-
-    initMap();
 </script>
 {% endblock %}
