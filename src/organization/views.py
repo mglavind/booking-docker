@@ -203,15 +203,14 @@ class TeamMembershipDeleteView(LoginRequiredMixin, generic.DeleteView):
 class VolunteerListView(LoginRequiredMixin, generic.ListView):
     model = models.Volunteer
     context_object_name = 'volunteer_list'
-    # 1. Limit the number of rows rendered at once
-    paginate_by = 50 
 
     def get_queryset(self):
-        # 2. Prefetch the teams and only grab the fields we actually show
-        return models.Volunteer.objects.all().prefetch_related(
+        return models.Volunteer.objects.filter(
+            is_active=True
+        ).prefetch_related(
             'teammembership_set__team'
         ).only(
-            'first_name', 'last_name', 'phone', 'email', 'id'
+            'first_name', 'last_name', 'phone', 'email', 'id', 'is_active'
         ).order_by('first_name')
 
 

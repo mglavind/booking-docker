@@ -119,6 +119,14 @@
     }
     
     .bg-secondary-subtle { background-color: #e2e3e5 !important; }
+
+    #volunteerTable thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: white;
+        box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
 </style>
 
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
@@ -126,28 +134,29 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Initialize the DataTable
         const dataTable = new simpleDatatables.DataTable("#volunteerTable", {
             searchable: true,
-            paging: false, // Turn off JS paging since we are using Django paging
+            paging: false,    // No paging: shows all rows sent by Django
             fixedHeight: false,
-            perPage: 50,
             labels: {
                 placeholder: "Søg efter navn, team, telefon eller mail...",
                 noRows: "Ingen frivillige fundet",
-                info: "Viser {rows} frivillige",
+                info: "Viser {rows} frivillige", // Shows total count of filtered rows
             }
         });
 
         // Event Delegation for row clicks
-        // This ensures clicks work even after sorting/searching changes the DOM
         const tableBody = document.querySelector("#volunteerTable tbody");
-        tableBody.addEventListener("click", function(e) {
-            const row = e.target.closest(".clickable-row");
-            if (row && row.dataset.href) {
-                window.location.href = row.dataset.href;
-            }
-        });
+        if (tableBody) {
+            tableBody.addEventListener("click", function(e) {
+                const row = e.target.closest(".clickable-row");
+                // Check if the click was on a link or button inside the row 
+                // to prevent double-navigation/conflicts
+                if (row && row.dataset.href && !e.target.closest('a, button')) {
+                    window.location.href = row.dataset.href;
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
