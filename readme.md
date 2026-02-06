@@ -13,6 +13,25 @@ A professional Django-based booking system designed for containerized deployment
 
 ## 🔧 Development Workflow
 
+### Initial Setup
+```bash 
+# 1. Clone the repository
+git clone <your-repo-url>
+cd booking-system
+
+# 2. Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Initial database setup & Admin user
+python manage.py migrate
+python manage.py createsuperuser
+´´´
+
+
 ### 1. Local Development
 Best for rapid UI/UX changes and logic testing.
 - `cd src`

@@ -32,16 +32,17 @@
                         <div class="fw-bold text-primary" style="line-height: 1;">{{ appt.start_date|date:"d" }}</div>
                         <small class="text-uppercase text-muted" style="font-size: 0.7rem;">{{ appt.start_date|date:"M" }}</small>
                     </div>
+
                     <div>
                         <div class="fw-bold text-dark">
                             {% if appt.requester == user %}
-                                {{ appt.receiver.get_full_name|default:appt.receiver.username }}
+                                {{ appt.receiver }}
                             {% else %}
-                                {{ appt.requester.get_full_name|default:appt.requester.username }}
+                                {{ appt.requester }}
                             {% endif %}
                         </div>
                         <small class="text-muted">
-                            {% bs_icon "clock" size="0.8em" %} {{ appt.start_time|time:"H:i" }}
+                            {% bs_icon "clock" %} {{ appt.start_time|time:"H:i" }}
                         </small>
                         {% if appt.requester == user %}
                             <span class="badge bg-light text-dark border ms-1" style="font-size: 0.65rem;">Afsender</span>
@@ -49,6 +50,7 @@
                             <span class="badge bg-primary-subtle text-primary ms-1" style="font-size: 0.65rem;">Modtager</span>
                         {% endif %}
                     </div>
+
                 </div>
 
                 <div class="text-end d-flex align-items-center">

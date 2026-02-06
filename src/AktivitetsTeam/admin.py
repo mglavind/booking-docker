@@ -20,7 +20,9 @@ from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
 from django.contrib.auth.models import Group
-
+# --- Forms ---
+from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 # --- Resources ---
 
@@ -61,7 +63,21 @@ class BaseAdmin(ModelAdmin, ImportExportModelAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
 
-# --- Forms ---
+
+
+@admin.register(models.AktivitetsTeamItemType)
+class AktivitetsTeamItemTypeAdmin(ModelAdmin):
+    # What shows up in the list view
+    list_display = ("name", "bs_icon", "slug")
+    
+    # Allows you to click these to enter the edit page
+    list_display_links = ("name",)
+    
+    # Auto-fills the slug as you type the name in the admin
+    prepopulated_fields = {"slug": ("name",)}
+    
+    # Makes searching easy
+    search_fields = ("name",)
 
 class AktivitetsTeamItemAdminForm(forms.ModelForm):
     class Meta:
@@ -77,6 +93,7 @@ class AktivitetsTeamItemAdminForm(forms.ModelForm):
             "description_aktiverede",
             "location",
             "image",
+            "category",
         ]
 
 class AktivitetsTeamBookingAdminForm(forms.ModelForm):

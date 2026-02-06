@@ -292,6 +292,16 @@ class VolunteerAppointmentListView(LoginRequiredMixin, generic.ListView):
     model = models.VolunteerAppointment
     context_object_name = 'appointments'
 
+    def get_queryset(self):
+        user = self.request.user
+        # Filter where user is EITHER the requester OR the receiver
+        return models.VolunteerAppointment.objects.filter(
+            Q(requester=user) | Q(receiver=user)
+        ).select_related(
+            'requester', 'receiver'
+        ).order_by('-start_date', '-start_time')
+    
+    
 class VolunteerAppointmentCreateView(LoginRequiredMixin, generic.CreateView):
     model = models.VolunteerAppointment
     form_class = forms.AppointmentForm
