@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-{% load bootstrap_icons %}
+{# Note: No need to load bootstrap_icons if you are using the CSS class approach, #}
+{# but ensure you have the Bootstrap Icons CDN link in your base.html head. #}
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
@@ -8,11 +9,14 @@
             <h2 class="display-6 mb-0">Måltidsbestillinger</h2>
             <p class="text-muted">Oversigt over teamets valgte forplejning</p>
         </div>
+        {% if TeamMealPlans %}
         <div>
+            
             <a href="{% url 'Butikken_TeamMealPlan_bulk_update' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                {% bs_icon 'pencil-square' %} Rediger alle måltider
+                <i class="bi bi-pencil-square"></i> Rediger alle måltider
             </a>
         </div>
+        {% endif %}
     </div>
 
     <nav aria-label="breadcrumb" class="mb-4">
@@ -48,12 +52,12 @@
                             {% if item.meal_option %}
                                 <span>{{ item.meal_option }}</span>
                             {% else %}
-                                <span>Intet valgt endnu</span>
+                                <span class="text-muted italic small">Intet valgt endnu</span>
                             {% endif %}
                         </td>
                         <td>{{ item.team }}</td>
                         <td>
-                            <span>{% bs_icon 'person' %} {{ item.team_contact }}</span>
+                            <span><i class="bi bi-person"></i> {{ item.team_contact }}</span>
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end align-items-center gap-2">
@@ -67,7 +71,7 @@
 
                                 <div class="btn-group">
                                     <a href="{% url 'Butikken_TeamMealPlan_update' item.pk %}" class="btn btn-outline-secondary btn-sm" title="Rediger denne">
-                                        {% bs_icon 'pencil' %}
+                                        <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
                             </div>
@@ -75,9 +79,10 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            {% bs_icon 'calendar-x' extra_classes="display-4 d-block mb-2" %}
-                            Ingen måltidsplaner fundet.
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x display-4 d-block mb-2"></i>
+                            Ingen måltidsplaner fundet. <br>
+                            Bed køkken teamlederen om at oprette tomme måltidsplaner for jeres team.
                         </td>
                     </tr>
                     {% endfor %}
@@ -91,6 +96,8 @@
     .card-custom { border-radius: 12px; overflow: hidden; }
     .table thead th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
     .fw-500 { font-weight: 500; }
+    /* Fine-tune icon alignment if needed */
+    .bi { vertical-align: -0.125em; }
 </style>
 
 {% endblock %}

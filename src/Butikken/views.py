@@ -472,22 +472,33 @@ from .models import TeamMealPlan
 from .forms import BulkMealForm
 
 def bulk_meal_update(request):
-    # Get all meal plans for the team (or all pending ones)
-    queryset = TeamMealPlan.objects.all().order_by('meal_plan__meal_date')
+    user = request.user
     
-    # Create the FormSet class
+    # 1. Use the same filtering logic as your list
+    if user.is_staff:
+        queryset = TeamMealPlan.objects.all()
+    else:
+        queryset = TeamMealPlan.objects.filter(team__teammembership__member=user)
+    
+    # 2. Add select_related to prevent 'NoneType' errors and optimize DB hits
+    queryset = queryset.select_related('meal_plan', 'meal_option', 'team').order_by('meal_plan__meal_date')
+
     MealFormSet = modelformset_factory(
         TeamMealPlan, 
         form=BulkMealForm, 
-        extra=0  # Don't show empty rows
+        extra=0
     )
 
     if request.method == 'POST':
+        # Pass the EXACT same queryset to the POST handler
         formset = MealFormSet(request.POST, queryset=queryset)
         if formset.is_valid():
             formset.save()
             return redirect('Butikken_TeamMealPlan_list')
+        else:
+            # Print errors to terminal so you can see them in 'docker logs'
+            print(formset.errors)
     else:
         formset = MealFormSet(queryset=queryset)
 
-    return render(request, 'butikken/meal_bulk_edit.html', {'formset': formset})
+    return render(request, 'Butikken/meal_bulk_edit.html', {'formset': formset})

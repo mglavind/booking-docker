@@ -48,7 +48,11 @@
                                 <div class="small text-muted">{{ form.instance.meal_plan.meal_date|date:"j. F" }}</div>
                             </td>
                             <td>
-                                <span class="badge bg-light text-dark border">{{ form.instance.meal_plan.name }}</span>
+                                {% if form.instance.meal_plan %}
+                                    <span class="badge bg-light text-dark border">{{ form.instance.meal_plan.name }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Fejl: Mangler måltid</span>
+                                {% endif %}
                             </td>
                             
                             <td>

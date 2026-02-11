@@ -86,7 +86,7 @@ class AktivitetsTeamBookingForm(forms.ModelForm):
         super(AktivitetsTeamBookingForm, self).__init__(*args, **kwargs)
         
         # 1. Populate Dynamic Querysets Safely
-        self.fields["item"].queryset = AktivitetsTeamItem.objects.all().order_by("name")
+        self.fields["item"].queryset = AktivitetsTeamItem.objects.filter(is_active=True).order_by("name")
         self.fields["team_contact"].queryset = Volunteer.objects.all().order_by("first_name")
         self.fields["team"].queryset = Team.objects.all().order_by("name")
 

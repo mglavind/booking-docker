@@ -305,9 +305,20 @@ class BulkMealForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.meal_plan:
-            # Filter the dropdown to only show recipes for THIS specific meal plan
+        
+        # 1. Safeguard against missing instance or meal_plan
+        if self.instance and hasattr(self.instance, 'meal_plan') and self.instance.meal_plan:
             self.fields['meal_option'].queryset = MealOption.objects.filter(
                 meal_plan=self.instance.meal_plan
             )
             self.fields['meal_option'].empty_label = "Vælg et måltid..."
+        else:
+            # Fallback: if no meal_plan is linked, don't show any options
+            self.fields['meal_option'].queryset = MealOption.objects.none()
+            self.fields['meal_option'].help_text = "Ingen måltidsplan fundet."
+
+        # 2. Safeguard team_contact (Limit to the specific team)
+        if self.instance and hasattr(self.instance, 'team') and self.instance.team:
+            self.fields['team_contact'].queryset = models.Volunteer.objects.filter(
+                teammembership__team=self.instance.team
+            )

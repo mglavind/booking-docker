@@ -35,7 +35,6 @@ class TeknikBookingResource(resources.ModelResource):
         )
 
 # --- Inlines ---
-
 class CommentInline(GenericTabularInline):
     model = XtdComment
     ct_field = "content_type"
@@ -45,29 +44,16 @@ class CommentInline(GenericTabularInline):
     readonly_fields = ("submit_date", "user") # Keep user read-only to prevent spoofing
     tab = False
 
-    def get_readonly_fields(self, request, obj=None):
-        # Default readonly fields
-        readonly = ["submit_date"]
-        
-        # 'obj' in a GenericInline is the child instance (the comment)
-        # If the comment exists and doesn't belong to the current user...
-        if obj and obj.pk:
-            is_owner = (obj.user == request.user)
-            is_admin = request.user.is_superuser
-            
-            if not is_owner and not is_admin:
-                # Return ALL fields as readonly if not owner or admin
-                return [f.name for f in self.model._meta.fields] + readonly
-        
-        # Always make user read-only on existing comments to prevent "identity theft"
-        if obj and obj.pk:
-            readonly.append("user")
-            
-        return readonly
+    def has_change_permission(self, request, obj=None):
+        # If we are looking at a specific comment
+        if obj and isinstance(obj, XtdComment):
+            # Only allow editing if the user is the author OR a superuser
+            return obj.user == request.user or request.user.is_superuser
+        return super().has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
-        # Also remove the "Delete" checkbox for non-owners
-        if obj and obj.pk:
+        # Only allow deleting if the user is the author OR a superuser
+        if obj and isinstance(obj, XtdComment):
             return obj.user == request.user or request.user.is_superuser
         return super().has_delete_permission(request, obj)
 

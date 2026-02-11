@@ -179,7 +179,7 @@ class AktivitetsTeamBookingListView(LoginRequiredMixin, generic.ListView):
         total_hours = int(total_duration.total_seconds() / 3600) + 1
 
         # 2. Get resources and bookings
-        items = models.AktivitetsTeamItem.objects.all()
+        items = models.AktivitetsTeamItem.objects.filter(is_active=True)
         item_rows = []
         all_bookings = list(self.get_queryset().filter(
             start_date__gte=active_event.start_date,
