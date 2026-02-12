@@ -165,22 +165,35 @@ MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 ROOT_URLCONF = 'core.urls'  # <--- THIS IS WHAT WAS MISSING
 
-CONSTANCE_REDIS_CONNECTION = {
-    'host': os.environ.get('REDIS_HOST', 'redis'),
-    'port': int(os.environ.get('REDIS_PORT', 6379)),
-    'db': 0,
-}
 
-# Example for Cache
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+if ENVIRONMENT == 'dev':
+    # Use database backend for constance in dev (no Redis needed)
+    CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+    
+    # Use in-memory cache for dev (no Redis needed)
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
         }
     }
-}
+else:
+    # Use Redis for staging/production
+    CONSTANCE_REDIS_CONNECTION = {
+        'host': os.environ.get('REDIS_HOST', 'redis'),
+        'port': int(os.environ.get('REDIS_PORT', 6379)),
+        'db': 0,
+    }
+    
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
 
 CONSTANCE_CONFIG = {
     'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
