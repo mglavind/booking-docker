@@ -51,6 +51,16 @@ nano .env  # eller brug din foretrukne editor
 Copy-Item .env.example .env
 notepad .env  # eller åbn i VS Code med: code .env
 ```
+
+**Vigtige .env variable:**
+
+| Variable              | Log level  | Database | Beskrivelse |
+|-----------------------|------------|----------|----------|
+| `ENVIRONMENT=dev`     | Debug      | sqlite3    | Til Django direkte - giver fuld log output og kører uden Redis |
+| `ENVIRONMENT=staging` | Warning    | postgres13 | Til Django pakket ind i en Docker container|
+
+
+
 Der er gjort klar til at der kan ligges en frontend på, derfor skal vi navigere ind i mappen "src"
 
 ```bash 
