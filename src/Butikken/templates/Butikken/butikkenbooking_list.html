@@ -5,11 +5,27 @@
 {% load comments %}
 <br>
 {% if request.user.is_authenticated %}
-  <h5>Booking oversigt for team: 
-    {% if user_team_membership %}
-      {{ user_team_membership.team.name }}
-    {% endif %}
-  </h5>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Booking oversigt for team: 
+      {% if user_team_membership %}
+        <strong>{{ user_team_membership.team.name }}</strong>
+      {% endif %}
+    </h5>
+    <div class="btn-group btn-group-sm" role="group">
+      <a href="?sort=item" class="btn {% if current_sort == 'item' %}btn-primary{% else %}btn-outline-secondary{% endif %}" title="Sortér efter vare navn">
+        Vare A-Z
+      </a>
+      <a href="?sort=-item" class="btn {% if current_sort == '-item' %}btn-primary{% else %}btn-outline-secondary{% endif %}" title="Sortér efter vare navn omvendt">
+        Vare Z-A
+      </a>
+      <a href="?sort=start" class="btn {% if current_sort == 'start' %}btn-primary{% else %}btn-outline-secondary{% endif %}" title="Sortér efter dato, tidligst først">
+        Dato ↑
+      </a>
+      <a href="?sort=-start" class="btn {% if current_sort == '-start' %}btn-primary{% else %}btn-outline-secondary{% endif %}" title="Sortér efter dato, senest først">
+        Dato ↓
+      </a>
+    </div>
+  </div>
 {% endif %}
 <table class="table">
   <thead>

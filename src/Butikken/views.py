@@ -81,15 +81,33 @@ class ButikkenBookingListView(LoginRequiredMixin, generic.ListView):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return models.ButikkenBooking.objects.select_related(
+        queryset = models.ButikkenBooking.objects.select_related(
             'team', 'team_contact', 'item'
-        ).order_by('item', 'start')
+        )
+        
+        # Get sort parameter from GET request
+        sort_by = self.request.GET.get('sort', 'item')
+        
+        # Validate sort parameter to prevent injection
+        allowed_sorts = {
+            'item': 'item__name',
+            '-item': '-item__name',
+            'start': 'start',
+            '-start': '-start',
+        }
+        
+        order_by = allowed_sorts.get(sort_by, 'item__name')
+        return queryset.order_by(order_by)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         user_team_membership = user.teammembership_set.select_related('team').first()
         context['user_team_membership'] = user_team_membership
+        
+        # Add current sort parameter to context
+        context['current_sort'] = self.request.GET.get('sort', 'item')
+        
         return context
 
 
