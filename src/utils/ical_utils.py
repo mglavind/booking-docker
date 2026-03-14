@@ -15,7 +15,6 @@ def convert_to_ical(booking):
 
     ical_event.add('dtstart', start_datetime)
     ical_event.add('dtend', end_datetime)
-    ical_event.add('description', booking.remarks)
 
     # Initialize description parts
     description_parts = []
@@ -28,6 +27,10 @@ def convert_to_ical(booking):
     if hasattr(booking.team_contact, 'phone') and booking.team_contact.phone:
         description_parts.append(f"Telefon: {booking.team_contact.phone}")
 
+    # Add quantity (for TeknikBooking)
+    if hasattr(booking, 'quantity') and booking.quantity:
+        description_parts.append(f"Antal: {booking.quantity}")
+
     # Add remarks
     if hasattr(booking, 'remarks') and booking.remarks:
         description_parts.append(f"Noter:\n{booking.remarks}")
@@ -36,13 +39,21 @@ def convert_to_ical(booking):
     if hasattr(booking, 'remarks_internal') and booking.remarks_internal:
         description_parts.append(f"Interne noter:\n{booking.remarks_internal}")
 
-    # Add location
-    if hasattr(booking, 'location') and hasattr(booking, 'address') and booking.location and booking.address:
+    # Add assistance and delivery info (for TeknikBooking)
+    if hasattr(booking, 'assistance_needed'):
+        assistance_text = "Ja" if booking.assistance_needed else "Nej"
+        description_parts.append(f"Bistand nødvendig: {assistance_text}")
+    if hasattr(booking, 'delivery_needed'):
+        delivery_text = "Ja" if booking.delivery_needed else "Nej"
+        description_parts.append(f"Levering nødvendig: {delivery_text}")
+
+    # Add location (for AktivitetsTeamBooking with address and coordinates)
+    if hasattr(booking, 'address') and hasattr(booking, 'location') and booking.location and booking.address:
         location_text = f"{booking.location}, {booking.address}"
         ical_event['location'] = vText(location_text)
         description_parts.append(f"Placering: {location_text}")
 
-    # Add Google Maps URL
+    # Add Google Maps URL (for AktivitetsTeamBooking with latitude/longitude fields)
     if hasattr(booking, 'latitude') and hasattr(booking, 'longitude') and booking.latitude and booking.longitude:
         prefix = "https://www.google.com/maps?q="
         separator = ","
@@ -51,12 +62,23 @@ def convert_to_ical(booking):
         google_maps_url = prefix + latitude + separator + longitude
         description_parts.append(f"Link til location: {google_maps_url}")
 
+    # Add location from LocationField (for TeknikBooking)
+    if hasattr(booking, 'location') and booking.location and not hasattr(booking, 'address'):
+        try:
+            coords = str(booking.location).split(',')
+            latitude = coords[0].strip()
+            longitude = coords[1].strip()
+            google_maps_url = f"https://www.google.com/maps?q={latitude},{longitude}"
+            description_parts.append(f"Link til location: {google_maps_url}")
+            ical_event['location'] = vText(f"Teknik ({latitude}, {longitude})")
+        except (ValueError, IndexError):
+            pass
+
     # Join all parts into the final description
     description_with_contact = "\n\n".join(description_parts)
     ical_event.add('description', description_with_contact)
 
-
-    # Add attendees if assigned_aktivitetsteam exists
+    # Add attendees if assigned_aktivitetsteam exists (for AktivitetsTeamBooking)
     if hasattr(booking, 'assigned_aktivitetsteam') and booking.assigned_aktivitetsteam.exists():
         for volunteer in booking.assigned_aktivitetsteam.all():
             attendee = vCalAddress(f'MAILTO:{volunteer.email}')

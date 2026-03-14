@@ -1,16 +1,20 @@
 import csv
 from django.contrib import admin, messages
 from django.http import HttpResponse
+from django.conf import settings
 
 # Unfold & Import/Export
 from unfold.admin import ModelAdmin, TabularInline
-from unfold.decorators import display
+from unfold.decorators import action, display
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
 # Unfold Contrib for styled Import/Export forms
 from unfold.contrib.import_export.forms import ImportForm, SelectableFieldsExportForm
+
+# iCal utilities
+from utils.ical_utils import export_selected_to_ical
 
 # Comments
 from django_comments_xtd.models import XtdComment
@@ -65,7 +69,7 @@ class TeknikBaseAdmin(ModelAdmin, ImportExportModelAdmin):
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
     
-    actions = ["approve_selected", "reject_selected"]
+    actions = ["approve_selected", "reject_selected", "export_selected_to_ical_action"]
 
     @admin.action(description="Godkend valgte")
     def approve_selected(self, request, queryset):
@@ -76,6 +80,13 @@ class TeknikBaseAdmin(ModelAdmin, ImportExportModelAdmin):
     def reject_selected(self, request, queryset):
         queryset.update(status="Rejected")
         self.message_user(request, "Valgte bookinger er afvist.", messages.WARNING)
+
+    @action(description="Export selected bookings to iCal")
+    def export_selected_to_ical_action(self, request, queryset):
+        ical_content = export_selected_to_ical(queryset)
+        response = HttpResponse(ical_content, content_type='text/calendar')
+        response['Content-Disposition'] = 'attachment; filename="teknik-bookings.ics"'
+        return response
 
 # --- Admin Classes ---
 @admin.register(TeknikBooking)
@@ -97,6 +108,7 @@ class TeknikBookingAdmin(TeknikBaseAdmin):
         ("end_date", "end_time"),
         "team_contact", 
         ("assistance_needed", "delivery_needed"),
+        "remarks",
         "remarks_internal",
         "location",
     ]
