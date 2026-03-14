@@ -32,7 +32,7 @@ python -m venv venv
 herefter skal der laves et virtuelt enviroment som vi kan køre python med diverse pakker afgrænset i
 **Mac/Linux:**
 ```bash 
-source venv/bin/activate
+source .venv/bin/activate
 ```
 **Windows (PowerShell):**
 ```powershell

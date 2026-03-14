@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from unfold.admin import ModelAdmin, TabularInline 
 from unfold.decorators import action, display
 from import_export.admin import ImportExportModelAdmin
-from import_export import resources
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
 
 # Unfold Contrib for styled Import/Export forms
 from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
@@ -16,11 +17,42 @@ from unfold.contrib.import_export.forms import ExportForm, ImportForm, Selectabl
 from .models import (
     ButikkenItem, ButikkenBooking, ButikkenItemType, 
     Day, Recipe, Meal, Option, MealBooking, 
-    MealPlan, MealOption, TeamMealPlan
+    MealPlan, MealOption, TeamMealPlan, Team
 )
 from .forms import ButikkenBookingForm, MealPlanForm
 
 # --- Resources ---
+
+class ButikkenBookingResource(resources.ModelResource):
+    item = fields.Field(attribute='item__name', column_name='Vare')
+    team = fields.Field(attribute='team__name', column_name='Team')
+    
+    class Meta:
+        model = ButikkenBooking
+        fields = ('item', 'team', 'quantity', 'status', 'for_meal')
+
+class TeamMealPlanResource(resources.ModelResource):
+    # Explicitly map the ForeignKey fields to use the 'name' attribute instead of 'id'
+    team = fields.Field(
+        column_name='Team',
+        attribute='team',
+        widget=ForeignKeyWidget(Team, 'name')
+    )
+    meal_plan = fields.Field(
+        column_name='Måltidsplan',
+        attribute='meal_plan',
+        widget=ForeignKeyWidget(MealPlan, 'name')
+    )
+    meal_option = fields.Field(
+        column_name='Valgt Menu',
+        attribute='meal_option',
+        widget=ForeignKeyWidget(MealOption, 'id') # Or another identifying field
+    )
+
+    class Meta:
+        model = TeamMealPlan
+        fields = ('id', 'team', 'meal_plan', 'meal_option', 'status')
+        export_order = ('id', 'team', 'meal_plan', 'meal_option', 'status')
 
 class ButikkenItemResource(resources.ModelResource):
     class Meta:

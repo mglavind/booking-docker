@@ -17,7 +17,7 @@ from django_comments_xtd.models import XtdComment
 from django.contrib import admin
 from unfold.admin import GenericStackedInline, GenericTabularInline  # Using Unfold's styled inline
 # Models & Forms
-from .models import SjakItem, SjakBooking, SjakItemType, SjakItemLocation
+from .models import SjakItem, SjakBooking, SjakItemType, SjakItemLocation, SjakTag
 from .forms import SjakBookingForm, SjakItemForm
 
 # --- Resources ---
@@ -221,3 +221,8 @@ class SjakItemTypeAdmin(SjakBaseAdmin):
 @admin.register(SjakItemLocation)
 class SjakItemLocationAdmin(SjakBaseAdmin):
     list_display = ["name", "created"]
+
+@admin.register(SjakTag)
+class SjakTagAdmin(SjakBaseAdmin):
+    list_display = ["name", "color", "created"]
+    fields = ["name", "color"]

@@ -19,6 +19,12 @@
         </div>
         
         <div class="d-none d-md-block">
+            {% if user.is_staff %}
+            <a href="{% url 'Sjak_SjakBooking_kanban' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm px-4 py-2 me-2">
+                <bs_icon class="bi bi-kanban"></bs_icon>
+                <span>Kanban</span>
+            </a>
+            {% endif %}
             <a href="{% url 'Sjak_SjakBooking_create' %}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm px-4 py-2">
                 <bs_icon class="bi bi-plus-lg"></bs_icon>
                 <span>Ny Booking</span>

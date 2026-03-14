@@ -24,6 +24,7 @@ urlpatterns = [
     path("Sjak/SjakItem/delete/<int:pk>/", views.SjakItemDeleteView.as_view(), name="Sjak_SjakItem_delete"),
 
     path("Sjak/SjakBooking/", views.SjakBookingListView.as_view(), name="Sjak_SjakBooking_list"),
+    path("Sjak/SjakBooking/kanban/", views.SjakKanbanView.as_view(), name="Sjak_SjakBooking_kanban"),
     path("Sjak/SjakBooking/create/", views.SjakBookingCreateView.as_view(), name="Sjak_SjakBooking_create"),
     path("Sjak/SjakBooking/create/<int:item_id>/", views.SjakBookingCreateView.as_view(), name="Sjak_SjakBooking_create_with_item"),
     path("Sjak/SjakBooking/detail/<int:pk>/", views.SjakBookingDetailView.as_view(), name="Sjak_SjakBooking_detail"),
@@ -31,6 +32,8 @@ urlpatterns = [
     path("Sjak/SjakBooking/delete/<int:pk>/", views.SjakBookingDeleteView.as_view(), name="Sjak_SjakBooking_delete"),
     path("Sjak/SjakBooking/approve/<int:pk>/", views.approve_booking, name="Sjak_SjakBooking_approve"),
     path("Sjak/SjakBooking/reject/<int:pk>/", views.reject_booking, name="Sjak_SjakBooking_reject"),
+    path("Sjak/SjakBooking/status/<int:pk>/", views.update_booking_status, name="Sjak_SjakBooking_update_status"),
+    path("Sjak/SjakBooking/field/<int:pk>/", views.update_booking_field, name="Sjak_SjakBooking_update_field"),
   
     path("Sjak/SjakItemType/", views.SjakItemTypeListView.as_view(), name="Sjak_SjakItemType_list"),
     path("Sjak/SjakItemType/create/", views.SjakItemTypeCreateView.as_view(), name="Sjak_SjakItemType_create"),

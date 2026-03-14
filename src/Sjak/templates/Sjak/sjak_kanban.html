@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<div class="container-fluid py-4 pb-5">
+    <nav aria-label="breadcrumb" class="d-none d-md-block mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Hjem</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'Sjak_SjakBooking_list' %}">Sjak Bookinger</a></li>
+            <li class="breadcrumb-item active">Kanban Dashboard</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-0 text-primary">Sjak Booking Kanban</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'Sjak_SjakBooking_list' %}" class="btn btn-sm btn-outline-secondary">
+                <bs_icon class="bi bi-list-ul"></bs_icon>
+                List
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <bs_icon class="bi bi-funnel"></bs_icon>
+                Filters
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <form method="get" class="d-flex gap-2 align-items-center" id="groupByForm">
+            <label for="groupBySelect" class="form-label mb-0 fw-bold">Group By:</label>
+            <select class="form-select form-select-sm" id="groupBySelect" name="group_by" style="max-width: 200px;">
+                <option value="status" {% if group_by == 'status' %}selected{% endif %}>Status</option>
+                <option value="status_internal" {% if group_by == 'status_internal' %}selected{% endif %}>Internal Status</option>
+                <option value="assigned_sjak" {% if group_by == 'assigned_sjak' %}selected{% endif %}>Assigned Staff</option>
+                <option value="item" {% if group_by == 'item' %}selected{% endif %}>Item</option>
+                <option value="tag" {% if group_by == 'tag' %}selected{% endif %}>Tag</option>
+            </select>
+            {% for key, value in current_filters.items %}
+                {% if value %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
+            {% endfor %}
+        </form>
+    </div>
+
+    <!-- Active Filters Display -->
+    {% if current_filters.team or current_filters.status or current_filters.item or current_filters.status_internal or current_filters.assigned_sjak or current_filters.tag %}
+    <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+        <strong>Active Filters:</strong>
+        {% if current_filters.team %}<span class="badge bg-secondary">Team: {{ current_filters.team }}</span>{% endif %}
+        {% if current_filters.status %}<span class="badge bg-secondary">Status: {{ current_filters.status }}</span>{% endif %}
+        {% if current_filters.item %}<span class="badge bg-secondary">Item: {{ current_filters.item }}</span>{% endif %}
+        {% if current_filters.status_internal %}<span class="badge bg-secondary">Internal: {{ current_filters.status_internal }}</span>{% endif %}
+        {% if current_filters.assigned_sjak %}<span class="badge bg-secondary">Assigned: {{ current_filters.assigned_sjak }}</span>{% endif %}
+        {% if current_filters.tag %}<span class="badge bg-secondary">Tag: {{ current_filters.tag }}</span>{% endif %}
+        <a href="{% url 'Sjak_SjakBooking_kanban' %}" class="ms-2 btn-close"></a>
+    </div>
+    {% endif %}
+
+    <div class="kanban-board" id="kanbanBoard">
+        {% for group_key, group_data in grouped_bookings.items %}
+        <div class="kanban-column" data-group-key="{{ group_key }}" data-group-by="{{ group_by }}">
+            <div class="kanban-column-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <span class="me-2">
+                            {% if group_by == 'status' and group_key == 'Pending' %}
+                                <bs_icon class="bi bi-clock"></bs_icon>
+                            {% elif group_by == 'status' and group_key == 'Approved' %}
+                                <bs_icon class="bi bi-check-circle"></bs_icon>
+                            {% elif group_by == 'status' and group_key == 'Rejected' %}
+                                <bs_icon class="bi bi-x-circle"></bs_icon>
+                            {% elif group_by == 'status_internal' and group_key == 'Afventer' %}
+                                <bs_icon class="bi bi-hourglass"></bs_icon>
+                            {% elif group_by == 'status_internal' and group_key == 'Igang' %}
+                                <bs_icon class="bi bi-play-circle"></bs_icon>
+                            {% elif group_by == 'status_internal' and group_key == 'Klar' %}
+                                <bs_icon class="bi bi-check2"></bs_icon>
+                            {% elif group_by == 'status_internal' and group_key == 'Afsluttet' %}
+                                <bs_icon class="bi bi-check-all"></bs_icon>
+                            {% elif group_by == 'tag' %}
+                                <bs_icon class="bi bi-tag"></bs_icon>
+                            {% elif group_by == 'assigned_sjak' %}
+                                <bs_icon class="bi bi-person"></bs_icon>
+                            {% elif group_by == 'item' %}
+                                <bs_icon class="bi bi-box"></bs_icon>
+                            {% endif %}
+                        </span>
+                        {{ group_data.label }}
+                    </h5>
+                    <span class="badge bg-primary">{{ group_data.count }}</span>
+                </div>
+            </div>
+
+            <div class="kanban-cards sortable-container" data-group-key="{{ group_key }}" data-group-by="{{ group_by }}">
+                {% for booking in group_data.bookings %}
+                <div class="kanban-card" data-booking-id="{{ booking.id }}">
+                    <div class="kanban-card-header">
+                        <div class="kanban-card-title">
+                            <a href="{{ booking.get_absolute_url }}" target="_blank" class="text-decoration-none fw-bold text-primary">
+                                {{ booking.team.name }}
+                            </a>
+                        </div>
+                        <span class="badge bg-secondary text-white" style="font-size: 0.7rem;">#{{ booking.id }}</span>
+                    </div>
+
+                    <div class="kanban-card-body">
+                        <div class="kanban-card-item">
+                            {% if booking.item.image %}
+                                <img src="{{ booking.item.image.url }}" alt="{{ booking.item }}">
+                            {% else %}
+                                <span class="kanban-card-icon"><bs_icon class="bi bi-box"></bs_icon></span>
+                            {% endif %}
+                            <strong>{{ booking.item.name }}</strong>
+                        </div>
+
+                        <div class="kanban-card-meta">
+                            <bs_icon class="bi bi-calendar"></bs_icon>
+                            <span>{{ booking.start|date:"d. M" }}</span>
+                        </div>
+
+                        <div class="kanban-card-meta">
+                            <bs_icon class="bi bi-person-circle"></bs_icon>
+                            <span>{{ booking.team_contact.first_name|truncatechars:10 }}</span>
+                        </div>
+
+                        {% if booking.tag %}
+                        <div class="mt-2">
+                            <span class="badge" style="background-color: {% if booking.tag == 'Urgent' %}#dc3545{% elif booking.tag == 'Low Priority' %}#6c757d{% elif booking.tag == 'In Review' %}#0dcaf0{% else %}#ffc107{% endif %};">
+                                <bs_icon class="bi bi-tag"></bs_icon> {{ booking.tag }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="kanban-card-footer">
+                        <div class="btn-group btn-group-xs w-100">
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-action-btn" data-booking-id="{{ booking.id }}" data-field="status" data-current="{{ booking.status }}">
+                                <bs_icon class="bi bi-flag"></bs_icon>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-action-btn" data-booking-id="{{ booking.id }}" data-field="tag" data-current="{{ booking.tag }}">
+                                <bs_icon class="bi bi-tag"></bs_icon>
+                            </button>
+                            <a href="{{ booking.get_absolute_url }}" class="btn btn-sm btn-outline-secondary">
+                                <bs_icon class="bi bi-eye"></bs_icon>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="kanban-empty-state">
+                    <div><bs_icon class="bi bi-inbox" style="font-size: 2.5rem;"></bs_icon></div>
+                    <p>No bookings</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="get" id="filterForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Team Filter -->
+                        <div class="col-md-6">
+                            <label for="teamFilter" class="form-label">Team</label>
+                            <select class="form-select" id="teamFilter" name="team">
+                                <option value="">All Teams</option>
+                                {% for team_id, team_name in teams %}<option value="{{ team_id }}" {% if current_filters.team == team_id|stringformat:"s" %}selected{% endif %}>{{ team_name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <!-- Status Filter -->
+                        <div class="col-md-6">
+                            <label for="statusFilter" class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter" name="status">
+                                <option value="">All Statuses</option>
+                                {% for status_val, status_label in status_choices %}<option value="{{ status_val }}" {% if current_filters.status == status_val %}selected{% endif %}>{{ status_label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <!-- Item Filter -->
+                        <div class="col-md-6">
+                            <label for="itemFilter" class="form-label">Item</label>
+                            <select class="form-select" id="itemFilter" name="item">
+                                <option value="">All Items</option>
+                                {% for item_id, item_name in items %}<option value="{{ item_id }}" {% if current_filters.item == item_id|stringformat:"s" %}selected{% endif %}>{{ item_name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <!-- Internal Status Filter -->
+                        <div class="col-md-6">
+                            <label for="statusInternalFilter" class="form-label">Internal Status</label>
+                            <select class="form-select" id="statusInternalFilter" name="status_internal">
+                                <option value="">All Internal Statuses</option>
+                                {% for status_val, status_label in status_internal_choices %}<option value="{{ status_val }}" {% if current_filters.status_internal == status_val %}selected{% endif %}>{{ status_label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <!-- Assigned Staff Filter -->
+                        <div class="col-md-6">
+                            <label for="assignedFilter" class="form-label">Assigned Staff</label>
+                            <select class="form-select" id="assignedFilter" name="assigned_sjak">
+                                <option value="">Unassigned</option>
+                                {% for staff_id, first_name, last_name in staff_members %}<option value="{{ staff_id }}" {% if current_filters.assigned_sjak == staff_id|stringformat:"s" %}selected{% endif %}>{{ first_name }} {{ last_name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <!-- Tag Filter -->
+                        <div class="col-md-6">
+                            <label for="tagFilter" class="form-label">Tag</label>
+                            <select class="form-select" id="tagFilter" name="tag">
+                                <option value="">All Tags</option>
+                                {% for tag in tag_choices %}<option value="{{ tag.id }}" {% if current_filters.tag == tag.id|stringformat:"s" %}selected{% endif %}>{{ tag.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'Sjak_SjakBooking_kanban' %}" class="btn btn-secondary">Clear All</a>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Action Modal -->
+<div class="modal fade" id="quickActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickActionTitle">Update Field</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickActionForm">
+                    <input type="hidden" id="bookingId" name="booking_id">
+                    <input type="hidden" id="fieldName" name="field_name">
+                    <div id="statusOptions" style="display: none;">
+                        <label class="form-label">Select Status:</label>
+                        <select class="form-select" id="statusValue">
+                            {% for status_val, status_label in status_choices %}<option value="{{ status_val }}">{{ status_label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div id="tagOptions" style="display: none;">
+                        <label class="form-label">Select Tag:</label>
+                        <select class="form-select" id="tagValue">
+                            <option value="">None</option>
+                            {% for tag in tag_choices %}<option value="{{ tag.id }}">{{ tag.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmActionBtn">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="updateToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white border-0">
+            <strong class="me-auto"><bs_icon class="bi bi-check-circle"></bs_icon> Success</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">Booking updated</div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<style>
+    .kanban-board {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 1rem;
+        padding: 0.5rem;
+        margin: -0.5rem;
+    }
+
+    .kanban-column {
+        flex: 0 0 auto;
+        min-width: 320px;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        background-color: #f5f7fa;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .kanban-column-header {
+        padding: 1rem;
+        background-color: #fff;
+        border-bottom: 2px solid #e0e0e0;
+        flex-shrink: 0;
+    }
+
+    .kanban-cards {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.75rem;
+        min-height: 500px;
+        background-color: #f5f7fa;
+    }
+
+    .kanban-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        cursor: grab;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .kanban-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+
+    .kanban-card:active {
+        cursor: grabbing;
+    }
+
+    .kanban-card.dragging {
+        opacity: 0.5;
+        transform: rotate(2deg);
+    }
+
+    .kanban-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .kanban-card-title {
+        flex: 1;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .kanban-card-body {
+        font-size: 0.8125rem;
+        color: #666;
+    }
+
+    .kanban-card-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+    }
+
+    .kanban-card-item img {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .kanban-card-item strong {
+        flex: 1;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kanban-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.35rem;
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .kanban-card-footer {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-group-xs .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .kanban-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: #999;
+        text-align: center;
+    }
+
+    .kanban-empty-state svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 768px) {
+        .kanban-column {
+            min-width: 280px;
+            max-width: 350px;
+        }
+
+        .kanban-cards {
+            min-height: 350px;
+        }
+
+        .kanban-card {
+            padding: 0.6rem;
+        }
+
+        .kanban-card-body {
+            font-size: 0.75rem;
+        }
+
+        .btn-group-xs .btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.65rem;
+        }
+    }
+
+    /* Drag over effect */
+    .sortable-container.sortable-ghost {
+        background-color: #e7f3ff;
+        border: 2px dashed #0066cc;
+        opacity: 0.5;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token from cookie (more reliable than DOM search)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrfToken = getCookie('csrftoken');
+    
+    // ============ GROUP BY CHANGE ============
+    document.getElementById('groupBySelect').addEventListener('change', function() {
+        document.getElementById('groupByForm').submit();
+    });
+
+    // ============ INITIALIZE SORTABLE ============
+    const sortableContainers = document.querySelectorAll('.sortable-container');
+    sortableContainers.forEach(container => {
+        new Sortable(container, {
+            group: 'bookings',
+            animation: 200,
+            ghostClass: 'sortable-ghost',
+            dragClass: 'kanban-card-dragging',
+            onEnd: function(evt) {
+                const card = evt.item;
+                const bookingId = card.dataset.bookingId;
+                const newContainer = evt.to;
+                const groupBy = newContainer.dataset.groupBy;
+                const groupKey = newContainer.dataset.groupKey;
+
+                // Determine field and value based on grouping
+                updateBookingOnDrop(bookingId, groupBy, groupKey);
+            }
+        });
+    });
+
+    // ============ UPDATE ON DROP ============
+    function updateBookingOnDrop(bookingId, groupBy, groupKey) {
+        let fieldName, fieldValue;
+
+        // Map grouping to field names
+        const fieldMap = {
+            'status': { field: 'status', value: groupKey },
+            'status_internal': { field: 'status_internal', value: groupKey },
+            'tag': { field: 'tag', value: groupKey === 'None' ? null : groupKey },
+            'assigned_sjak': { field: 'assigned_sjak', value: groupKey === 'None' ? null : groupKey.replace('staff_', '') },
+            'item': { field: 'item', value: groupKey.replace('item_', '') }
+        };
+
+        if (!fieldMap[groupBy]) return;
+
+        const mapping = fieldMap[groupBy];
+        updateBookingField(bookingId, mapping.field, mapping.value);
+    }
+
+    // ============ GENERIC UPDATE FUNCTION ============
+    function updateBookingField(bookingId, fieldName, fieldValue) {
+        const formData = new FormData();
+        formData.append('field_name', fieldName);
+        formData.append('field_value', fieldValue || 'None');
+
+        fetch(`/sjak/Sjak/SjakBooking/field/${bookingId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`${data.message}`);
+            } else {
+                showToast(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error updating booking', 'error');
+        });
+    }
+
+    // ============ QUICK ACTION BUTTONS ============
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const bookingId = this.dataset.bookingId;
+            const field = this.dataset.field;
+            const current = this.dataset.current;
+
+            document.getElementById('bookingId').value = bookingId;
+            document.getElementById('fieldName').value = field;
+
+            // Show appropriate options
+            if (field === 'status') {
+                document.getElementById('statusOptions').style.display = 'block';
+                document.getElementById('tagOptions').style.display = 'none';
+                document.getElementById('statusValue').value = current;
+                document.getElementById('quickActionTitle').textContent = 'Change Status';
+            } else if (field === 'tag') {
+                document.getElementById('statusOptions').style.display = 'none';
+                document.getElementById('tagOptions').style.display = 'block';
+                document.getElementById('tagValue').value = current || '';
+                document.getElementById('quickActionTitle').textContent = 'Change Tag';
+            }
+
+            new bootstrap.Modal(document.getElementById('quickActionModal')).show();
+        });
+    });
+
+    // ============ CONFIRM ACTION ============
+    document.getElementById('confirmActionBtn').addEventListener('click', function() {
+        const bookingId = document.getElementById('bookingId').value;
+        const fieldName = document.getElementById('fieldName').value;
+        let fieldValue;
+
+        if (fieldName === 'status') {
+            fieldValue = document.getElementById('statusValue').value;
+        } else if (fieldName === 'tag') {
+            fieldValue = document.getElementById('tagValue').value;
+        }
+
+        updateBookingField(bookingId, fieldName, fieldValue);
+        bootstrap.Modal.getInstance(document.getElementById('quickActionModal')).hide();
+        
+        // Reload page to see changes
+        setTimeout(() => location.reload(), 1500);
+    });
+
+    // ============ TOAST NOTIFICATION ============
+    function showToast(message, type = 'success') {
+        const toastElement = document.getElementById('updateToast');
+        const messageElement = document.getElementById('toastMessage');
+        messageElement.textContent = message;
+
+        if (type === 'error') {
+            toastElement.querySelector('.toast-header').className = 'toast-header bg-danger text-white border-0';
+        } else {
+            toastElement.querySelector('.toast-header').className = 'toast-header bg-success text-white border-0';
+        }
+
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+});
+</script>
+{% endblock %}
