@@ -36,11 +36,19 @@
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
                     <label class="text-muted small d-block">Afsender</label>
-                    <span class="fs-5">{% bs_icon "person" %} {{ object.requester.get_full_name|default:object.requester.username }}</span>
+                    <span class="fs-5">{% bs_icon "person" %} {{ object.requester.get_full_name|default:object.requester.username }}
+                    {% with object.requester.teams.first as team %}
+                        {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
+                    {% endwith %}
+                    </span>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="text-muted small d-block">Modtager</label>
-                    <span class="fs-5">{% bs_icon "person-fill" %} {{ object.receiver.get_full_name|default:object.receiver.username }}</span>
+                    <span class="fs-5">{% bs_icon "person-fill" %} {{ object.receiver.get_full_name|default:object.receiver.username }}
+                    {% with object.receiver.teams.first as team %}
+                        {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
+                    {% endwith %}
+                    </span>
                 </div>
             </div>
 

@@ -215,7 +215,15 @@ class VolunteerAppointment(models.Model):
         verbose_name = "Aftale"
 
     def __str__(self):
-        return f"{self.requester} -> {self.receiver} ({self.start_time.date()})"
+        # Get first team for requester
+        requester_team = self.requester.teams.first()
+        requester_str = f"{self.requester} ({requester_team.short_name})" if requester_team else str(self.requester)
+        
+        # Get first team for receiver
+        receiver_team = self.receiver.teams.first()
+        receiver_str = f"{self.receiver} ({receiver_team.short_name})" if receiver_team else str(self.receiver)
+        
+        return f"{requester_str} -> {receiver_str} "
     
     def get_absolute_url(self):
         return reverse("organization_VolunteerAppointment_detail", args=(self.pk,))

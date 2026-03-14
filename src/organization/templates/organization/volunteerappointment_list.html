@@ -37,8 +37,14 @@
                         <div class="fw-bold text-dark">
                             {% if appt.requester == user %}
                                 {{ appt.receiver }}
+                                {% with appt.receiver.teams.first as team %}
+                                    {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
+                                {% endwith %}
                             {% else %}
                                 {{ appt.requester }}
+                                {% with appt.requester.teams.first as team %}
+                                    {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
+                                {% endwith %}
                             {% endif %}
                         </div>
                         <small class="text-muted">

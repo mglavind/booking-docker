@@ -163,6 +163,7 @@ class AppointmentForm(forms.ModelForm):
         widget=TextInput(attrs={"type": "time", "class": "form-control"}),
         label="Slut tidspunkt"
     )
+    
     class Meta:
         model = models.VolunteerAppointment
         fields = [
@@ -179,6 +180,9 @@ class AppointmentForm(forms.ModelForm):
         # 1. Setup Querysets
         # We order by first_name to make the dropdown readable
         self.fields["receiver"].queryset = models.Volunteer.objects.all().order_by("first_name")
+        
+        # Customize the receiver field display to show team short_name
+        self.fields["receiver"].label_from_instance = self._label_from_instance
 
         # 2. Intelligent Initial Values (Don't override if instance exists)
         instance = kwargs.get('instance')
@@ -199,6 +203,13 @@ class AppointmentForm(forms.ModelForm):
                 self.fields["end_date"].initial = active_event.start_date # Default to same day
                 self.fields["start_time"].initial = time(12, 0)
                 self.fields["end_time"].initial = time(13, 0)
+    
+    def _label_from_instance(self, obj):
+        """Customize how each volunteer is displayed in the dropdown."""
+        team = obj.teams.first()
+        if team:
+            return f"{obj.get_full_name()} ({team.short_name})"
+        return obj.get_full_name()
 
     def save(self, commit=True):
         instance = super().save(commit=False)
