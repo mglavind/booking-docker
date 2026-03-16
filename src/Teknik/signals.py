@@ -54,7 +54,7 @@ def notify_discord_on_teknikbooking_change(sender, instance, created, **kwargs):
         }.get(instance.status, "📋")
         
         # Byg booking URL
-        booking_url = f"{settings.CSRF_TRUSTED_ORIGINS[0]}/Teknik/TeknikBooking/{instance.id}/"
+        booking_url = f"{settings.CSRF_TRUSTED_ORIGINS[0]}/teknik/Teknik/TeknikBooking/detail/{instance.id}/"
         
         # Byg kort, menneskeligt besked
         contact_name = instance.team_contact.get_full_name() if instance.team_contact else "Ikke angivet"

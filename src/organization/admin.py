@@ -158,8 +158,8 @@ from Butikken.models import MealPlan, TeamMealPlan
 
 @admin.register(Team)
 class TeamAdmin(SimpleHistoryAdmin, ModelAdmin):
-    list_display = ["id", "name", "short_name", "last_updated", "created"]
-    readonly_fields = ["last_updated", "created"]
+    list_display = ["name", "short_name", "last_updated", "created"]
+    readonly_fields = ["id", "last_updated", "created"]
     
     # 1. Reference the method name as a string
     actions = ["create_team_meal_plans_action"]
@@ -189,7 +189,7 @@ class TeamMembershipAdmin(ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(SimpleHistoryAdmin, ModelAdmin):
-    list_display = ["id", "name", "start_date", "end_date", "is_active", "last_updated", "created"]
+    list_display = ["name", "start_date", "end_date", "is_active", "last_updated", "created"]
     readonly_fields = ["id", "last_updated", "created"]
 
 @admin.register(EventMembership)
