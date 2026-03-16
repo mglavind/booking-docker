@@ -85,6 +85,19 @@ class ButikkenBookingListView(LoginRequiredMixin, generic.ListView):
             'team', 'team_contact', 'item'
         )
         
+        user = self.request.user
+        # Filter by user's team if not staff
+        if not user.is_staff:
+            # Get user's team efficiently with single query
+            try:
+                team = user.teammembership_set.select_related('team').values_list('team', flat=True).first()
+                if team:
+                    queryset = queryset.filter(team_id=team)
+                else:
+                    queryset = queryset.none()
+            except:
+                queryset = queryset.none()
+        
         # Get sort parameter from GET request
         sort_by = self.request.GET.get('sort', 'item')
         
@@ -102,8 +115,13 @@ class ButikkenBookingListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        user_team_membership = user.teammembership_set.select_related('team').first()
-        context['user_team_membership'] = user_team_membership
+        
+        # Only fetch team membership once - already filtered in get_queryset
+        if not user.is_staff:
+            user_team_membership = user.teammembership_set.select_related('team').first()
+            context['user_team_membership'] = user_team_membership
+        else:
+            context['user_team_membership'] = None
         
         # Add current sort parameter to context
         context['current_sort'] = self.request.GET.get('sort', 'item')

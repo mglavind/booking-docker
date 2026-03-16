@@ -3,6 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
 
 
 
@@ -90,6 +94,8 @@ class Volunteer(AbstractUser):
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     email = models.EmailField(unique=True, db_index=True)
     phone = models.CharField(max_length=30, blank=True, db_index=True)
+    image = models.ImageField(upload_to='volunteer_profiles/', blank=True, null=True)
+    image_thumbnail = models.ImageField(upload_to='volunteer_profiles/thumbnails/', blank=True, null=True, editable=False)
     events = models.ManyToManyField(Event, through='EventMembership',blank=True, db_index=True)
     teams = models.ManyToManyField(Team, through='TeamMembership', blank=True, db_index=True)
     history = HistoricalRecords()
@@ -99,6 +105,40 @@ class Volunteer(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+    def save(self, *args, **kwargs):
+        # Generate thumbnail when image is uploaded
+        if self.image and not self.image_thumbnail:
+            self._create_thumbnail()
+        super().save(*args, **kwargs)
+    
+    def _create_thumbnail(self):
+        """Generate a thumbnail from the uploaded image (300x300px, optimized)"""
+        try:
+            img = Image.open(self.image)
+            # Convert RGBA to RGB if necessary (for JPEG compatibility)
+            if img.mode in ('RGBA', 'LA', 'P'):
+                rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = rgb_img
+            
+            # Create thumbnail
+            img.thumbnail((300, 300), Image.Resampling.LANCZOS)
+            
+            # Save to BytesIO
+            thumb_io = BytesIO()
+            img.save(thumb_io, format='JPEG', quality=85, optimize=True)
+            thumb_io.seek(0)
+            
+            # Generate filename
+            name = os.path.splitext(self.image.name)[0]
+            thumb_filename = f"{name}_thumb.jpg"
+            
+            # Save thumbnail
+            self.image_thumbnail.save(thumb_filename, ContentFile(thumb_io.read()), save=False)
+        except Exception as e:
+            # Silently fail if thumbnail generation fails
+            pass
 
     def get_absolute_url(self):
         return reverse("organization_Volunteer_detail", args=(self.pk,))

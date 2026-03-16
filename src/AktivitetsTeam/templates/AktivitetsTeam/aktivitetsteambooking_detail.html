@@ -164,9 +164,15 @@
                 <div class="card-body p-4">
                     <h5 class="card-title mb-3 border-bottom pb-2">Kontaktperson</h5>
                     <div class="d-flex align-items-center mb-3">
-                        <div class="bg-soft-primary rounded-circle p-2 me-3">
-                            {% bs_icon "person-circle" extra_classes="fs-3 text-primary" %}
-                        </div>
+                        {% if object.team_contact.image_thumbnail %}
+                            <img src="{{ object.team_contact.image_thumbnail.url }}" alt="{{ object.team_contact.get_full_name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;" loading="lazy">
+                        {% elif object.team_contact.image %}
+                            <img src="{{ object.team_contact.image.url }}" alt="{{ object.team_contact.get_full_name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;" loading="lazy">
+                        {% else %}
+                            <div class="bg-soft-primary rounded-circle p-2 me-3">
+                                {% bs_icon "person-circle" extra_classes="fs-3 text-primary" %}
+                            </div>
+                        {% endif %}
                         <div>
                             <a href="{% url 'organization_Volunteer_detail' object.team_contact.pk %}" class="detail-value text-decoration-none">
                                 {{ object.team_contact }}

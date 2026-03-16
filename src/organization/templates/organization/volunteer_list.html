@@ -48,9 +48,15 @@
                         <tr class="clickable-row" data-href="{% url 'organization_Volunteer_detail' volunteer.id %}">
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-secondary-subtle text-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.8rem;">
-                                        {{ volunteer.first_name|slice:":1" }}{{ volunteer.last_name|slice:":1" }}
-                                    </div>
+                                    {% if volunteer.image_thumbnail %}
+                                        <img src="{{ volunteer.image_thumbnail.url }}" alt="{{ volunteer.first_name }} {{ volunteer.last_name }}" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                                    {% elif volunteer.image %}
+                                        <img src="{{ volunteer.image.url }}" alt="{{ volunteer.first_name }} {{ volunteer.last_name }}" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                                    {% else %}
+                                        <div class="avatar-sm me-3 bg-secondary-subtle text-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                            {{ volunteer.first_name|slice:":1" }}{{ volunteer.last_name|slice:":1" }}
+                                        </div>
+                                    {% endif %}
                                     <div>
                                         <span class="text-dark fw-bold">
                                             {{ volunteer.first_name }} {{ volunteer.last_name }}

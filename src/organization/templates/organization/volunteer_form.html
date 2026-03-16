@@ -7,9 +7,15 @@
         <div class="col-lg-8">
             
             <div class="text-center mb-5">
-                <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
-                    <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
-                </div>
+                {% if object.image %}
+                    <div class="position-relative d-inline-block mb-3">
+                        <img src="{{ object.image.url }}" alt="{{ object.get_full_name }}" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover;" loading="lazy">
+                    </div>
+                {% else %}
+                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 120px; height: 120px;">
+                        <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
+                    </div>
+                {% endif %}
                 <h2 class="fw-bold mb-1">{{ object.get_full_name }}</h2>
                 <p class="text-muted small">Medlem siden {{ object.created|date:"M Y" }}</p>
             </div>
@@ -43,12 +49,46 @@
                                 <input type="text" name="last_name" class="form-control bg-light border-0 py-2" value="{{ object.last_name }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold small text-muted">E-mail (Kan ikke ændres)</label>
-                                <input type="email" class="form-control bg-white border-0 py-2 text-muted" value="{{ object.email }}" readonly>
+                                <label class="form-label fw-semibold small text-muted">E-mail</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="small text-danger mt-1">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}<br>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold small text-muted">Telefon</label>
                                 <input type="text" name="phone" class="form-control bg-light border-0 py-2" value="{{ object.phone }}">
+                            </div>
+                        </div>
+
+                        <hr class="my-4 opacity-10">
+
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-secondary-subtle p-2 rounded-3 me-3 text-secondary">
+                                <bs_icon class="bi bi-image fs-4"></bs_icon>
+                            </div>
+                            <h5 class="fw-bold mb-0">Profilbillede</h5>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small text-muted">Upload profilbillede</label>
+                                {{ form.image }}
+                                <small class="text-muted d-block mt-2">
+                                    <bs_icon class="bi bi-info-circle me-1"></bs_icon>
+                                    Tilladte format: JPG, PNG (maks 5 MB)
+                                </small>
+                                {% if form.image.errors %}
+                                    <div class="small text-danger mt-1">
+                                        {% for error in form.image.errors %}
+                                            {{ error }}<br>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 

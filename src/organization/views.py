@@ -228,7 +228,8 @@ class VolunteerDetailView(LoginRequiredMixin, generic.DetailView):
 
 class VolunteerUpdateView(UserPassesTestMixin, generic.UpdateView):
     model = models.Volunteer
-    fields = ['first_name', 'last_name', 'phone']
+    form_class = forms.VolunteerProfileUpdateForm
+    template_name = 'organization/volunteer_form.html'
 
     def test_func(self):
         # Only allow the user to edit their own profile
@@ -238,6 +239,11 @@ class VolunteerUpdateView(UserPassesTestMixin, generic.UpdateView):
     def handle_no_permission(self):
         # Redirect them back to their own profile if they try to edit someone else's
         return redirect('volunteer_detail', pk=self.request.user.pk)
+    
+    def form_valid(self, form):
+        # Add success message
+        messages.success(self.request, 'Din profil blev opdateret succesfuldt!')
+        return super().form_valid(form)
 
 
 class VolunteerDeleteView(generic.DeleteView):

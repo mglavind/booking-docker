@@ -65,7 +65,13 @@
                                 </tr>
                                 <tr>
                                     <th class="text-muted text-uppercase small">Kontaktperson</th>
-                                    <td>{{ object.team_contact }}</td>
+                                    <td>
+                                        {% if object.team_contact.image_thumbnail %}
+                                            <img src="{{ object.team_contact.image_thumbnail.url }}" alt="{{ object.team_contact.get_full_name }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; margin-right: 10px;" loading="lazy">
+                                        {% elif object.team_contact.image %}
+                                            <img src="{{ object.team_contact.image.url }}" alt="{{ object.team_contact.get_full_name }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; margin-right: 10px;" loading="lazy">
+                                        {% endif %}{{ object.team_contact }}
+                                    </td>
                                 </tr>
                                 {% if object.remarks %}
                                 <tr>

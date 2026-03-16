@@ -36,19 +36,43 @@
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
                     <label class="text-muted small d-block">Afsender</label>
-                    <span class="fs-5">{% bs_icon "person" %} {{ object.requester.get_full_name|default:object.requester.username }}
-                    {% with object.requester.teams.first as team %}
-                        {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
-                    {% endwith %}
-                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if object.requester.image_thumbnail %}
+                            <img src="{{ object.requester.image_thumbnail.url }}" alt="{{ object.requester.get_full_name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                        {% elif object.requester.image %}
+                            <img src="{{ object.requester.image.url }}" alt="{{ object.requester.get_full_name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                {{ object.requester.first_name|slice:":1" }}{{ object.requester.last_name|slice:":1" }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="fs-5">{% bs_icon "person" %} {{ object.requester.get_full_name|default:object.requester.username }}</span>
+                            {% with object.requester.teams.first as team %}
+                                {% if team %}<small class="text-muted d-block">({{ team.short_name }})</small>{% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="text-muted small d-block">Modtager</label>
-                    <span class="fs-5">{% bs_icon "person-fill" %} {{ object.receiver.get_full_name|default:object.receiver.username }}
-                    {% with object.receiver.teams.first as team %}
-                        {% if team %}<small class="text-muted">({{ team.short_name }})</small>{% endif %}
-                    {% endwith %}
-                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if object.receiver.image_thumbnail %}
+                            <img src="{{ object.receiver.image_thumbnail.url }}" alt="{{ object.receiver.get_full_name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                        {% elif object.receiver.image %}
+                            <img src="{{ object.receiver.image.url }}" alt="{{ object.receiver.get_full_name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                {{ object.receiver.first_name|slice:":1" }}{{ object.receiver.last_name|slice:":1" }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="fs-5">{% bs_icon "person-fill" %} {{ object.receiver.get_full_name|default:object.receiver.username }}</span>
+                            {% with object.receiver.teams.first as team %}
+                                {% if team %}<small class="text-muted d-block">({{ team.short_name }})</small>{% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
                 </div>
             </div>
 

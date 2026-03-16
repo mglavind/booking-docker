@@ -42,80 +42,41 @@
   </thead>
   <tbody>
     {% for object in object_list %}
-      {% if not user.is_staff %}
-        {% if user_team_membership.team.name and object.team == user_team_membership.team %}
-          <tr>
-            <th scope="row">{{ object.id }}</th>
-            <td><a href="{{ object.get_absolute_url }}">{{ object.item }}</a></td>
-            <td>{{ object.quantity }}</td>
-            <td>{{ object.start }}</td>
-            <td>{{ object.start_time }}</td>
-            <td>{{ object.team_contact }}</td>
-            <td>
-              {% if object.status == 'Pending' %}
-                <span class="badge bg-warning text-dark">
-                  <small>Afventer</small>
-                </span>
-              {% elif object.status == 'Approved' %}
-                <span class="badge bg-success">
-                  <small>Godkendt</small>
-                </span>
-              {% elif object.status == 'Rejected' %}
-                <span class="badge bg-danger">
-                  <small>Afvist</small>
-                </span>
-              {% elif object.status == 'Udleveret' %}
-                <span class="badge bg-info">
-                  <small>Udleveret</small>
-                </span>
-              {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'Butikken_ButikkenBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
-                {% bs_icon 'pencil' %}
-              </a>
-              <a href="{% url 'Butikken_ButikkenBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
-                {% bs_icon 'trash' %}
-              </a>
-            </td>
-          </tr>
-        {% endif %}
-      {% else %}
-        <tr>
-          <th scope="row">{{ object.id }}</th>
-          <td><a href="{{ object.get_absolute_url }}">{{ object.item }}</a></td>
-          <td>{{ object.quantity }}</td>
-          <td>{{ object.start }}</td>
-          <td>{{ object.team_contact }}</td>
-          <td>
-            {% if object.status == 'Pending' %}
-              <span class="badge bg-warning text-dark">
-                <small>Afventer</small>
-              </span>
-            {% elif object.status == 'Approved' %}
-              <span class="badge bg-success">
-                <small>Godkendt</small>
-              </span>
-            {% elif object.status == 'Rejected' %}
-              <span class="badge bg-danger">
-                <small>Afvist</small>
-              </span>
-            {% elif object.status == 'Udleveret' %}
-              <span class="badge bg-info">
-                <small>Udleveret</small>
-              </span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'Butikken_ButikkenBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
-              {% bs_icon 'pencil' %}
-            </a>
-            <a href="{% url 'Butikken_ButikkenBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
-              {% bs_icon 'trash' %}
-            </a>
-          </td>
-        </tr>
-      {% endif %}
+      <tr>
+        <th scope="row">{{ object.id }}</th>
+        <td><a href="{{ object.get_absolute_url }}">{{ object.item }}</a></td>
+        <td>{{ object.quantity }}</td>
+        <td>{{ object.start }}</td>
+        <td>{{ object.start_time }}</td>
+        <td>{{ object.team_contact }}</td>
+        <td>
+          {% if object.status == 'Pending' %}
+            <span class="badge bg-warning text-dark">
+              <small>Afventer</small>
+            </span>
+          {% elif object.status == 'Approved' %}
+            <span class="badge bg-success">
+              <small>Godkendt</small>
+            </span>
+          {% elif object.status == 'Rejected' %}
+            <span class="badge bg-danger">
+              <small>Afvist</small>
+            </span>
+          {% elif object.status == 'Udleveret' %}
+            <span class="badge bg-info">
+              <small>Udleveret</small>
+            </span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'Butikken_ButikkenBooking_update' object.pk %}" class="btn btn-outline-warning btn-sm">
+            {% bs_icon 'pencil' %}
+          </a>
+          <a href="{% url 'Butikken_ButikkenBooking_delete' object.pk %}" class="btn btn-outline-danger btn-sm">
+            {% bs_icon 'trash' %}
+          </a>
+        </td>
+      </tr>
     {% endfor %}
   </tbody>
 </table>

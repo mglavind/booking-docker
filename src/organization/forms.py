@@ -109,6 +109,59 @@ class VolunteerForm(forms.ModelForm):
         ]
 
 
+class VolunteerProfileUpdateForm(forms.ModelForm):
+    """Form for volunteers to update their own profile including email and picture"""
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control bg-light border-0 py-2',
+            'placeholder': 'Din e-mail adresse'
+        })
+    )
+    
+    class Meta:
+        model = models.Volunteer
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "image",
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control bg-light border-0 py-2',
+                'placeholder': 'Dit fornavn'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control bg-light border-0 py-2',
+                'placeholder': 'Dit efternavn'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control bg-light border-0 py-2',
+                'placeholder': 'Dit telefonnummer'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control bg-light border-0 py-2',
+                'accept': 'image/*'
+            }),
+        }
+        labels = {
+            'first_name': 'Fornavn',
+            'last_name': 'Efternavn',
+            'email': 'E-mail',
+            'phone': 'Telefon',
+            'image': 'Profilbillede',
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Check if email is unique, excluding the current user
+        if models.Volunteer.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('Denne e-mail adresse er allerede i brug. Væg venligst en anden.')
+        return email
+
+
 class KeyForm(forms.ModelForm):
     class Meta:
         model = models.Key

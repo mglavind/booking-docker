@@ -6,6 +6,7 @@ from . import views
 from django.shortcuts import render
 #from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf.urls import handler404, handler500, handler403
+from django.conf.urls.static import static
 
 handler404 = 'django.views.defaults.page_not_found'
 handler500 = 'django.views.defaults.server_error'
@@ -31,4 +32,8 @@ urlpatterns = [
     path('test-500/', lambda r: render(r, '500.html')),
     path('test-403/', lambda r: render(r, '403.html')),
 ] #+ debug_toolbar_urls()
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
