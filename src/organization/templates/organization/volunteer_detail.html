@@ -25,9 +25,19 @@
                     </div>
                     {% endif %}
 
-                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
-                        <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
-                    </div>
+                    {% if object.image %}
+                        <div class="position-relative d-inline-block mb-3 mx-auto">
+                            <img src="{{ object.image.url }}" alt="{{ object.get_full_name }}" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; display: block;" loading="lazy">
+                        </div>
+                    {% elif object.image_thumbnail %}
+                        <div class="position-relative d-inline-block mb-3 mx-auto">
+                            <img src="{{ object.image_thumbnail.url }}" alt="{{ object.get_full_name }}" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; display: block;" loading="lazy">
+                        </div>
+                    {% else %}
+                        <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                            <span class="display-4 fw-bold">{{ object.first_name|slice:":1" }}{{ object.last_name|slice:":1" }}</span>
+                        </div>
+                    {% endif %}
                     <h2 class="fw-bold mb-1">{{ object.get_full_name }}</h2>
                     <span class="badge bg-light text-secondary border rounded-pill px-3">Frivillig Profil</span>
                 </div>
