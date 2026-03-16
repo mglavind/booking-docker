@@ -72,7 +72,8 @@ class Team(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     short_name = models.CharField(max_length=30, db_index=True)   
-    events = models.ManyToManyField(Event, through='TeamEventMembership', db_index=True) 
+    events = models.ManyToManyField(Event, through='TeamEventMembership', db_index=True)
+    discord_webhook_url = models.URLField(null=True, blank=True, help_text="Discord webhook URL for real-time notifications. Get this from Server Settings > Integrations > Webhooks > Copy Webhook URL")
     history = HistoricalRecords()
 
 
@@ -96,6 +97,7 @@ class Volunteer(AbstractUser):
     phone = models.CharField(max_length=30, blank=True, db_index=True)
     image = models.ImageField(upload_to='volunteer_profiles/', blank=True, null=True)
     image_thumbnail = models.ImageField(upload_to='volunteer_profiles/thumbnails/', blank=True, null=True, editable=False)
+    discord_id = models.CharField(max_length=30, null=True, blank=True, help_text="Discord user ID for @mention functionality (e.g., '123456789')")
     events = models.ManyToManyField(Event, through='EventMembership',blank=True, db_index=True)
     teams = models.ManyToManyField(Team, through='TeamMembership', blank=True, db_index=True)
     history = HistoricalRecords()
