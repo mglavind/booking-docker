@@ -74,8 +74,16 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
         queryset.update(status="Rejected")
         self.message_user(request, "Foto bookinger afvist.", messages.WARNING)
 
-    @admin.action(description="Eksporter til iCal")
+    @admin.action(description="Exporter valgte bookinger til iCal fil")
     def export_selected_to_ical(self, request, queryset):
+        """
+        Eksporter valgte bookinger som iCal fil.
+        Opretter én .ics fil med alle valgte bookinger som separate eventos.
+        """
+        if not queryset.exists():
+            self.message_user(request, "Vælg mindst én booking for at eksportere.", messages.WARNING)
+            return
+        
         calendar = Calendar()
         for booking in queryset:
             event = ICalEvent()
@@ -90,8 +98,19 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
             event.add('dtend', end)
             calendar.add_component(event)
         
+        count = queryset.count()
+        first_booking = queryset.first()
+        start_date = first_booking.start_date.strftime("%d-%m-%Y")
+        filename = f"foto_{count}_bookinger_{start_date}.ics"
+        
         response = HttpResponse(calendar.to_ical(), content_type='text/calendar')
-        response['Content-Disposition'] = 'attachment; filename="foto_bookings.ics"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        self.message_user(
+            request,
+            f"✅ Eksporteret {count} booking(er) til iCal fil.",
+            messages.SUCCESS
+        )
         return response
 
 @admin.register(FotoItem)

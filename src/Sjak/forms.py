@@ -29,25 +29,38 @@ class SjakBookingForm(forms.ModelForm):
     class Meta:
         model = models.SjakBooking
         fields = [
-            "start", "start_time", "end", "end_time",
-            "team_contact", "item", "team", "remarks", "quantity",'image'
+            "quantity",
+            "team",
+            "item",
+            "start",
+            "start_time",
+            "end",
+            "end_time",
+            "team_contact",
+            "remarks",
+            "image",
+            "status_internal",
         ]
-        labels = {
-            "item": "Vælg en ting",       # Changed from "Sjak ting"
-            "quantity": "Antal",   # Changed from "Antal"
-            "team": "Team",
-            "team_contact": "Kontaktperson",
-            "start": "Udlånsdato",
-            "end": "Afleveringsdato",
-            "remarks": "Bemærkninger til Sjak",
-        }
         widgets = {
-            # Add 'tom-select' class here
-            "item": forms.Select(attrs={"class": "tom-select", "placeholder": "Søg efter ting..."}),
+            "item": forms.Select(attrs={"class": "form-select"}),
             "team": forms.Select(attrs={"class": "form-select"}),
             "team_contact": forms.Select(attrs={"class": "form-select"}),
             "quantity": forms.NumberInput(attrs={"class": "form-control", "step": "1", "min": "1"}),
             "remarks": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "status_internal": forms.Select(attrs={"class": "form-select"}),
+        }
+        labels = {
+            "quantity": "Antal",
+            "team": "Team",
+            "item": "Sjak Ting",
+            "team_contact": "Kontaktperson",
+            "start": "Udlånsdato",
+            "start_time": "Afhentning tidspunkt",
+            "end": "Afleveringsdato",
+            "end_time": "Retur tidspunkt",
+            "remarks": "Bemærkninger til Sjak",
+            "image": "Billede",
+            "status_internal": "Intern Status",
         }
 
     def __init__(self, *args, user=None, **kwargs):

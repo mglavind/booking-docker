@@ -2,24 +2,17 @@
 Discord-notifikationer i realtid for ButikkenBooking ændringer.
 
 Når en ButikkenBooking oprettes eller opdateres, sendes en notifikation til det
-konfigurerede Discord webhook URL for teamet.
+konfigurerede Discord webhook URL for teamet via en thread.
 """
 
 import logging
+import json
+import requests
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
-
-# Kontroller om apprise er tilgængelig
-try:
-    import apprise
-    from apprise import NotifyType
-    APPRISE_AVAILABLE = True
-except ImportError:
-    APPRISE_AVAILABLE = False
-    logger.warning('apprise bibliotek ikke installeret - Discord notifikationer deaktiveret')
 
 from Butikken.models import ButikkenBooking
 
@@ -27,18 +20,14 @@ from Butikken.models import ButikkenBooking
 @receiver(post_save, sender=ButikkenBooking)
 def notify_discord_on_butikkenbooking_change(sender, instance, created, **kwargs):
     """
-    Send en Discord notifikation når en ButikkenBooking oprettes eller opdateres.
+    Send en Discord notifikation til en thread når en ButikkenBooking oprettes eller opdateres.
     
     Signal handler der:
-    - Kontrollerer om apprise er tilgængelig
     - Verificerer at teamet har et discord_webhook_url konfigureret
-    - Formaterer en rig Discord embed besked med bookingdetaljer
-    - Sender via Discord webhook ved brug af apprise
+    - Opretter eller finder threaden "Booking opdateringer"
+    - Poster notifikationen til threaden
     - Håndterer fejl elegant (påvirker ikke bookingoprettelse)
     """
-    
-    if not APPRISE_AVAILABLE:
-        return
     
     # Afslut tidligt hvis teamet ikke har webhook URL konfigureret
     if not instance.team or not instance.team.discord_webhook_url:
@@ -61,8 +50,7 @@ def notify_discord_on_butikkenbooking_change(sender, instance, created, **kwargs
         contact_name = instance.team_contact.get_full_name() if instance.team_contact else "Ikke angivet"
         item_name = instance.item.name if instance.item else "Ikke valgt"
         
-        message = f"""
-**{action}** {status_emoji} | **Butikken**
+        message_text = f"""**{action}** {status_emoji} | **Butikken**
 
 {item_name} for {instance.team.name}
 
@@ -72,28 +60,33 @@ def notify_discord_on_butikkenbooking_change(sender, instance, created, **kwargs
 
 {instance.remarks if instance.remarks else ""}
 
-[Se booking →]({booking_url})
-""".strip()
+[Se booking →]({booking_url})"""
         
-        # Byg Discord notifikation
-        apobj = apprise.Apprise()
+        # Send Discord webhook med thread support
+        webhook_url = instance.team.discord_webhook_url
         
-        # Byg webhook URL med avatar
-        favicon_url = f"{settings.CSRF_TRUSTED_ORIGINS[0]}/static/favicon.png"
-        webhook_url = f"{instance.team.discord_webhook_url}?avatar_url={favicon_url}"
-        apobj.add(webhook_url)
+        payload = {
+            "content": message_text,
+            "username": "🛒 Butikken Notifikationer",
+            "thread_name": "Booking opdateringer",
+        }
         
-        # Send notifikation via Discord webhook
-        success = apobj.notify(
-            body=message,
-            title=f"🛒 Butikken - {instance.team.name}",
-            notify_type=NotifyType.INFO
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            timeout=10
         )
         
-        if success:
+        if response.status_code == 204:
             logger.info(f'Discord notifikation sendt for ButikkenBooking {instance.id}')
         else:
-            logger.warning(f'Fejl ved afsendelse af Discord notifikation for ButikkenBooking {instance.id}')
+            logger.warning(f'Discord webhook fejl for ButikkenBooking {instance.id}: HTTP {response.status_code} - {response.text[:200]}')
+    
+    except Exception as e:
+        logger.error(
+            f'Fejl ved afsendelse af Discord notifikation for ButikkenBooking {instance.id}: {str(e)}',
+            exc_info=True
+        )
     
     except Exception as e:
         logger.error(

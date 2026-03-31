@@ -81,11 +81,30 @@ class TeknikBaseAdmin(ModelAdmin, ImportExportModelAdmin):
         queryset.update(status="Rejected")
         self.message_user(request, "Valgte bookinger er afvist.", messages.WARNING)
 
-    @action(description="Export selected bookings to iCal")
+    @action(description="Exporter valgte bookinger til iCal fil")
     def export_selected_to_ical_action(self, request, queryset):
+        """
+        Export selected bookings to iCal format.
+        Creates one .ics file with all selected bookings as separate events.
+        """
+        if not queryset.exists():
+            self.message_user(request, "Select at least one booking to export.", messages.WARNING)
+            return
+        
         ical_content = export_selected_to_ical(queryset)
+        count = queryset.count()
+        first_booking = queryset.first()
+        start_date = first_booking.start_date.strftime("%d-%m-%Y")
+        filename = f"teknik_{count}_bookings_{start_date}.ics"
+        
         response = HttpResponse(ical_content, content_type='text/calendar')
-        response['Content-Disposition'] = 'attachment; filename="teknik-bookings.ics"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        self.message_user(
+            request,
+            f"✅ Exported {count} booking(s) to iCal file.",
+            messages.SUCCESS
+        )
         return response
 
 # --- Admin Classes ---

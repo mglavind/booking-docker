@@ -5,17 +5,19 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from unfold.admin import ModelAdmin, GenericTabularInline
-from unfold.decorators import display
+from unfold.admin import ModelAdmin, TabularInline
+from unfold.decorators import display, action
 from unfold.contrib.import_export.forms import ImportForm, SelectableFieldsExportForm
 from import_export.admin import ImportExportModelAdmin
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget
 
 from django_comments_xtd.models import XtdComment
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from .models import SjakItem, SjakBooking, SjakItemType, SjakItemLocation, SjakTag
 from .forms import SjakBookingForm, SjakItemForm
+from utils.ical_utils import export_selected_to_ical
 
 
 # ============================================================================
@@ -30,6 +32,22 @@ class CreateIfNotFoundWidget(ForeignKeyWidget):
             return None
         obj, _ = self.model.objects.get_or_create(**{self.field: value})
         return obj
+
+
+class SjakBookingResource(resources.ModelResource):
+    """Import/Export ressource for SjakBooking."""
+    
+    item = fields.Field(column_name='Item', attribute='item', widget=ForeignKeyWidget(SjakItem, 'name'))
+    team = fields.Field(column_name='Team', attribute='team', widget=ForeignKeyWidget(SjakItem, 'name'))
+    team_contact = fields.Field(column_name='Kontakt', attribute='team_contact', widget=ForeignKeyWidget(SjakItem, 'first_name'))
+
+    class Meta:
+        model = SjakBooking
+        fields = (
+            'id', 'item', 'quantity', 'team', 'team_contact', 
+            'start', 'start_time', 'end', 'end_time', 
+            'status', 'status_internal'
+        )
 
 
 class SjakItemResource(resources.ModelResource):
@@ -62,7 +80,7 @@ class SjakBaseAdmin(ModelAdmin, ImportExportModelAdmin):
     
     import_form_class = ImportForm
     export_form_class = SelectableFieldsExportForm
-    actions = ["approve_selected", "reject_selected", "export_selected_raw"]
+    actions = ["approve_selected", "reject_selected", "export_selected_to_ical_action"]
 
     @admin.action(description="Godkend valgte")
     def approve_selected(self, request, queryset):
@@ -76,20 +94,30 @@ class SjakBaseAdmin(ModelAdmin, ImportExportModelAdmin):
         updated = queryset.update(status="Rejected")
         self.message_user(request, f"{updated} bookinger er blevet afvist.", messages.WARNING)
 
-    @admin.action(description="Eksporter valgte (CSV)")
-    def export_selected_raw(self, request, queryset):
-        """Eksporter valgte elementer som CSV."""
-        meta = self.model._meta
-        field_names = [field.name for field in meta.fields]
+    @action(description="Exporter valgte bookinger til iCal fil")
+    def export_selected_to_ical_action(self, request, queryset):
+        """
+        Eksporter valgte bookinger som iCal fil.
+        Oprettter én .ics fil med alle valgte bookinger som separate eventos.
+        """
+        if not queryset.exists():
+            self.message_user(request, "Vælg mindst én booking for at eksportere.", messages.WARNING)
+            return
         
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename={meta.model_name}_export.csv'
+        ical_content = export_selected_to_ical(queryset)
+        count = queryset.count()
+        first_booking = queryset.first()
+        start_date = first_booking.start.strftime("%d-%m-%Y")
+        filename = f"sjak_{count}_bookinger_{start_date}.ics"
         
-        writer = csv.writer(response)
-        writer.writerow(field_names)
-        for obj in queryset:
-            writer.writerow([getattr(obj, field) for field in field_names])
+        response = HttpResponse(ical_content, content_type='text/calendar')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
+        self.message_user(
+            request,
+            f"✅ Eksporteret {count} booking(er) til iCal fil.",
+            messages.SUCCESS
+        )
         return response
 
 
@@ -106,6 +134,7 @@ class CommentInline(GenericTabularInline):
     extra = 1
     fields = ("user", "comment", "submit_date", "is_public")
     readonly_fields = ("submit_date", "user")
+    tab = False
 
     def has_change_permission(self, request, obj=None):
         """Tillad kun forfatter eller superuser at redigere kommentarer."""
@@ -118,18 +147,6 @@ class CommentInline(GenericTabularInline):
         if obj and isinstance(obj, XtdComment):
             return obj.user == request.user or request.user.is_superuser
         return super().has_delete_permission(request, obj)
-
-    def save_model(self, request, obj, form, change):
-        """Indsæt nuværende bruger og site ID når kommentarer gemmes."""
-        if not obj.user:
-            obj.user = request.user
-        if not obj.site_id:
-            obj.site_id = getattr(settings, "SITE_ID", 1)
-        if not obj.user_name:
-            obj.user_name = request.user.get_full_name() or request.user.username
-        if not obj.user_email:
-            obj.user_email = request.user.email
-        super().save_model(request, obj, form, change)
 
 
 # ============================================================================
@@ -148,6 +165,13 @@ class SjakItemAdmin(SjakBaseAdmin):
     date_hierarchy = "created"
     ordering = ["-last_updated"]
     list_per_page = 25
+    
+    # Unfold styling
+    unfold_fieldset_summary = {
+        "Grundlæggende": ("name", "item_type"),
+        "Lokation og Lager": ("location", "quantity_lager"),
+    }
+    unfold_hide_empty_change_form_tabs = True
 
     @display(description="Billede")
     def display_image(self, obj):
@@ -178,40 +202,31 @@ class SjakItemAdmin(SjakBaseAdmin):
 class SjakBookingAdmin(SjakBaseAdmin):
     """Admin for håndtering af Sjak udstyrsbookinger."""
     
+    resource_class = SjakItemResource
+    list_fullwidth = True
+    
     inlines = [CommentInline]
     form = SjakBookingForm
-    list_fullwidth = True
-    date_hierarchy = "start"
-    ordering = ["-start"]
-    list_per_page = 30
     
     list_display = [
-        "item", "quantity", "team",
-        "display_status", "display_internal_status",
-        "formatted_times", "last_updated"
+        "item", "quantity", "team", "display_status",
+        "formatted_times", "display_internal_status"
     ]
     list_filter = ["status", "status_internal", "team", "item", "start"]
     search_fields = ["item__name", "team__name", "team_contact__first_name"]
     readonly_fields = ["image_preview"]
-    actions = SjakBaseAdmin.actions + ["set_status_klar", "set_status_igang"]
 
-    fieldsets = (
-        ("Booking Information", {
-            "fields": ("item", "quantity", "team", "team_contact", "assigned_sjak"),
-            "description": "Grundlæggende bookingoplysninger"
-        }),
-        ("Datoer og Tider", {
-            "fields": ("start", "start_time", "end", "end_time"),
-            "classes": ("wide",)
-        }),
-        ("Status", {
-            "fields": ("status", "status_internal"),
-            "description": "Booking- og internt arbejdsstatus"
-        }),
-        ("Noter og Billede", {
-            "fields": ("remarks", "image", "image_preview"),
-        }),
-    )
+    fields = [
+        ("item", "status"),
+        ("team", "quantity"),
+        ("start", "start_time"),
+        ("end", "end_time"),
+        "team_contact",
+        "assigned_sjak",
+        ("remarks", "status_internal"),
+        "image",
+        "image_preview",
+    ]
 
     # ---- Visningsmetoder ----
 
@@ -237,7 +252,7 @@ class SjakBookingAdmin(SjakBaseAdmin):
     @display(description="Tidsramme")
     def formatted_times(self, obj):
         """Vis datointervallet i kompakt format."""
-        return f"{obj.start.strftime('%d/%m')} - {obj.end.strftime('%d/%m')}"
+        return f"{obj.start.strftime('%d/%m')} {obj.start_time.strftime('%H:%M')} - {obj.end.strftime('%d/%m')} {obj.end_time.strftime('%H:%M')}"
 
     def image_preview(self, obj):
         """Vis forhåndsvisning af bookingbillede hvis tilgængeligt."""
@@ -249,19 +264,30 @@ class SjakBookingAdmin(SjakBaseAdmin):
 
     image_preview.short_description = "Forhåndsvisning"
 
-    # ---- Brugerdefinerede handlinger ----
+    def save_formset(self, request, form, formset, change):
+        """
+        Catches the inline formset and injects the SITE_ID and 
+        the current user into any new comments.
+        """
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, XtdComment):
+                # 1. Inject Site ID
+                if not instance.site_id:
+                    instance.site_id = getattr(settings, "SITE_ID", 1)
+                
+                # 2. Inject Current User if none is set
+                if not instance.user:
+                    instance.user = request.user
+                
+                # 3. Force the user's name/email into the required fields
+                if not instance.user_name:
+                    instance.user_name = request.user.get_full_name() or request.user.username
+                if not instance.user_email:
+                    instance.user_email = request.user.email
 
-    @admin.action(description="Sæt Intern status: Klar")
-    def set_status_klar(self, request, queryset):
-        """Sæt internt status til 'Klar' for valgte bookinger."""
-        count = queryset.update(status_internal="Klar")
-        self.message_user(request, f"{count} booking(er) sat til 'Klar'.", messages.SUCCESS)
-
-    @admin.action(description="Sæt Intern status: Igang")
-    def set_status_igang(self, request, queryset):
-        """Sæt internt status til 'Igang' for valgte bookinger."""
-        count = queryset.update(status_internal="Igang")
-        self.message_user(request, f"{count} booking(er) sat til 'Igang'.", messages.SUCCESS)
+            instance.save()
+        formset.save_m2m()
 
 
 # ============================================================================
@@ -274,6 +300,7 @@ class SjakItemTypeAdmin(SjakBaseAdmin):
     list_display = ["name", "created"]
     list_fullwidth = True
     ordering = ["name"]
+    unfold_hide_empty_change_form_tabs = True
 
 
 @admin.register(SjakItemLocation)
@@ -282,6 +309,7 @@ class SjakItemLocationAdmin(SjakBaseAdmin):
     list_display = ["name", "created"]
     list_fullwidth = True
     ordering = ["name"]
+    unfold_hide_empty_change_form_tabs = True
 
 
 @admin.register(SjakTag)
@@ -291,3 +319,4 @@ class SjakTagAdmin(SjakBaseAdmin):
     fields = ["name", "color"]
     list_fullwidth = True
     ordering = ["name"]
+    unfold_hide_empty_change_form_tabs = True
