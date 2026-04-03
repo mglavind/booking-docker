@@ -1,0 +1,62 @@
+{# Reusable comments section for booking modules - Danish version #}
+{# Usage: {% include "components/booking_comments_section.html" with object=object comments=comments %} #}
+{% load bootstrap_icons %}
+{% load comments %}
+{% load comments_xtd %}
+
+<div class="comments-section mb-4">
+    <h5 class="fw-bold mb-3 border-bottom pb-2">
+        {% bs_icon "chat-left-text" %} Kommentarer
+        <span class="badge bg-secondary rounded-pill ms-2">{{ comments|length }}</span>
+    </h5>
+    
+    {% if comments %}
+        <div class="mb-4">
+            {% for comment in comments %}
+                <div id="c{{ comment.id }}" class="card border-light mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-start gap-3">
+                            {% if comment.user.image_thumbnail %}
+                                <img src="{{ comment.user.image_thumbnail.url }}" alt="{{ comment.user.get_full_name }}" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" loading="lazy">
+                            {% elif comment.user.image %}
+                                <img src="{{ comment.user.image.url }}" alt="{{ comment.user.get_full_name }}" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" loading="lazy">
+                            {% else %}
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; font-size: 0.8rem;">
+                                    {{ comment.user.first_name|slice:":1" }}{{ comment.user.last_name|slice:":1" }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>{{ comment.user.get_full_name }}</strong>
+                                        <small class="text-muted d-block">{{ comment.submit_date|date:"d. M Y H:i" }}</small>
+                                    </div>
+                                    <div class="small">
+                                        {% if user.is_staff or user == comment.user %}
+                                            <a class="text-decoration-none text-danger" href="/comments/delete/{{ comment.id }}/" title="Slet kommentar">
+                                                {% bs_icon "trash" %}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="content py-1">
+                                    {{ comment.comment|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted mb-4">Ingen kommentarer endnu.</p>
+    {% endif %}
+    
+    <div class="card bg-light border">
+        <div class="card-body">
+            {% render_comment_form for object %}
+        </div>
+    </div>
+</div>

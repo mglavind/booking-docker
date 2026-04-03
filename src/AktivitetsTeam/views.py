@@ -365,7 +365,19 @@ class AktivitetsTeamBookingDetailView(LoginRequiredMixin, generic.DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from django_comments_xtd.models import XtdComment
+        from django.contrib.contenttypes.models import ContentType
+        
         context['object_dict'] = self.object.to_dict()
+        
+        content_type = ContentType.objects.get_for_model(models.AktivitetsTeamBooking)
+        context['comments'] = XtdComment.objects.filter(
+            content_type=content_type,
+            object_pk=str(self.object.pk),
+            is_public=True
+        ).select_related('user').order_by('-submit_date')
+        context['content_type_id'] = content_type.id
+        
         return context
 
 

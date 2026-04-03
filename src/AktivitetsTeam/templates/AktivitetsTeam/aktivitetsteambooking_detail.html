@@ -149,12 +149,7 @@
 
             <div class="card card-custom mb-5">
                 <div class="card-body p-4">
-                    {% get_comment_count for object as comment_count %}
-                    <h5 class="card-title mb-4 border-bottom pb-2">
-                        Kommentarer <span class="badge bg-secondary rounded-pill ms-2">{{ comment_count }}</span>
-                    </h5>
-                    {% if comment_count %}<div class="mb-4">{% render_xtdcomment_tree for object %}</div>{% endif %}
-                    <div class="bg-light p-3 rounded">{% render_comment_form for object %}</div>
+                    {% include "components/booking_comments_section.html" with object=object comments=comments %}
                 </div>
             </div>
         </div>

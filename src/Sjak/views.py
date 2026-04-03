@@ -318,6 +318,21 @@ class SjakBookingDetailView(LoginRequiredMixin, generic.DetailView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django_comments_xtd.models import XtdComment
+        from django.contrib.contenttypes.models import ContentType
+        
+        content_type = ContentType.objects.get_for_model(models.SjakBooking)
+        context['comments'] = XtdComment.objects.filter(
+            content_type=content_type,
+            object_pk=str(self.object.pk),
+            is_public=True
+        ).select_related('user').order_by('-submit_date')
+        context['content_type_id'] = content_type.id
+        
+        return context
+    
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def approve_booking(request, pk):

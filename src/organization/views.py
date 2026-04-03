@@ -325,6 +325,31 @@ class VolunteerAppointmentCreateView(LoginRequiredMixin, generic.CreateView):
 
 class VolunteerAppointmentDetailView(LoginRequiredMixin, generic.DetailView):
     model = models.VolunteerAppointment
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django_comments_xtd.models import XtdComment
+        from django.contrib.contenttypes.models import ContentType
+        from django.urls import reverse
+        
+        # Get all comments for this appointment
+        content_type = ContentType.objects.get_for_model(models.VolunteerAppointment)
+        context['comments'] = XtdComment.objects.filter(
+            content_type=content_type,
+            object_pk=str(self.object.pk),
+            is_public=True
+        ).select_related('user').order_by('-submit_date')
+        
+        # Add flag for whether user can comment
+        context['user_can_comment'] = (
+            self.request.user == self.object.requester or 
+            self.request.user == self.object.receiver
+        )
+        
+        # Add URL for comment form submission
+        context['comment_form_url'] = reverse('appointment_comment_add', kwargs={'pk': self.object.pk})
+        
+        return context
 
 class VolunteerAppointmentUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = models.VolunteerAppointment
@@ -352,4 +377,40 @@ def appointment_status_update(request, pk, new_status):
     if new_status in ['accepted', 'rejected', 'pending']:
         appointment.status = new_status
         appointment.save()
+    return redirect('organization_VolunteerAppointment_detail', pk=pk)
+
+
+@login_required
+@require_POST
+def appointment_comment_add(request, pk):
+    """Add a comment to a VolunteerAppointment."""
+    from django_comments_xtd.models import XtdComment
+    from django.contrib.contenttypes.models import ContentType
+    from django.conf import settings
+    
+    appointment = get_object_or_404(models.VolunteerAppointment, pk=pk)
+    
+    # Only requester and receiver can comment
+    if request.user != appointment.requester and request.user != appointment.receiver:
+        return redirect('organization_VolunteerAppointment_detail', pk=pk)
+    
+    comment_text = request.POST.get('comment', '').strip()
+    if not comment_text:
+        messages.warning(request, "Kommentaren kan ikke være tom.")
+        return redirect('organization_VolunteerAppointment_detail', pk=pk)
+    
+    content_type = ContentType.objects.get_for_model(models.VolunteerAppointment)
+    
+    comment = XtdComment.objects.create(
+        content_type=content_type,
+        object_pk=str(appointment.pk),
+        user=request.user,
+        user_name=request.user.get_full_name() or request.user.username,
+        user_email=request.user.email,
+        comment=comment_text,
+        is_public=True,
+        site_id=getattr(settings, 'SITE_ID', 1),
+    )
+    
+    messages.success(request, "Kommentar tilføjet!")
     return redirect('organization_VolunteerAppointment_detail', pk=pk)

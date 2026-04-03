@@ -97,6 +97,9 @@
                 </div>
             </div>
 
+            <!-- Comments Section -->
+            {% include "components/comments_section.html" with object=object comments=comments user_can_comment=user_can_comment comment_form_url=comment_form_url show_no_permission_message=True %}
+
             <div class="d-flex flex-wrap gap-2 mt-5">
                 {% if user == object.requester %}
                     <a href="{{ object.get_update_url }}" class="btn btn-warning btn-lg px-4">

@@ -89,4 +89,5 @@ urlpatterns = [
      path('appointment/<int:pk>/update/', views.VolunteerAppointmentUpdateView.as_view(), name='organization_VolunteerAppointment_update'),
      path('appointment/<int:pk>/delete/', views.VolunteerAppointmentDeleteView.as_view(), name='organization_VolunteerAppointment_delete'),
      path('appointment/<int:pk>/status/<str:new_status>/', views.appointment_status_update, name='appointment_status_update'),
+     path('appointment/<int:pk>/comment/', views.appointment_comment_add, name='appointment_comment_add'),
 ]
