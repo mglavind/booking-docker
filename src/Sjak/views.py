@@ -234,7 +234,7 @@ class SjakBookingListView(LoginRequiredMixin, generic.ListView):
         queryset = queryset.select_related(
             'team', 'team_contact', 'event', 'item__item_type'
         ).only(
-            'id', 'team_id', 'team_contact_id', 'event_id', 'start', 'start_time', 'end', 'end_time', 'item_id', 'quantity', 'status'
+            'id', 'team_id', 'team_contact_id', 'event_id', 'start_date', 'start_time', 'end_date', 'end_time', 'item_id', 'quantity', 'status'
         ).order_by('id')
         
         logger.info(f"Fetched {queryset.count()} bookings for user {user.id}")

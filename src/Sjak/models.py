@@ -119,10 +119,11 @@ class SjakBooking(models.Model):
     )
 
     # Fields
-    start = models.DateField(verbose_name='Start dato')
+    start_date = models.DateField(verbose_name='Start dato')
     start_time = models.TimeField(verbose_name='Start tidspunkt', default='12:01')
-    end = models.DateField(verbose_name='Slut dato')
+    end_date = models.DateField(verbose_name='Slut dato')
     end_time = models.TimeField(verbose_name='Slut tidspunkt', default='12:01')
+    
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)

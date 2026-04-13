@@ -1,12 +1,16 @@
 {% extends "base.html" %}
+{% load bootstrap_icons %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="mb-5 text-center text-md-start">
-        <h1 class="h2 fw-bold text-primary mb-1">Velkommen, {{ user.first_name|default:"Spejder" }}</h1>
-        <p class="text-muted">Hvad skal du booke i dag?</p>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="h3 fw-bold text-primary mb-1">Velkommen, {{ user.first_name|default:"Spejder" }}</h1>
+        <p class="text-muted mb-3">Din kommende bookinger og aftaler</p>
     </div>
 
     <div class="row g-4">
+        {% if config.APP_ENABLE_CONTACTS %}
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'organization_Volunteer_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
@@ -18,11 +22,13 @@
                 </div>
             </a>
         </div>
+        {% endif %}
         
+        {% if config.APP_ENABLE_DEPOT %}
         <div class="col-12 col-sm-6 col-lg-3">
-            <a href="{% url 'Butikken_ButikkenBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+            <a href="{% url 'Butikken_ButikkenBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-secondary text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-info text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-shop fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Butikken</h4>
@@ -30,9 +36,11 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_AKTIVITETSTEAM %}
         <div class="col-12 col-sm-6 col-lg-3">
-            <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+            <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
                     <div class="icon-box bg-success text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-universal-access fs-1"></bs_icon>
@@ -42,11 +50,13 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_SJAK %}
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'Sjak_SjakBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-warning text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-tools fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Sjak</h4>
@@ -54,7 +64,9 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_SOS %}
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'SOS_SOSBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
@@ -66,11 +78,13 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_TEKNIK %}
         <div class="col-12 col-sm-6 col-lg-3">
             <a href="{% url 'Teknik_TeknikBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-tertiary text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-warning text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-cpu fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Teknik</h4>
@@ -78,11 +92,13 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_FOTO %}
         <div class="col-12 col-sm-6 col-lg-3">
-            <a href="{% url 'Foto_FotoBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+            <a href="{% url 'Foto_FotoBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-grey text-white rounded-4 mb-3 mx-auto">
+                    <div class="icon-box bg-secondary text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-camera fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Foto</h4>
@@ -90,9 +106,11 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if config.APP_ENABLE_LEGEAFTALER %}
         <div class="col-12 col-sm-6 col-lg-3">
-            <a href="{% url 'organization_VolunteerAppointment_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+            <a href="{% url 'organization_VolunteerAppointment_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
                 <div class="card-body p-4 text-center">
                     <div class="icon-box bg-danger text-white rounded-4 mb-3 mx-auto">
                         <bs_icon class="bi bi-balloon-heart fs-1"></bs_icon>
@@ -102,25 +120,109 @@
                 </div>
             </a>
         </div>
+        {% endif %}
 
 
 
     </div>
 </div>
 
+    <!-- Timeline Section -->
+    {% if grouped_bookings %}
+        <div class="timeline">
+            {% for date, date_bookings in grouped_bookings.items %}
+                <!-- Date Header -->
+                <div class="mb-4 mt-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-0">
+                                {% if date|date:"Y-m-d" == now|date:"Y-m-d" %}
+                                    I dag, {{ date|date:"l j. F" }}
+                                {% elif date|date:"Y-m-d" == tomorrow|date:"Y-m-d" %}
+                                    I morgen, {{ date|date:"l j. F" }}
+                                {% else %}
+                                    {{ date|date:"l j. F Y" }}
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <span class="badge bg-light text-dark">{{ date_bookings|length }} booking{{ date_bookings|length|pluralize:"," }}</span>
+                    </div>
+
+                    <!-- Bookings for this date -->
+                    <div class="list-group shadow-sm border-0 rounded-2 overflow-hidden">
+                        {% for booking in date_bookings %}
+                            <div class="list-group-item p-0 border-start-0 border-end-0 border-top-0 border-bottom booking-item">
+                                <div class="booking-wrapper">
+                                    <!-- Type Icon - Left Ear -->
+                                    <button type="button" class="btn flex-shrink-0 booking-create-btn" style="width: 44px; background-color: var(--bs-{{ booking.color }}); border: none; font-size: 1.5rem; border-radius: 0;" title="Create new {{ booking.type }}">
+                                        {% if booking.type == 'Sjak' %}
+                                            <bs_icon class="bi bi-tools text-white"></bs_icon>
+                                        {% elif booking.type == 'Teknik' %}
+                                            <bs_icon class="bi bi-cpu text-white"></bs_icon>
+                                        {% elif booking.type == 'AktivitetsTeam' %}
+                                            <bs_icon class="bi bi-universal-access text-white"></bs_icon>
+                                        {% elif booking.type == 'Foto' %}
+                                            <bs_icon class="bi bi-camera text-white"></bs_icon>
+                                        {% elif booking.type == 'SOS' %}
+                                            <bs_icon class="bi bi-heart-pulse text-white"></bs_icon>
+                                        {% elif booking.type == 'Butikken' %}
+                                            <bs_icon class="bi bi-shop text-white"></bs_icon>
+                                        {% elif booking.type == 'Legeaftale' %}
+                                            <bs_icon class="bi bi-balloon-heart text-white"></bs_icon>
+                                        {% endif %}
+                                    </button>
+
+                                    <!-- Card Content -->
+                                    <a href="{{ booking.url }}" class="booking-card text-decoration-none p-2" style="flex-grow: 1;">
+                                        <div class="d-flex w-100 justify-content-between align-items-center gap-2">
+                                            <div class="d-flex align-items-center flex-grow-1 min-w-0">
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-bold text-dark mb-0">
+                                                        <span class="text-primary">{{ booking.title }}</span>
+                                                        <span class="text-muted small fw-normal ms-2">
+                                                            {{ booking.start|time:"H:i" }}
+                                                            {% if booking.end %}
+                                                                - {{ booking.end|time:"H:i" }}
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <span class="badge rounded-pill text-white flex-shrink-0" style="font-size: 0.75rem; padding: 0.35rem 0.65rem; background-color: var(--bs-{{ booking.status_color }});">
+                                                {% if booking.obj.status == 'Pending' %}
+                                                    Afventer
+                                                {% elif booking.obj.status == 'Approved' %}
+                                                    Godkendt
+                                                {% elif booking.obj.status == 'Rejected' %}
+                                                    Afvist
+                                                {% else %}
+                                                    {{ booking.obj.status }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                {% bs_icon "calendar-check" extra_classes="fs-1 text-muted opacity-25" %}
+            </div>
+            <h5 class="text-muted fw-bold mb-2">Ingen kommende bookinger</h5>
+            <p class="text-muted mb-4">Du har ingen kommende bookinger eller aftaler. Gå til en af modulerne for at oprette en ny booking.</p>
+            <a href="{% url 'Sjak_SjakBooking_list' %}" class="btn btn-primary">Se alle bookinger</a>
+        </div>
+    {% endif %}
+</div>
+
 <style>
-    /* Ensure the grid looks balanced */
-    .dashboard-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border-radius: 1.25rem !important;
-        background-color: #fff;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08) !important;
-    }
-
     .icon-box {
         width: 70px;
         height: 70px;
@@ -133,6 +235,60 @@
     .bg-info { background-color: #0dcaf0 !important; }
     .bg-dark { background-color: #212529 !important; }
 
+    
+
+    .booking-item {
+        padding: 0 !important;
+    }
+
+    .booking-wrapper {
+        display: flex;
+        gap: 0;
+        align-items: stretch;
+    }
+
+    .booking-card {
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        flex-grow: 1;
+    }
+
+    .booking-card:hover {
+        color: inherit;
+    }
+
+    .booking-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .booking-create-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        height: auto;
+    }
+
+    .booking-create-btn:focus {
+        outline: none;
+        box-shadow: none;
+    }
+        /* Ensure the grid looks balanced */
+    .dashboard-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 1.25rem !important;
+        background-color: #fff;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08) !important;
+    }
+
+    
     @media (max-width: 576px) {
         .icon-box {
             width: 60px;
@@ -143,4 +299,44 @@
         }
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Map booking types to their list URLs
+    const createUrlMap = {
+        'Sjak': '{% url "Sjak_SjakBooking_list" %}',
+        'Teknik': '{% url "Teknik_TeknikBooking_list" %}',
+        'AktivitetsTeam': '{% url "AktivitetsTeam_AktivitetsTeamBooking_list" %}',
+        'Foto': '{% url "Foto_FotoBooking_list" %}',
+        'SOS': '{% url "SOS_SOSBooking_list" %}',
+        'Butikken': '{% url "Butikken_ButikkenBooking_list" %}',
+        'Legeaftale': '{% url "organization_VolunteerAppointment_list" %}',
+    };
+
+    // Add click handlers to create buttons
+    document.querySelectorAll('.booking-create-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Get the booking type from the parent card's data or text
+            const bookingCard = btn.closest('.booking-card');
+            const bookingType = bookingCard.querySelector('.badge')?.textContent?.trim() || '';
+            
+            // Find the matching booking type from siblings
+            let type = null;
+            for (let [key, url] of Object.entries(createUrlMap)) {
+                if (bookingCard.innerHTML.includes(key)) {
+                    type = key;
+                    break;
+                }
+            }
+            
+            if (type && createUrlMap[type]) {
+                window.location.href = createUrlMap[type];
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

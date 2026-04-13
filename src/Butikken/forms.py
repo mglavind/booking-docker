@@ -108,7 +108,7 @@ class ButikkenItemForm(forms.ModelForm):
         self.fields["type"].queryset = ButikkenItemType.objects.all()
 
 class ButikkenBookingForm(forms.ModelForm):
-    start = forms.DateField(
+    start_date = forms.DateField(
         widget=TextInput(attrs={"type": "date"}),
         label="Afhentning Dato:"
     )
@@ -126,7 +126,7 @@ class ButikkenBookingForm(forms.ModelForm):
             "item",
             "team",
             "team_contact",
-            "start",
+            "start_date",
             "start_time",
             "quantity",
             "unit",
@@ -143,7 +143,7 @@ class ButikkenBookingForm(forms.ModelForm):
             "unit": "Enhed",
             "for_meal": "Måltid",
             "remarks": "Bemærkninger",
-            "start": "Afhentning Dato",
+            "start_date": "Afhentning Dato",
             "start_time": "Afhentning Tidspunkt",
             "date_used": "Anvendelsesdato",
 
@@ -157,7 +157,7 @@ class ButikkenBookingForm(forms.ModelForm):
             "unit": forms.TextInput(attrs={"class": "form-control"}),            
             "for_meal": forms.Select(attrs={"class": "form-select"}),
             "remarks": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "start": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
+            "start_date": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
             "start_time": forms.TextInput(attrs={"class": "form-control", "type": "time"}),
             "date_used": forms.TextInput(attrs={"class": "form-control", "type": "date"}),
         }
@@ -191,7 +191,7 @@ class ButikkenBookingForm(forms.ModelForm):
         # 4. Handle Event Dates / Initials
         instance = kwargs.get('instance')
         if instance:
-            self.fields["start"].initial = instance.start
+            self.fields["start_date"].initial = instance.start_date
             self.fields["start_time"].initial = instance.start_time    
             self.fields["date_used"].initial = instance.date_used       
         else:
@@ -201,7 +201,7 @@ class ButikkenBookingForm(forms.ModelForm):
                 active_event = Event.objects.filter(start_date__gt=timezone.now()).order_by('start_date').first()
 
             if active_event:
-                self.fields["start"].initial = active_event.start_date
+                self.fields["start_date"].initial = active_event.start_date
                 self.fields["start_time"].initial = time(8, 0)
                 self.fields["date_used"].initial = active_event.start_date
         
@@ -214,13 +214,13 @@ class ButikkenBookingForm(forms.ModelForm):
         # Check if the form is being initialized with an instance
         if self.instance and self.instance.pk:
             # Use the existing value from the instance
-            self.fields["start"].initial = self.instance.start.strftime('%Y-%m-%d')
-            print(self.instance.start.strftime('%Y-%m-%d'))
+            self.fields["start_date"].initial = self.instance.start_date.strftime('%Y-%m-%d')
+            print(self.instance.start_date.strftime('%Y-%m-%d'))
         else:
             # Use the next event's start date if no instance or new instance
             next_event = get_next_event()
             if next_event:
-                self.fields["start"].initial = next_event.start_date.strftime('%Y-%m-%d')
+                self.fields["start_date"].initial = next_event.start_date.strftime('%Y-%m-%d')
                 self.fields["start_time"].initial = time(8, 0)  # Set default time to 08:00 AM
 
 

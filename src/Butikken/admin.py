@@ -146,7 +146,7 @@ class ButikkenBookingAdmin(BaseAdmin):
     list_fullwidth = True
     # FIXED: 'for_meal' used directly as it's a field in your model
     list_display = ["item", "display_status", "team", "for_meal", "formatted_start", "quantity_with_unit"]
-    list_filter = ["status", "for_meal", "team", "item", "start"]
+    list_filter = ["status", "for_meal", "team", "item", "start_date"]
     
     @display(description="Status", label={
         "Approved": "success", "Pending": "warning", "Rejected": "danger", "Udleveret": "info",
@@ -160,7 +160,7 @@ class ButikkenBookingAdmin(BaseAdmin):
 
     @display(description="Afhentning")
     def formatted_start(self, obj):
-        return f"{obj.start.strftime('%d/%m')} kl. {obj.start_time.strftime('%H:%M')}"
+        return f"{obj.start_date.strftime('%d/%m')} kl. {obj.start_time.strftime('%H:%M')}"
 
 @admin.register(TeamMealPlan)
 class TeamMealPlanAdmin(BaseAdmin):

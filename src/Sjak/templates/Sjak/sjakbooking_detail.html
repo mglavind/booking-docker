@@ -84,14 +84,14 @@
                         <div class="col-md-6 border-end">
                             <div class="detail-label">Fra (Start)</div>
                             <div class="detail-value">
-                                {% bs_icon "calendar-event" %} {{ object.start|date:"l \d. j. F" }} <br>
+                                {% bs_icon "calendar-event" %} {{ object.start_date|date:"l \d. j. F" }} <br>
                                 <span class="text-dark small">kl. {{ object.start_time|time:"H:i" }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="detail-label">Til (Slut)</div>
                             <div class="detail-value">
-                                {% bs_icon "calendar-check" %} {{ object.end|date:"l \d. j. F" }} <br>
+                                {% bs_icon "calendar-check" %} {{ object.end_date|date:"l \d. j. F" }} <br>
                                 <span class="text-dark small">kl. {{ object.end_time|time:"H:i" }}</span>
                             </div>
                         </div>

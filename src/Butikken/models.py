@@ -49,7 +49,7 @@ class ButikkenBooking(models.Model):
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
 
-    start = models.DateField(verbose_name='Start')
+    start_date = models.DateField(verbose_name='Start')
     start_time = models.TimeField(verbose_name='Start_time')
     date_used = models.DateField(verbose_name='Dato brugt', blank=True, null=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)

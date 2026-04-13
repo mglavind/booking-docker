@@ -9,7 +9,7 @@ from utils.image_utils import process_image
 
 class SjakBookingForm(forms.ModelForm): 
     # Defined without initial values to prevent crashes on startup
-    start = forms.DateField(
+    start_date = forms.DateField(
         widget=TextInput(attrs={"type": "date", "class": "form-control"}),
         label="Start Dato"
     )
@@ -17,7 +17,7 @@ class SjakBookingForm(forms.ModelForm):
         widget=TextInput(attrs={"type": "time", "class": "form-control"}),
         label="Start tidspunkt"
     )
-    end = forms.DateField(
+    end_date = forms.DateField(
         widget=TextInput(attrs={"type": "date", "class": "form-control"}),
         label="Slut Dato"
     )
@@ -32,9 +32,9 @@ class SjakBookingForm(forms.ModelForm):
             "quantity",
             "team",
             "item",
-            "start",
+            "start_date",
             "start_time",
-            "end",
+            "end_date",
             "end_time",
             "team_contact",
             "remarks",
@@ -54,9 +54,9 @@ class SjakBookingForm(forms.ModelForm):
             "team": "Team",
             "item": "Sjak Ting",
             "team_contact": "Kontaktperson",
-            "start": "Udlånsdato",
+            "start_date": "Udlånsdato",
             "start_time": "Afhentning tidspunkt",
-            "end": "Afleveringsdato",
+            "end_date": "Afleveringsdato",
             "end_time": "Retur tidspunkt",
             "remarks": "Bemærkninger til Sjak",
             "image": "Billede",
@@ -90,9 +90,9 @@ class SjakBookingForm(forms.ModelForm):
         if instance:
             # When updating, fields are automatically populated by ModelForm.
             # We just ensure the date/time fields match the instance.
-            self.fields["start"].initial = instance.start
+            self.fields["start_date"].initial = instance.start_date
             self.fields["start_time"].initial = instance.start_time
-            self.fields["end"].initial = instance.end
+            self.fields["end_date"].initial = instance.end_date
             self.fields["end_time"].initial = instance.end_time
         else:
             # For NEW bookings, find the active or next event
@@ -101,8 +101,8 @@ class SjakBookingForm(forms.ModelForm):
                 active_event = Event.objects.filter(start_date__gt=timezone.now()).order_by('start_date').first()
             
             if active_event:
-                self.fields["start"].initial = active_event.start_date
-                self.fields["end"].initial = active_event.end_date
+                self.fields["start_date"].initial = active_event.start_date
+                self.fields["end_date"].initial = active_event.end_date
                 self.fields["start_time"].initial = time(12, 0)
                 self.fields["end_time"].initial = time(12, 0)
 

@@ -105,8 +105,8 @@ class ButikkenBookingListView(LoginRequiredMixin, generic.ListView):
         allowed_sorts = {
             'item': 'item__name',
             '-item': '-item__name',
-            'start': 'start',
-            '-start': '-start',
+            'start_date': 'start_date',
+            '-start_date': '-start_date',
         }
         
         order_by = allowed_sorts.get(sort_by, 'item__name')

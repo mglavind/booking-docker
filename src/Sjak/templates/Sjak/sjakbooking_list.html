@@ -47,8 +47,8 @@
                     
                     <div class="d-flex align-items-center flex-grow-1">
                         <div class="text-center me-3 border-end pe-3 d-none d-sm-block" style="min-width: 65px;">
-                            <div class="fw-bold text-primary" style="line-height: 1; font-size: 1.25rem;">{{ object.start|date:"d" }}</div>
-                            <small class="text-uppercase text-muted" style="font-size: 0.75rem;">{{ object.start|date:"M" }}</small>
+                            <div class="fw-bold text-primary" style="line-height: 1; font-size: 1.25rem;">{{ object.start_date|date:"d" }}</div>
+                            <small class="text-uppercase text-muted" style="font-size: 0.75rem;">{{ object.start_date|date:"M" }}</small>
                         </div>
                         <div>
                             <div class="fw-bold text-dark mb-0">
@@ -59,7 +59,7 @@
                             </div>
                             <div class="small text-muted d-flex align-items-center flex-wrap gap-2 mt-1">
                                 <span><bs_icon class="bi bi-person"></bs_icon> {{ object.team_contact }}</span>
-                                <span class="d-sm-none"><bs_icon class="bi bi-calendar3"></bs_icon> {{ object.start|date:"d/m" }}</span>
+                                <span class="d-sm-none"><bs_icon class="bi bi-calendar3"></bs_icon> {{ object.start_date|date:"d/m" }}</span>
                                 <span><bs_icon class="bi bi-clock"></bs_icon> {{ object.start_time|time:"H:i" }} - {{ object.end_time|time:"H:i" }}</span>
                             </div>
                         </div>

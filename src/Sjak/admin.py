@@ -45,7 +45,7 @@ class SjakBookingResource(resources.ModelResource):
         model = SjakBooking
         fields = (
             'id', 'item', 'quantity', 'team', 'team_contact', 
-            'start', 'start_time', 'end', 'end_time', 
+            'start_date', 'start_time', 'end_date', 'end_time', 
             'status', 'status_internal'
         )
 
@@ -107,7 +107,7 @@ class SjakBaseAdmin(ModelAdmin, ImportExportModelAdmin):
         ical_content = export_selected_to_ical(queryset)
         count = queryset.count()
         first_booking = queryset.first()
-        start_date = first_booking.start.strftime("%d-%m-%Y")
+        start_date = first_booking.start_date.strftime("%d-%m-%Y")
         filename = f"sjak_{count}_bookinger_{start_date}.ics"
         
         response = HttpResponse(ical_content, content_type='text/calendar')
@@ -212,15 +212,15 @@ class SjakBookingAdmin(SjakBaseAdmin):
         "item", "quantity", "team", "display_status",
         "formatted_times", "display_internal_status"
     ]
-    list_filter = ["status", "status_internal", "team", "item", "start"]
+    list_filter = ["status", "status_internal", "team", "item", "start_date"]
     search_fields = ["item__name", "team__name", "team_contact__first_name"]
     readonly_fields = ["image_preview"]
 
     fields = [
         ("item", "status"),
         ("team", "quantity"),
-        ("start", "start_time"),
-        ("end", "end_time"),
+        ("start_date", "start_time"),
+        ("end_date", "end_time"),
         "team_contact",
         "assigned_sjak",
         ("remarks", "status_internal"),
@@ -252,7 +252,7 @@ class SjakBookingAdmin(SjakBaseAdmin):
     @display(description="Tidsramme")
     def formatted_times(self, obj):
         """Vis datointervallet i kompakt format."""
-        return f"{obj.start.strftime('%d/%m')} {obj.start_time.strftime('%H:%M')} - {obj.end.strftime('%d/%m')} {obj.end_time.strftime('%H:%M')}"
+        return f"{obj.start_date.strftime('%d/%m')} {obj.start_time.strftime('%H:%M')} - {obj.end_date.strftime('%d/%m')} {obj.end_time.strftime('%H:%M')}"
 
     def image_preview(self, obj):
         """Vis forhåndsvisning af bookingbillede hvis tilgængeligt."""
