@@ -32,8 +32,7 @@ class AppFeatureGateMiddleware:
         'teknik': 'APP_ENABLE_TEKNIK',
         'aktivitetsteam': 'APP_ENABLE_AKTIVITETSTEAM',
         'foto': 'APP_ENABLE_FOTO',
-        'butikken': 'APP_ENABLE_DEPOT',
-        'depot': 'APP_ENABLE_DEPOT',
+        'butikken': 'APP_ENABLE_BUTIKKEN',
         'sjak': 'APP_ENABLE_SJAK',
     }
 

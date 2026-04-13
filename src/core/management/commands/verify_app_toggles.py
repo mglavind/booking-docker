@@ -49,11 +49,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('=== App Toggle Status ===\n'))
 
         toggles = {
-            'APP_ENABLE_SOS': 'SOS (Emergency)',
-            'APP_ENABLE_TEKNIK': 'Teknik (Technical)',
-            'APP_ENABLE_AKTIVITETSTEAM': 'AktivitetsTeam (Activities)',
-            'APP_ENABLE_FOTO': 'Foto (Photography)',
-            'APP_ENABLE_DEPOT': 'Depot/Butikken (Store)',
+            'APP_ENABLE_SOS': 'SOS',
+            'APP_ENABLE_TEKNIK': 'Teknik',
+            'APP_ENABLE_AKTIVITETSTEAM': 'AktivitetsTeam',
+            'APP_ENABLE_FOTO': 'Foto',
+            'APP_ENABLE_BUTIKKEN': 'Butikken (Store)',
             'APP_ENABLE_SJAK': 'Sjak (Tools & Materials)',
             'APP_ENABLE_CONTACTS': 'Contact Book',
             'APP_ENABLE_LEGEAFTALER': 'Volunteer Appointments',

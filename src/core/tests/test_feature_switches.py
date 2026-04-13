@@ -54,16 +54,10 @@ class FeatureToggleMiddlewareTests(TestCase):
         response = self.client.get('/foto/')
         self.assertEqual(response.status_code, 404)
 
-    @override_config(APP_ENABLE_DEPOT=False)
+    @override_config(APP_ENABLE_BUTIKKEN=False)
     def test_disabled_butikken_app_returns_404(self):
-        """Test that disabled Butikken app (via DEPOT toggle) returns 404."""
+        """Test that disabled Butikken app returns 404."""
         response = self.client.get('/butikken/')
-        self.assertEqual(response.status_code, 404)
-
-    @override_config(APP_ENABLE_DEPOT=False)
-    def test_disabled_depot_app_returns_404(self):
-        """Test that disabled Depot app returns 404."""
-        response = self.client.get('/depot/')
         self.assertEqual(response.status_code, 404)
 
     @override_config(APP_ENABLE_SJAK=False)
@@ -92,7 +86,7 @@ class FeatureToggleMiddlewareTests(TestCase):
             APP_ENABLE_TEKNIK=False,
             APP_ENABLE_AKTIVITETSTEAM=False,
             APP_ENABLE_FOTO=False,
-            APP_ENABLE_DEPOT=False,
+            APP_ENABLE_BUTIKKEN=False,
         ):
             response = self.client.get('/admin/')
             # Should not be blocked by middleware (might be 302 redirect or 200)
@@ -105,7 +99,7 @@ class FeatureToggleMiddlewareTests(TestCase):
             APP_ENABLE_TEKNIK=False,
             APP_ENABLE_AKTIVITETSTEAM=False,
             APP_ENABLE_FOTO=False,
-            APP_ENABLE_DEPOT=False,
+            APP_ENABLE_BUTIKKEN=False,
         ):
             # Even if URL doesn't exist, middleware should not block it
             # or should not return our "disabled" message
@@ -121,7 +115,7 @@ class FeatureToggleMiddlewareTests(TestCase):
             APP_ENABLE_TEKNIK=False,
             APP_ENABLE_AKTIVITETSTEAM=False,
             APP_ENABLE_FOTO=False,
-            APP_ENABLE_DEPOT=False,
+            APP_ENABLE_BUTIKKEN=False,
         ):
             # Even if URL doesn't exist, middleware should not block it
             response = self.client.get('/media/test.jpg')
@@ -203,7 +197,7 @@ class FeatureToggleMiddlewareTests(TestCase):
             APP_ENABLE_TEKNIK=False,
             APP_ENABLE_AKTIVITETSTEAM=False,
             APP_ENABLE_FOTO=False,
-            APP_ENABLE_DEPOT=False,
+            APP_ENABLE_BUTIKKEN=False,
         ):
             response = self.client.get('/')
             # Root should not be blocked by middleware
@@ -228,7 +222,7 @@ class FeatureToggleContextProcessorTests(TestCase):
         APP_ENABLE_TEKNIK=True,
         APP_ENABLE_AKTIVITETSTEAM=True,
         APP_ENABLE_FOTO=True,
-        APP_ENABLE_DEPOT=True,
+        APP_ENABLE_BUTIKKEN=True,
     )
     def test_context_has_config_object(self):
         """Test that templates have access to config object."""

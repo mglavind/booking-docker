@@ -197,14 +197,14 @@ else:
     }
 
 CONSTANCE_CONFIG = {
-    'APP_ENABLE_SOS': (True, 'Enable/Disable the SOS (Emergency) app'),
-    'APP_ENABLE_TEKNIK': (True, 'Enable/Disable the Teknik (Technical) app'),
-    'APP_ENABLE_AKTIVITETSTEAM': (True, 'Enable/Disable the AktivitetsTeam (Activities) app'),
-    'APP_ENABLE_FOTO': (True, 'Enable/Disable the Foto (Photography) app'),
-    'APP_ENABLE_DEPOT': (True, 'Enable/Disable the Depot/Butikken (Store) app'),
-    'APP_ENABLE_SJAK': (True, 'Enable/Disable the Sjak app'),
-    'APP_ENABLE_CONTACTS': (True, 'Enable/Disable the Contact Book'),
-    'APP_ENABLE_LEGEAFTALER': (True, 'Enable/Disable Volunteer Appointments'),
+    'APP_ENABLE_SOS': (True, 'Slå SOS modul til/fra'),
+    'APP_ENABLE_TEKNIK': (True, 'Slå Teknik modul til/fra'),
+    'APP_ENABLE_AKTIVITETSTEAM': (True, 'Slå AktivitetsTeam modul til/fra'),
+    'APP_ENABLE_FOTO': (True, 'Slå Foto modul til/fra'),
+    'APP_ENABLE_BUTIKKEN': (True, 'Slå Butikken modul til/fra'),
+    'APP_ENABLE_SJAK': (True, 'Slå Sjak modul til/fra'),
+    'APP_ENABLE_CONTACTS': (True, 'Slå kontaktbog modul til/fra'),
+    'APP_ENABLE_LEGEAFTALER': (True, 'Slå legeaftale modul til/fra'),
 }
 CONSTANCE_ADDITIONAL_FIELDS = {
     **UNFOLD_CONSTANCE_ADDITIONAL_FIELDS,
