@@ -136,6 +136,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'core.middleware.AppFeatureGateMiddleware',
     #"debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 INTERNAL_IPS = [
@@ -196,8 +197,14 @@ else:
     }
 
 CONSTANCE_CONFIG = {
-    'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
-                       'The Universe, and Everything'),
+    'APP_ENABLE_SOS': (True, 'Enable/Disable the SOS (Emergency) app'),
+    'APP_ENABLE_TEKNIK': (True, 'Enable/Disable the Teknik (Technical) app'),
+    'APP_ENABLE_AKTIVITETSTEAM': (True, 'Enable/Disable the AktivitetsTeam (Activities) app'),
+    'APP_ENABLE_FOTO': (True, 'Enable/Disable the Foto (Photography) app'),
+    'APP_ENABLE_DEPOT': (True, 'Enable/Disable the Depot/Butikken (Store) app'),
+    'APP_ENABLE_SJAK': (True, 'Enable/Disable the Sjak app'),
+    'APP_ENABLE_CONTACTS': (True, 'Enable/Disable the Contact Book'),
+    'APP_ENABLE_LEGEAFTALER': (True, 'Enable/Disable Volunteer Appointments'),
 }
 CONSTANCE_ADDITIONAL_FIELDS = {
     **UNFOLD_CONSTANCE_ADDITIONAL_FIELDS,
@@ -226,6 +233,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.app_feature_toggles',
             ],
         },
     },
