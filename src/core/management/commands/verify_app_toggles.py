@@ -57,6 +57,7 @@ class Command(BaseCommand):
             'APP_ENABLE_SJAK': 'Sjak (Tools & Materials)',
             'APP_ENABLE_CONTACTS': 'Contact Book',
             'APP_ENABLE_LEGEAFTALER': 'Volunteer Appointments',
+            'APP_ENABLE_DEPOT': 'Depot (Inventory)',
         }
 
         for toggle_name, display_name in toggles.items():

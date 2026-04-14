@@ -9,12 +9,12 @@
         <p class="text-muted mb-3">Din kommende bookinger og aftaler</p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3" style="display: flex; flex-wrap: wrap;">
         {% if config.APP_ENABLE_CONTACTS %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'organization_Volunteer_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-primary text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-person-lines-fill fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Kontaktbog</h4>
@@ -25,10 +25,10 @@
         {% endif %}
         
         {% if config.APP_ENABLE_BUTIKKEN %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'Butikken_ButikkenBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-info text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-info text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-shop fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Butikken</h4>
@@ -39,10 +39,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_AKTIVITETSTEAM %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'AktivitetsTeam_AktivitetsTeamBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-success text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-success text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-universal-access fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Aktiviteter</h4>
@@ -53,10 +53,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_SJAK %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'Sjak_SjakBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-primary text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-primary text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-tools fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Sjak</h4>
@@ -67,10 +67,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_SOS %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'SOS_SOSBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-danger text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-danger text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-heart-pulse fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">SOS</h4>
@@ -81,10 +81,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_TEKNIK %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'Teknik_TeknikBooking_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-warning text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-warning text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-cpu fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Teknik</h4>
@@ -95,10 +95,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_FOTO %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'Foto_FotoBooking_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-secondary text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-secondary text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-camera fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Foto</h4>
@@ -109,10 +109,10 @@
         {% endif %}
 
         {% if config.APP_ENABLE_LEGEAFTALER %}
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
             <a href="{% url 'organization_VolunteerAppointment_create' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
-                <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-danger text-white rounded-4 mb-3 mx-auto">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-danger text-white rounded-4 mb-2 mx-auto">
                         <bs_icon class="bi bi-balloon-heart fs-1"></bs_icon>
                     </div>
                     <h4 class="fw-bold text-dark">Legeaftaler</h4>
@@ -122,7 +122,19 @@
         </div>
         {% endif %}
 
-
+        {% if config.APP_ENABLE_DEPOT %}
+        <div class="col-12 col-sm-6 col-md-4" style="flex: 0 0 calc(20% - 0.6rem);">
+            <a href="{% url 'Depot_DepotItem_list' %}" class="card h-100 shadow-sm border-0 text-decoration-none dashboard-card">
+                <div class="card-body p-2 text-center d-flex flex-column align-items-center justify-content-center">
+                    <div class="icon-box bg-info text-white rounded-4 mb-2 mx-auto">
+                        <bs_icon class="bi bi-box-seam fs-1"></bs_icon>
+                    </div>
+                    <h4 class="fw-bold text-dark">Depot</h4>
+                    <p class="text-muted small mb-0">Inventar og udstyr</p>
+                </div>
+            </a>
+        </div>
+        {% endif %}
 
     </div>
 </div>
@@ -224,8 +236,8 @@
 
 <style>
     .icon-box {
-        width: 70px;
-        height: 70px;
+        width: 65px;
+        height: 65px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -291,11 +303,11 @@
     
     @media (max-width: 576px) {
         .icon-box {
-            width: 60px;
-            height: 60px;
+            width: 45px;
+            height: 45px;
         }
         .icon-box bs_icon {
-            font-size: 1.5rem !important;
+            font-size: 1.25rem !important;
         }
     }
 </style>

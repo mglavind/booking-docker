@@ -172,12 +172,31 @@ def index(request):
             'url': f"/organization/appointment/{appointment.pk}/",
         })
     
+    # Depot bookings
+    from Depot.models import DepotBooking
+    depot_bookings = DepotBooking.objects.filter(
+        team_id__in=user_teams
+    ).select_related('team', 'team_contact', 'item').exclude(
+        start_date__lt=now.date()
+    )
+    for booking in depot_bookings:
+        bookings.append({
+            'obj': booking,
+            'type': 'Depot',
+            'icon': 'box-seam',
+            'color': 'info',    
+            'status_color': get_status_color(booking.status),
+            'start': datetime.combine(booking.start_date, booking.start_time),
+            'end': datetime.combine(booking.end_date, booking.end_time),
+            'title': f"{booking.quantity} x {booking.item.name if booking.item else 'Depot'}",
+            'url': f"/depot/bookings/{booking.pk}/",
+        })
+    
     # Sort by start time
     bookings.sort(key=lambda x: x['start'])
     
     # Group by date
     from itertools import groupby
-    from operator import itemgetter
     
     grouped_bookings = {}
     for date_key, items in groupby(bookings, key=lambda x: x['start'].date()):

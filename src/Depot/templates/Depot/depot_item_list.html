@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block title %}Depot Vareoversigt{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0">
+                <bs_icon class="bi bi-boxes"></bs_icon> Depot katalog
+            </h1>
+        </div>
+        {% if user.is_authenticated and user.is_staff %}
+        <div class="col-md-4 text-end">
+            <a href="{% url 'Depot_DepotItem_create' %}" class="btn btn-primary">
+                <bs_icon class="bi bi-plus-circle"></bs_icon> Tilføj genstand
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="form-inline" id="search-form">
+                <div class="input-group w-100">
+                    <input type="text" name="search" id="search-input" class="form-control" 
+                           placeholder="Søg i vareoversigt..." value="{{ search }}" autocomplete="off">
+                    {% if search %}
+                        <a href="{% url 'Depot_DepotItem_list' %}" class="btn btn-outline-secondary">
+                            <bs_icon class="bi bi-x-circle"></bs_icon> Ryd
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    {% if items %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Navn</th>
+                        <th>Lokation</th>
+                        <th>Antal</th>
+                        <th>Enhed</th>
+                        <th>Billede</th>
+                        <th>Oprettet</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody id="items-table-body">
+                    {% for item in items %}
+                    <tr class="item-row" data-name="{{ item.name|lower }}" data-description="{{ item.description|lower }}">
+                        <td>
+                            <a href="{{ item.get_absolute_url }}" class="text-decoration-none">
+                                {{ item.name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if item.location %}
+                                <span class="badge bg-secondary">{{ item.location.name }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ item.quantity }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ item.unit }}</small>
+                        </td>
+                        <td>
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" 
+                                     style="max-width: 50px; max-height: 50px;" class="rounded">
+                            {% else %}
+                                <span class="text-muted">Intet billede</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.created|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{{ item.get_update_url }}" class="btn btn-sm btn-warning">
+                                <bs_icon class="bi bi-pencil"></bs_icon>
+                            </a>
+                            <a href="{% url 'Depot_DepotItem_delete' item.pk %}" class="btn btn-sm btn-danger">
+                                <bs_icon class="bi bi-trash"></bs_icon>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">Første</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">Forrige</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">Næste</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">Sidste</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Ingen varer fundet</h4>
+        <p>Der er endnu ingen depot varer. <a href="{% url 'Depot_DepotItem_create' %}" class="alert-link">Opret en nu</a>!</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Live search functionality
+document.getElementById('search-input').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.item-row');
+    
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const description = row.getAttribute('data-description');
+        
+        if (name.includes(searchTerm) || description.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

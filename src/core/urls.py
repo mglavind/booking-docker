@@ -22,6 +22,7 @@ urlpatterns = [
     path('teknik/', include('Teknik.urls')),
     path('SOS/', include('SOS.urls')),
     path('foto/', include('Foto.urls')),
+    path('depot/', include('Depot.urls')),
     
     
     # NEW: Comments URLs

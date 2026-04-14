@@ -17,9 +17,9 @@ class AppFeatureGateMiddleware:
     - /teknik/ → APP_ENABLE_TEKNIK
     - /aktivitetsteam/ → APP_ENABLE_AKTIVITETSTEAM
     - /foto/ → APP_ENABLE_FOTO
-    - /butikken/ → APP_ENABLE_DEPOT
-    - /depot/ → APP_ENABLE_DEPOT
+    - /butikken/ → APP_ENABLE_BUTIKKEN
     - /sjak/ → APP_ENABLE_SJAK
+    - /depot/ → APP_ENABLE_DEPOT
     - /organization/volunteer/ → APP_ENABLE_CONTACTS
     - /organization/volunteerappointment/ → APP_ENABLE_LEGEAFTALER
     
@@ -34,6 +34,7 @@ class AppFeatureGateMiddleware:
         'foto': 'APP_ENABLE_FOTO',
         'butikken': 'APP_ENABLE_BUTIKKEN',
         'sjak': 'APP_ENABLE_SJAK',
+        'depot': 'APP_ENABLE_DEPOT',
     }
 
     # Specific organization sub-routes that have feature toggles

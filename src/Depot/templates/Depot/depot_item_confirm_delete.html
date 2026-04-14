@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block title %}Slet {{ object.name }}?{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <bs_icon class="bi bi-exclamation-triangle"></bs_icon> Slet Vare
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <p class="lead">Er du sikker på, at du vil slette <strong>{{ object.name }}</strong>?</p>
+                    <p class="text-muted">Denne handling kan ikke gøres om.</p>
+                    
+                    <form method="post" class="d-grid gap-2 d-sm-flex">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <bs_icon class="bi bi-trash"></bs_icon> Slet
+                        </button>
+                        <a href="{{ object.get_absolute_url }}" class="btn btn-outline-secondary">
+                            <bs_icon class="bi bi-x-circle"></bs_icon> Annuller
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     'Teknik',
     'SOS',
     'Foto',
+    'Depot',
     #"debug_toolbar",
 
 ]
@@ -205,6 +206,7 @@ CONSTANCE_CONFIG = {
     'APP_ENABLE_SJAK': (True, 'Slå Sjak modul til/fra'),
     'APP_ENABLE_CONTACTS': (True, 'Slå kontaktbog modul til/fra'),
     'APP_ENABLE_LEGEAFTALER': (True, 'Slå legeaftale modul til/fra'),
+    'APP_ENABLE_DEPOT': (True, 'Slå Depot (inventar) modul til/fra'),
 }
 CONSTANCE_ADDITIONAL_FIELDS = {
     **UNFOLD_CONSTANCE_ADDITIONAL_FIELDS,
@@ -488,6 +490,29 @@ UNFOLD = {
                         "title": _("Udstyrskatalog"),
                         "icon": "photo_camera",
                         "link": reverse_lazy("admin:Foto_fotoitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Depot"),
+                "separator": True,
+                "collapsible": True,
+                "default_open": True,
+                "items": [
+                    {
+                        "title": _("Depot Bookinger"),
+                        "icon": "calendar_add_on",
+                        "link": reverse_lazy("admin:Depot_depotbooking_changelist"),
+                    },
+                    {
+                        "title": _("Depot sager"),
+                        "icon": "toys_and_games",
+                        "link": reverse_lazy("admin:Depot_depotitem_changelist"),
+                    },
+                    {
+                        "title": _("Depot kasser"),
+                        "icon": "box",
+                        "link": reverse_lazy("admin:Depot_depotlocation_changelist"),
                     },
                 ],
             },

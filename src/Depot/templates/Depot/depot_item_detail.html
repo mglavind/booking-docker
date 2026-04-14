@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap_icons %}
+
+{% block title %}{{ item.name }} - Depot Vare{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0">
+                <bs_icon class="bi bi-box"></bs_icon> {{ item.name }}
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ item.get_update_url }}" class="btn btn-warning">
+                <bs_icon class="bi bi-pencil"></bs_icon> Rediger
+            </a>
+            <a href="{% url 'Depot_DepotItem_list' %}" class="btn btn-outline-secondary">
+                <bs_icon class="bi bi-arrow-left"></bs_icon> Tilbage
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Item Details -->
+        <div class="col-md-4">
+            <div class="card">
+                {% if item.image %}
+                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 300px;">
+                    <bs_icon class="bi bi-image"></bs_icon> <span class="ms-2">Ingen billede</span>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-6">Antal på lager:</dt>
+                        <dd class="col-sm-6">
+                            <span class="badge bg-info fs-6">{{ item.quantity }} {{ item.unit }}</span>
+                        </dd>
+                        
+                        <dt class="col-sm-6">Oprettet:</dt>
+                        <dd class="col-sm-6">{{ item.created|date:"d/m/Y H:i" }}</dd>
+                        
+                        <dt class="col-sm-6">Sidst opdateret:</dt>
+                        <dd class="col-sm-6">{{ item.last_updated|date:"d/m/Y H:i" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Bookinger</h5>
+                </div>
+                
+                {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hold</th>
+                                <th>Kontakt</th>
+                                <th>Antal</th>
+                                <th>Start</th>
+                                <th>Slut</th>
+                                <th>Status</th>
+                                <th>Handlinger</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td>{{ booking.team.name }}</td>
+                                <td>{{ booking.team_contact.name }}</td>
+                                <td>{{ booking.quantity }}</td>
+                                <td>{{ booking.start_date|date:"d/m/Y" }} {{ booking.start_time|time:"H:i" }}</td>
+                                <td>{{ booking.end_date|date:"d/m/Y" }} {{ booking.end_time|time:"H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-{{ booking.get_status_display_color }}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ booking.get_update_url }}" class="btn btn-sm btn-warning">
+                                        <bs_icon class="bi bi-pencil"></bs_icon>
+                                    </a>
+                                    <a href="{% url 'Depot_DepotBooking_delete' booking.pk %}" class="btn btn-sm btn-danger">
+                                        <bs_icon class="bi bi-trash"></bs_icon>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="card-body">
+                    <p class="text-muted mb-0">Ingen bookinger for denne vare endnu.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            {% if item.description %}
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Beskrivelse</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ item.description|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

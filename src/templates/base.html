@@ -172,6 +172,22 @@
                             </ul>
                         </li>
                         {% endif %}
+
+                        {% if config.APP_ENABLE_DEPOT %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Depot
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'Depot_DepotItem_list' %}">Inventarkatalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'Depot_DepotBooking_list' %}">Depot bookinger</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><a class="dropdown-item" href="{% url 'Depot_DepotBooking_create' %}">Ny Depot booking</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
 
