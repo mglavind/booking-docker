@@ -95,3 +95,4 @@ class AppFeatureGateMiddleware:
             return not is_enabled
 
         return False
+

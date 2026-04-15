@@ -27,3 +27,4 @@ urlpatterns = (
     path("Foto/FotoBooking/reject/<int:pk>/", views.reject_booking, name="Foto_FotoBooking_reject"),
 
 )
+

@@ -36,3 +36,4 @@ urlpatterns = (
     path("Teknik/TeknikType/delete/<int:pk>/", views.TeknikTypeDeleteView.as_view(), name="Teknik_TeknikType_delete"),
 
 )
+

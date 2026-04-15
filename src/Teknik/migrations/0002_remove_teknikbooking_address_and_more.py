@@ -29,3 +29,4 @@ class Migration(migrations.Migration):
             field=map_location.fields.LocationField(blank=True, default='56.114951,9.655592', null=True, verbose_name='Lokation'),
         ),
     ]
+

@@ -15,3 +15,4 @@ class Migration(migrations.Migration):
             options={'ordering': ['-start_date', '-start_time'], 'verbose_name': 'Foto Booking', 'verbose_name_plural': 'Foto Bookinger'},
         ),
     ]
+

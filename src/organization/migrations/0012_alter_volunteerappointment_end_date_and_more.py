@@ -31,3 +31,4 @@ class Migration(migrations.Migration):
             field=models.TimeField(blank=True, null=True),
         ),
     ]
+

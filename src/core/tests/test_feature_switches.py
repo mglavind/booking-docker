@@ -260,3 +260,4 @@ class FeatureToggleContextProcessorTests(TestCase):
             context = app_feature_toggles(request)
             self.assertFalse(context['config'].APP_ENABLE_SOS)
             self.assertTrue(context['config'].APP_ENABLE_TEKNIK)
+

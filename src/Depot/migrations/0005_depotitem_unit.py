@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.CharField(default='stk', help_text='Unit of measurement (e.g., stk, liter, kg, m, etc.)', max_length=50),
         ),
     ]
+

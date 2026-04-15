@@ -25,3 +25,4 @@ class DepotBookingViewSet(viewsets.ModelViewSet):
     search_fields = ['item__name', 'team__name', 'team_contact__name']
     ordering_fields = ['created_at', 'start', 'status']
     ordering = ['-created_at']
+

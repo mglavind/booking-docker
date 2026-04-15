@@ -60,3 +60,4 @@ def notify_appointment_comment(sender, instance, created, **kwargs):
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to send Discord notification for appointment comment: {e}")
+

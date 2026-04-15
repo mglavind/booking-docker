@@ -81,3 +81,4 @@ def notify_discord_on_aktivitetsteambooking_change(sender, instance, created, **
             f'Fejl ved afsendelse af Discord notifikation for AktivitetsTeamBooking {instance.id}: {str(e)}',
             exc_info=True
         )
+

@@ -98,3 +98,4 @@ class SOSType(models.Model):
     def get_update_url(self):
         return reverse("SOS_SOSType_update", args=(self.pk,))
 
+

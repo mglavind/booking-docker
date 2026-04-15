@@ -8,3 +8,4 @@ class ButikkenConfig(AppConfig):
 
     def ready(self):
         import Butikken.signals
+

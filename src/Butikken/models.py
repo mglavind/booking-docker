@@ -330,3 +330,4 @@ class TeamMealPlan(models.Model):
         return reverse("Butikken_TeamMealPlan_htmx_delete", args=(self.pk,))
 
 
+

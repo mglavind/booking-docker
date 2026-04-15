@@ -26,3 +26,4 @@ class TeknikTypeViewSet(viewsets.ModelViewSet):
     queryset = models.TeknikType.objects.all()
     serializer_class = serializers.TeknikTypeSerializer
     permission_classes = [permissions.IsAuthenticated]
+

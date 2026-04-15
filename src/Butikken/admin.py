@@ -185,3 +185,4 @@ class MealPlanAdmin(BaseAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(BaseAdmin):
     list_display = ["name", "description", "last_updated"]
+

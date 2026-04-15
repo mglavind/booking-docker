@@ -129,3 +129,4 @@ class TeknikTypeForm(forms.ModelForm):
         fields = [
             "name",
         ]
+

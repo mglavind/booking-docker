@@ -145,3 +145,4 @@ class SOSTypeForm(forms.ModelForm):
         fields = [
             "name",
         ]
+

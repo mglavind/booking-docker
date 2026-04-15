@@ -136,3 +136,4 @@ class SOSTypeUpdateView(generic.UpdateView):
 class SOSTypeDeleteView(generic.DeleteView):
     model = models.SOSType
     success_url = reverse_lazy("SOS_SOSType_list")
+

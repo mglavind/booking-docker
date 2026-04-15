@@ -16,3 +16,4 @@ urlpatterns = [
     path('bookings/<int:pk>/edit/', views.DepotBookingUpdateView.as_view(), name='Depot_DepotBooking_update'),
     path('bookings/<int:pk>/delete/', views.DepotBookingDeleteView.as_view(), name='Depot_DepotBooking_delete'),
 ]
+

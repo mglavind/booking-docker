@@ -190,3 +190,4 @@ class FotoBookingUpdateView(LoginRequiredMixin, generic.UpdateView):
 class FotoBookingDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.FotoBooking
     success_url = reverse_lazy("Foto_FotoBooking_list")
+

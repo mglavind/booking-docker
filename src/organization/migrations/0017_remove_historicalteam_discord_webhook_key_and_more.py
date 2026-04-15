@@ -19,3 +19,4 @@ class Migration(migrations.Migration):
             name='discord_webhook_key',
         ),
     ]
+

@@ -58,3 +58,4 @@ def notify_discord_on_sosbooking_change(sender, instance, created, **kwargs):
     
     except Exception as e:
         logger.error(f'Fejl for SOSBooking {instance.id}: {str(e)}', exc_info=True)
+

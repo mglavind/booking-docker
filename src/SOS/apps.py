@@ -8,3 +8,4 @@ class SosConfig(AppConfig):
     def ready(self):
         """Registrer signals når app er klar."""
         import SOS.signals
+

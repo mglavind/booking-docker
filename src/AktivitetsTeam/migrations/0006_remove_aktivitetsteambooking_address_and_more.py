@@ -29,3 +29,4 @@ class Migration(migrations.Migration):
             field=map_location.fields.LocationField(help_text='Vælg placering på kortet'),
         ),
     ]
+

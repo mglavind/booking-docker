@@ -21,3 +21,4 @@ class Migration(migrations.Migration):
             field=models.URLField(blank=True, help_text='Discord webhook URL for real-time notifications. Get this from Server Settings > Integrations > Webhooks > Copy Webhook URL', null=True),
         ),
     ]
+

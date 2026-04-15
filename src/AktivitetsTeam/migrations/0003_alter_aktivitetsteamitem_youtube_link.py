@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.URLField(blank=True, help_text='Indsæt link til YouTube video (valgfrit)', max_length=2000, null=True),
         ),
     ]
+

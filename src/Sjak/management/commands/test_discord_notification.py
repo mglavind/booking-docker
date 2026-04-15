@@ -98,3 +98,4 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'✓ Discord notification should be sent to: {team.discord_webhook_url}'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'✗ Error creating test booking: {str(e)}'))
+

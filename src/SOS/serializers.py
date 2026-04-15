@@ -39,3 +39,4 @@ class SOSTypeSerializer(serializers.ModelSerializer):
             "last_updated",
             "created",
         ]
+

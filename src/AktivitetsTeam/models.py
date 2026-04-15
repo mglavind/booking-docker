@@ -233,3 +233,4 @@ class AktivitetsTeamBooking(models.Model):
         }
 
 
+
