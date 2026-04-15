@@ -17,3 +17,5 @@ class Migration(migrations.Migration):
             field=map_location.fields.LocationField(blank=True, null=True, verbose_name='Placering'),
         ),
     ]
+
+

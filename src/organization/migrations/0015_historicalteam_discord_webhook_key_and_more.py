@@ -31,3 +31,5 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, help_text="Discord user ID for @mention functionality (e.g., '123456789')", max_length=30, null=True),
         ),
     ]
+
+

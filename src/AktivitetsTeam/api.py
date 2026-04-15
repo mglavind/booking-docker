@@ -18,3 +18,5 @@ class AktivitetsTeamBookingViewSet(viewsets.ModelViewSet):
     queryset = models.AktivitetsTeamBooking.objects.all()
     serializer_class = serializers.AktivitetsTeamBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+

@@ -618,3 +618,5 @@ def update_booking_status(request, pk):
         logger.error(f"Error updating booking status: {str(e)}")
         return JsonResponse({'error': 'Failed to update booking'}, status=500)
 
+
+

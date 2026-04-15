@@ -93,3 +93,5 @@ def notify_discord_on_butikkenbooking_change(sender, instance, created, **kwargs
             f'Fejl ved afsendelse af Discord notifikation for ButikkenBooking {instance.id}: {str(e)}',
             exc_info=True
         )
+
+

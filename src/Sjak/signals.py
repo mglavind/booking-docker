@@ -81,3 +81,5 @@ def notify_discord_on_sjakbooking_change(sender, instance, created, **kwargs):
             f'Fejl ved afsendelse af Discord notifikation for SjakBooking {instance.id}: {str(e)}',
             exc_info=True
         )
+
+

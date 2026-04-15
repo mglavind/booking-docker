@@ -44,3 +44,5 @@ class SjakItemTypeSerializer(serializers.ModelSerializer):
         ]
 
 
+
+

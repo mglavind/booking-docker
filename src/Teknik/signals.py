@@ -57,3 +57,5 @@ def notify_discord_on_teknikbooking_change(sender, instance, created, **kwargs):
     
     except Exception as e:
         logger.error(f'Fejl for TeknikBooking {instance.id}: {str(e)}', exc_info=True)
+
+

@@ -26,3 +26,5 @@ class SOSTypeViewSet(viewsets.ModelViewSet):
     queryset = models.SOSType.objects.all()
     serializer_class = serializers.SOSTypeSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+

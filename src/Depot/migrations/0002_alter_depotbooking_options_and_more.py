@@ -57,3 +57,5 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['start_date', 'end_date'], name='Depot_depot_start_d_8fa6b2_idx'),
         ),
     ]
+
+

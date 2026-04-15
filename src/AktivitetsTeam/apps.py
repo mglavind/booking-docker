@@ -8,3 +8,5 @@ class AktivitetsTeamConfig(AppConfig):
 
     def ready(self):
         import AktivitetsTeam.signals
+
+

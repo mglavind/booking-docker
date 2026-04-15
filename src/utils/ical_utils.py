@@ -125,3 +125,4 @@ def send_ical_via_email(queryset, email_template, from_email):
             )
             email.attach(f"booking_{booking.id}.ics", ical_content, "text/calendar")
             email.send()
+

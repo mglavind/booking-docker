@@ -28,3 +28,5 @@ class FotoBookingSerializer(serializers.ModelSerializer):
             "item",
             "team_contact",
         ]
+
+

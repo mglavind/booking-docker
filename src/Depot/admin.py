@@ -233,3 +233,5 @@ class DepotBookingAdmin(DepotBaseAdmin):
         available = obj.item.available_quantity(obj.start_date, obj.end_date)
         return f"{available} / {obj.item.quantity}"
 
+
+

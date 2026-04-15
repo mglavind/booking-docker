@@ -390,3 +390,5 @@ class AktivitetsTeamBookingDeleteView(LoginRequiredMixin, generic.DeleteView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
     
+
+

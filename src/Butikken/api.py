@@ -71,3 +71,5 @@ class TeamMealPlanViewSet(viewsets.ModelViewSet):
     queryset = models.TeamMealPlan.objects.all()
     serializer_class = serializers.TeamMealPlanSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+

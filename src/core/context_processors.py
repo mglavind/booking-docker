@@ -18,3 +18,5 @@ def app_feature_toggles(request):
     return {
         'config': config,
     }
+
+

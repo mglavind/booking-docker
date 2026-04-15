@@ -127,3 +127,5 @@ class DepotBookingDeleteView(LoginRequiredMixin, DeleteView):
     model = DepotBooking
     template_name = 'Depot/depot_booking_confirm_delete.html'
     success_url = reverse_lazy('Depot_DepotBooking_list')
+
+

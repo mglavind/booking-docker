@@ -30,3 +30,5 @@ urlpatterns = (
     path("SOS/SOSType/delete/<int:pk>/", views.SOSTypeDeleteView.as_view(), name="SOS_SOSType_delete"),
 
 )
+
+

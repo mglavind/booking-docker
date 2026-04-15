@@ -33,3 +33,5 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(db_index=True, through='organization.TeamEventMembership', to='organization.event'),
         ),
     ]
+
+

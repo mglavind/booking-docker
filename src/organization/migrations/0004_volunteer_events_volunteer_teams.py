@@ -21,3 +21,5 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(blank=True, db_index=True, through='organization.TeamMembership', to='organization.team'),
         ),
     ]
+
+

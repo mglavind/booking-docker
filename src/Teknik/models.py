@@ -135,3 +135,5 @@ class TeknikType(models.Model):
     def get_update_url(self):
         return reverse("Teknik_TeknikType_update", args=(self.pk,))
 
+
+

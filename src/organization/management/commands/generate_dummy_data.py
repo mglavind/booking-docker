@@ -31,3 +31,4 @@ class Command(BaseCommand):
                 role='Member'
             )
             self.stdout.write(self.style.SUCCESS(f'Successfully created membership for {volunteer.username} in {team.name}'))
+

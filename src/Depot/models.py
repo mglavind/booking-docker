@@ -173,3 +173,5 @@ class DepotBooking(models.Model):
             'Udleveret': 'info',
         }
         return status_colors.get(self.status, 'secondary')
+
+

@@ -126,3 +126,5 @@ class Command(BaseCommand):
                 'backend': 'Database',
                 'error': str(e),
             }
+
+

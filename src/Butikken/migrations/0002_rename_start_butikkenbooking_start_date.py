@@ -16,3 +16,5 @@ class Migration(migrations.Migration):
             new_name='start_date',
         ),
     ]
+
+

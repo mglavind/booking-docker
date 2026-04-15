@@ -31,3 +31,5 @@ class Migration(migrations.Migration):
             field=models.TimeField(auto_now_add=True, null=True),
         ),
     ]
+
+

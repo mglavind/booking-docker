@@ -91,3 +91,4 @@ urlpatterns = [
      path('appointment/<int:pk>/status/<str:new_status>/', views.appointment_status_update, name='appointment_status_update'),
      path('appointment/<int:pk>/comment/', views.appointment_comment_add, name='appointment_comment_add'),
 ]
+

@@ -21,3 +21,5 @@ class Migration(migrations.Migration):
             field=models.ImageField(blank=True, editable=False, null=True, upload_to='volunteer_profiles/thumbnails/'),
         ),
     ]
+
+

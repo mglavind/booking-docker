@@ -110,3 +110,5 @@ class HTMXAktivitetsTeamBookingDeleteView(generic.DeleteView):
     def form_valid(self, form):
         super().form_valid(form)
         return HttpResponse()
+
+

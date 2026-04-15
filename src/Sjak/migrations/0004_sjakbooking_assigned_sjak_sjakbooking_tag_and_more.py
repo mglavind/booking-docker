@@ -29,3 +29,5 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('Afventer', 'Afventer'), ('Igang', 'Igang'), ('Klar', 'Klar'), ('Afsluttet', 'Afsluttet')], default='Afventer', max_length=20),
         ),
     ]
+
+

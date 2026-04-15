@@ -146,3 +146,4 @@ class SOSItemAdmin(SOSBaseAdmin):
 @admin.register(SOSType)
 class SOSTypeAdmin(SOSBaseAdmin):
     list_display = ["name", "created"]
+

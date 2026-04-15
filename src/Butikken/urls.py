@@ -76,3 +76,5 @@ urlpatterns = (
     path("Butikken/TeamMealPlan/delete/<int:pk>/", views.TeamMealPlanDeleteView.as_view(), name="Butikken_TeamMealPlan_delete"),
 
 )
+
+
