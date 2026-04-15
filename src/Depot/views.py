@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.db.models import Q
 from .models import DepotItem, DepotBooking
 from .forms import DepotItemForm, DepotBookingForm
 
@@ -12,24 +11,11 @@ class DepotItemListView(LoginRequiredMixin, ListView):
     model = DepotItem
     template_name = 'Depot/depot_item_list.html'
     context_object_name = 'items'
-    paginate_by = 20
 
     def get_queryset(self):
-        queryset = DepotItem.objects.all()
-        
-        # Search functionality
-        search = self.request.GET.get('search')
-        if search:
-            queryset = queryset.filter(
-                Q(name__icontains=search) | Q(description__icontains=search)
-            )
-        
-        return queryset.order_by('name')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['search'] = self.request.GET.get('search', '')
-        return context
+        # Single database query: select_related loads location data in one query
+        # Client-side search handles filtering in JavaScript (no server round-trips)
+        return DepotItem.objects.select_related('location').order_by('name')
 
 
 class DepotItemDetailView(LoginRequiredMixin, DetailView):
