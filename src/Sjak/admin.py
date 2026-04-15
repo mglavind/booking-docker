@@ -320,3 +320,4 @@ class SjakTagAdmin(SjakBaseAdmin):
     list_fullwidth = True
     ordering = ["name"]
     unfold_hide_empty_change_form_tabs = True
+

@@ -108,3 +108,4 @@ class FotoBookingForm(forms.ModelForm):
                 self.fields["end_date"].initial = active_event.end_date
                 self.fields["start_time"].initial = time(8, 0)
                 self.fields["end_time"].initial = time(8, 0)
+

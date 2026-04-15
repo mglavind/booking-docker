@@ -112,3 +112,4 @@ class HTMXFotoBookingDeleteView(generic.DeleteView):
         super().form_valid(form)
         return HttpResponse()
 
+

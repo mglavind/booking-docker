@@ -539,3 +539,4 @@ def bulk_meal_update(request):
 
     return render(request, 'Butikken/meal_bulk_edit.html', {'formset': formset})
 
+

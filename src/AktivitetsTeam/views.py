@@ -391,3 +391,4 @@ class AktivitetsTeamBookingDeleteView(LoginRequiredMixin, generic.DeleteView):
         return super().dispatch(*args, **kwargs)
     
 
+

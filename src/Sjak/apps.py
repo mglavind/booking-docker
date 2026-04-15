@@ -9,3 +9,4 @@ class SjakConfig(AppConfig):
     def ready(self):
         import Sjak.signals
 
+

@@ -96,3 +96,4 @@ class AppFeatureGateMiddleware:
 
         return False
 
+

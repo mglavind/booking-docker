@@ -226,3 +226,4 @@ class TeknikTypeDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = models.TeknikType
     success_url = reverse_lazy("Teknik_TeknikType_list")
 
+

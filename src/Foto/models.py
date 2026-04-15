@@ -100,3 +100,4 @@ class FotoBooking(models.Model):
             'longitude': coords[1],
             'status': self.status,
         }
+

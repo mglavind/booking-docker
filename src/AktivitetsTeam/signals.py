@@ -82,3 +82,4 @@ def notify_discord_on_aktivitetsteambooking_change(sender, instance, created, **
             exc_info=True
         )
 
+

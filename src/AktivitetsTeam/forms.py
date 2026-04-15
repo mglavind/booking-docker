@@ -137,3 +137,4 @@ class AktivitetsTeamBookingForm(forms.ModelForm):
             instance.save()
         return instance
 
+

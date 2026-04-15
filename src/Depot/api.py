@@ -26,3 +26,4 @@ class DepotBookingViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'start', 'status']
     ordering = ['-created_at']
 
+

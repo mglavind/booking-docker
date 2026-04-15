@@ -174,3 +174,4 @@ class DepotBooking(models.Model):
         }
         return status_colors.get(self.status, 'secondary')
 
+

@@ -82,3 +82,4 @@ def notify_discord_on_sjakbooking_change(sender, instance, created, **kwargs):
             exc_info=True
         )
 
+

@@ -17,3 +17,4 @@ urlpatterns = [
     path('bookings/<int:pk>/delete/', views.DepotBookingDeleteView.as_view(), name='Depot_DepotBooking_delete'),
 ]
 
+

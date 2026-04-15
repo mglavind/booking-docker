@@ -146,3 +146,4 @@ class SOSTypeForm(forms.ModelForm):
             "name",
         ]
 
+

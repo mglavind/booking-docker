@@ -27,3 +27,4 @@ class TeknikTypeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TeknikTypeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+

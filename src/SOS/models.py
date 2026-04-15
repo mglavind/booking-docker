@@ -99,3 +99,4 @@ class SOSType(models.Model):
         return reverse("SOS_SOSType_update", args=(self.pk,))
 
 
+

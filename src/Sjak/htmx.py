@@ -165,3 +165,4 @@ class HTMXSjakItemTypeDeleteView(generic.DeleteView):
         return HttpResponse()
 
 
+

@@ -619,3 +619,4 @@ def update_booking_status(request, pk):
         return JsonResponse({'error': 'Failed to update booking'}, status=500)
 
 
+

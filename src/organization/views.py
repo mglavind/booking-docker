@@ -414,3 +414,4 @@ def appointment_comment_add(request, pk):
     
     messages.success(request, "Kommentar tilføjet!")
     return redirect('organization_VolunteerAppointment_detail', pk=pk)
+

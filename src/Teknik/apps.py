@@ -9,3 +9,4 @@ class TeknikConfig(AppConfig):
     def ready(self):
         import Teknik.signals
 
+

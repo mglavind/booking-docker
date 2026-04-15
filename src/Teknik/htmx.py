@@ -164,3 +164,4 @@ class HTMXTeknikTypeDeleteView(generic.DeleteView):
         super().form_valid(form)
         return HttpResponse()
 
+

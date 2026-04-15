@@ -19,3 +19,4 @@ class AktivitetsTeamBookingViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AktivitetsTeamBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+

@@ -322,3 +322,4 @@ class BulkMealForm(forms.ModelForm):
             self.fields['team_contact'].queryset = models.Volunteer.objects.filter(
                 teammembership__team=self.instance.team
             )
+

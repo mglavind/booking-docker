@@ -40,3 +40,4 @@ class TeknikTypeSerializer(serializers.ModelSerializer):
             "created",
         ]
 
+

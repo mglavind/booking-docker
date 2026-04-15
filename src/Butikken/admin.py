@@ -186,3 +186,4 @@ class MealPlanAdmin(BaseAdmin):
 class RecipeAdmin(BaseAdmin):
     list_display = ["name", "description", "last_updated"]
 
+

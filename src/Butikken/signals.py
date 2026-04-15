@@ -94,3 +94,4 @@ def notify_discord_on_butikkenbooking_change(sender, instance, created, **kwargs
             exc_info=True
         )
 
+

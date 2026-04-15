@@ -156,3 +156,4 @@ class SjakItemTypeForm(forms.ModelForm):
         model = models.SjakItemType
         fields = ["name"]
         widgets = {"name": forms.TextInput(attrs={"class": "form-control"})}
+

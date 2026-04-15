@@ -72,3 +72,4 @@ class TeamMealPlanViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TeamMealPlanSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+

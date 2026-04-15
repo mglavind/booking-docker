@@ -171,3 +171,4 @@ class DepotBookingTestCase(TestCase):
         self.assertTrue(booking2.is_overbooked())
 
 
+

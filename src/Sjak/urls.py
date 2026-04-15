@@ -56,3 +56,4 @@ htmx_urlpatterns = [
 urlpatterns += htmx_urlpatterns
 
 
+

@@ -9,3 +9,4 @@ class FotoConfig(AppConfig):
     def ready(self):
         import Foto.signals
 
+

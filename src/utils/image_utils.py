@@ -27,3 +27,4 @@ def process_image(image_field, instance):
     image_content = ContentFile(image_io.getvalue(), new_filename)
 
     return new_filename, image_content
+

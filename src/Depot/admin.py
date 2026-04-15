@@ -234,3 +234,4 @@ class DepotBookingAdmin(DepotBaseAdmin):
         return f"{available} / {obj.item.quantity}"
 
 
+

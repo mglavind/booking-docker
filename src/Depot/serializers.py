@@ -30,3 +30,4 @@ class DepotBookingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'last_updated']
 
+

@@ -8,3 +8,4 @@ class OrganizationConfig(AppConfig):
     def ready(self):
         import organization.signals
 
+

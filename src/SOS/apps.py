@@ -9,3 +9,4 @@ class SosConfig(AppConfig):
         """Registrer signals når app er klar."""
         import SOS.signals
 
+

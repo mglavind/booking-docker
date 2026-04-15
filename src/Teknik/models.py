@@ -136,3 +136,4 @@ class TeknikType(models.Model):
         return reverse("Teknik_TeknikType_update", args=(self.pk,))
 
 
+

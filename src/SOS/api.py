@@ -27,3 +27,4 @@ class SOSTypeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.SOSTypeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+

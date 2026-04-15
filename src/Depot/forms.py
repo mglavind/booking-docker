@@ -162,3 +162,4 @@ class DepotBookingForm(forms.ModelForm):
             instance.save()
         return instance
 
+

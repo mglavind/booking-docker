@@ -191,3 +191,4 @@ class TeknikItemAdmin(TeknikBaseAdmin):
 @admin.register(TeknikType)
 class TeknikTypeAdmin(TeknikBaseAdmin):
     list_display = ["name", "created"]
+

@@ -117,3 +117,4 @@ class FotoBookingAdmin(ModelAdmin, ImportExportModelAdmin):
 class FotoItemAdmin(ModelAdmin, ImportExportModelAdmin):
     list_display = ["name", "description", "last_updated"]
     search_fields = ["name"]
+

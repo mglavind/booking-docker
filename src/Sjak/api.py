@@ -28,3 +28,4 @@ class SjakItemTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+

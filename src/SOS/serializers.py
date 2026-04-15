@@ -40,3 +40,4 @@ class SOSTypeSerializer(serializers.ModelSerializer):
             "created",
         ]
 
+

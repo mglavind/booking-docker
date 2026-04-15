@@ -130,3 +130,4 @@ class TeknikTypeForm(forms.ModelForm):
             "name",
         ]
 
+

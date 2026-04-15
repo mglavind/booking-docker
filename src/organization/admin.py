@@ -333,3 +333,4 @@ class VolunteerAdmin(SimpleHistoryAdmin, ModelAdmin, ImportExportModelAdmin):
             self.message_user(request, f'Added to event: {next_event}', messages.SUCCESS)
         else:
             self.message_user(request, "No upcoming events found.", messages.ERROR)
+

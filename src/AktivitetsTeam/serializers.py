@@ -31,3 +31,4 @@ class AktivitetsTeamBookingSerializer(serializers.ModelSerializer):
             "team_contact",
         ]
 
+

@@ -19,3 +19,4 @@ class FotoBookingViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.FotoBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
